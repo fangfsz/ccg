@@ -1,4 +1,4 @@
-module github.com/lich0821/ccNexus
+module github.com/fangfsz/ccg
 
 go 1.24.0
 

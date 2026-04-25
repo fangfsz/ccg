@@ -2,9 +2,13 @@
 set -e
 
 # Ensure data directory exists and has correct permissions
-if [ ! -w "${CCNEXUS_DATA_DIR:-/data}" ]; then
-    echo "Warning: Data directory is not writable, attempting to fix..."
+if [ ! -d "$CCNEXUS_DATA_DIR" ]; then
+    mkdir -p "$CCNEXUS_DATA_DIR"
 fi
 
-# Run the server
+# Fix permissions on data directory if running as non-root
+if [ "$(id -u)" = "0" ]; then
+    chown -R ccnexus:ccnexus "$CCNEXUS_DATA_DIR"
+fi
+
 exec /app/ccnexus-server "$@"

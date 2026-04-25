@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/logger"
+	"github.com/fangfsz/ccg/internal/logger"
 )
 
 // Manager WebDAV 同步管理器

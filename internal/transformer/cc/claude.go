@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/lich0821/ccNexus/internal/transformer"
+	"github.com/fangfsz/ccg/internal/transformer"
 )
 
 // ClaudeTransformer is a passthrough transformer for Claude Code → Claude endpoint

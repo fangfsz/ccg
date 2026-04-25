@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/lich0821/ccNexus/internal/config"
+	"github.com/fangfsz/ccg/internal/config"
 	_ "modernc.org/sqlite"
 )
 

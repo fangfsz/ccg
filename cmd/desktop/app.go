@@ -14,12 +14,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/logger"
-	"github.com/lich0821/ccNexus/internal/proxy"
-	"github.com/lich0821/ccNexus/internal/service"
-	"github.com/lich0821/ccNexus/internal/storage"
-	"github.com/lich0821/ccNexus/internal/tray"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
+	"github.com/fangfsz/ccg/internal/proxy"
+	"github.com/fangfsz/ccg/internal/service"
+	"github.com/fangfsz/ccg/internal/storage"
+	"github.com/fangfsz/ccg/internal/tray"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -67,14 +67,15 @@ type App struct {
 	trayIcon []byte
 
 	// Services
-	stats    *service.StatsService
-	endpoint *service.EndpointService
-	settings *service.SettingsService
-	webdav   *service.WebDAVService
-	backup   *service.BackupService
-	archive  *service.ArchiveService
-	update   *service.UpdateService
-	terminal *service.TerminalService
+	stats      *service.StatsService
+	endpoint   *service.EndpointService
+	settings   *service.SettingsService
+	webdav     *service.WebDAVService
+	backup     *service.BackupService
+	archive    *service.ArchiveService
+	update     *service.UpdateService
+	terminal   *service.TerminalService
+	cliConfig  *service.CLIConfigService
 }
 
 // NewApp creates a new App application struct
@@ -101,7 +102,7 @@ func (a *App) startup(ctx context.Context) {
 		logger.Error("Failed to get home directory: %v", err)
 		homeDir = "."
 	}
-	configDir := filepath.Join(homeDir, ".ccNexus")
+	configDir := filepath.Join(homeDir, ".ccg")
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		logger.Error("Failed to create config directory: %v", err)
 	}
@@ -166,6 +167,7 @@ func (a *App) startup(ctx context.Context) {
 	a.archive = service.NewArchiveService(a.storage)
 	a.update = service.NewUpdateService(a.config, a.storage, version)
 	a.terminal = service.NewTerminalService(a.config, a.storage)
+	a.cliConfig = service.NewCLIConfigService(a.config)
 
 	a.initTray()
 
@@ -183,6 +185,9 @@ func (a *App) startup(ctx context.Context) {
 
 // shutdown is called when the app is closing
 func (a *App) shutdown(ctx context.Context) {
+	if a.cliConfig != nil {
+		a.cliConfig.RestoreAllConfigs()
+	}
 	if a.proxy != nil {
 		a.proxy.Stop()
 	}
@@ -1050,8 +1055,8 @@ func (a *App) SendUpdateNotification(title, message string) error {
 
 func (a *App) DetectTerminals() string   { return a.terminal.DetectTerminals() }
 func (a *App) GetTerminalConfig() string { return a.terminal.GetTerminalConfig() }
-func (a *App) SaveTerminalConfig(selectedTerminal string, projectDirs []string, claudeCommand string) error {
-	return a.terminal.SaveTerminalConfig(selectedTerminal, projectDirs, claudeCommand)
+func (a *App) SaveTerminalConfig(selectedTerminal string, projectDirs []string, claudeCommand string, geminiCommand string) error {
+	return a.terminal.SaveTerminalConfig(selectedTerminal, projectDirs, claudeCommand, geminiCommand)
 }
 func (a *App) AddProjectDir(dir string) error       { return a.terminal.AddProjectDir(dir) }
 func (a *App) RemoveProjectDir(dir string) error    { return a.terminal.RemoveProjectDir(dir) }
@@ -1094,4 +1099,112 @@ func (a *App) DeleteCodexSession(sessionID string) error {
 
 func (a *App) RenameCodexSession(sessionID, alias string) error {
 	return a.terminal.RenameCodexSession(sessionID, alias)
+}
+
+// ========== Gemini Terminal Bindings ==========
+
+func (a *App) LaunchGeminiTerminal(dir string) error {
+	return a.terminal.LaunchGeminiTerminal(dir)
+}
+
+func (a *App) LaunchGeminiSessionTerminal(dir, sessionID string) error {
+	return a.terminal.LaunchGeminiSessionTerminal(dir, sessionID)
+}
+
+func (a *App) ApplyCLIConfig(cliType string) error {
+	if a.cliConfig == nil {
+		return fmt.Errorf("cli config service not initialized")
+	}
+	switch cliType {
+	case "claude":
+		return a.cliConfig.ApplyClaudeConfig()
+	case "codex":
+		return a.cliConfig.ApplyCodexConfig("")
+	case "gemini":
+		return a.cliConfig.ApplyGeminiConfig("")
+	default:
+		return fmt.Errorf("unsupported CLI type: %s", cliType)
+	}
+}
+
+func (a *App) RestoreCLIConfigs() {
+	if a.cliConfig != nil {
+		a.cliConfig.RestoreAllConfigs()
+	}
+}
+
+func (a *App) GetMatchingEndpointsForCLI(cliType string) string {
+	endpoints := a.config.GetEndpoints()
+	var matchingEndpoints []config.Endpoint
+
+	for _, ep := range endpoints {
+		if !ep.Enabled {
+			continue
+		}
+		switch cliType {
+		case "claude":
+			if ep.Transformer == "claude" || ep.Transformer == "anthropic" {
+				matchingEndpoints = append(matchingEndpoints, ep)
+			}
+		case "codex":
+			if ep.Transformer == "openai" || ep.Transformer == "codex" {
+				matchingEndpoints = append(matchingEndpoints, ep)
+			}
+		case "gemini":
+			if ep.Transformer == "gemini" || ep.Transformer == "google" {
+				matchingEndpoints = append(matchingEndpoints, ep)
+			}
+		}
+	}
+
+	data, _ := json.Marshal(matchingEndpoints)
+	return string(data)
+}
+
+func (a *App) IsCLIConfigModified(cliType string) bool {
+	if a.cliConfig == nil {
+		return false
+	}
+	switch cliType {
+	case "claude":
+		return a.cliConfig.IsModified(service.CLITypeClaude)
+	case "codex":
+		return a.cliConfig.IsModified(service.CLITypeCodex)
+	case "gemini":
+		return a.cliConfig.IsModified(service.CLITypeGemini)
+	default:
+		return false
+	}
+}
+
+func (a *App) GetContainerInfo() string {
+	if a.cliConfig == nil {
+		return "{}"
+	}
+	info := a.cliConfig.GetContainerInfo()
+	data, _ := json.Marshal(info)
+	return string(data)
+}
+
+func (a *App) IsRunningInContainer() bool {
+	if a.cliConfig == nil {
+		return false
+	}
+	return a.cliConfig.IsContainer()
+}
+
+func (a *App) ValidateContainerSetup() string {
+	if a.cliConfig == nil {
+		return "[]"
+	}
+	errors := a.cliConfig.ValidateContainerSetup()
+	if errors == nil {
+		return "[]"
+	}
+	errStrings := make([]string, len(errors))
+	for i, e := range errors {
+		errStrings[i] = e.Error()
+	}
+	data, _ := json.Marshal(errStrings)
+	return string(data)
 }

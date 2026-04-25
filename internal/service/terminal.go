@@ -4,11 +4,11 @@ import (
     "encoding/json"
     "fmt"
 
-    "github.com/lich0821/ccNexus/internal/config"
-    "github.com/lich0821/ccNexus/internal/logger"
-    "github.com/lich0821/ccNexus/internal/session"
-    "github.com/lich0821/ccNexus/internal/storage"
-    "github.com/lich0821/ccNexus/internal/terminal"
+    "github.com/fangfsz/ccg/internal/config"
+    "github.com/fangfsz/ccg/internal/logger"
+    "github.com/fangfsz/ccg/internal/session"
+    "github.com/fangfsz/ccg/internal/storage"
+    "github.com/fangfsz/ccg/internal/terminal"
 )
 
 // TerminalService handles terminal and session operations
@@ -37,23 +37,24 @@ func (t *TerminalService) GetTerminalConfig() string {
 }
 
 // SaveTerminalConfig saves the terminal configuration
-func (t *TerminalService) SaveTerminalConfig(selectedTerminal string, projectDirs []string, claudeCommand string) error {
-    terminalCfg := &config.TerminalConfig{
-        SelectedTerminal: selectedTerminal,
-        ProjectDirs:      projectDirs,
-        ClaudeCommand:    claudeCommand,
-    }
-    t.config.UpdateTerminal(terminalCfg)
+func (t *TerminalService) SaveTerminalConfig(selectedTerminal string, projectDirs []string, claudeCommand string, geminiCommand string) error {
+	terminalCfg := &config.TerminalConfig{
+		SelectedTerminal: selectedTerminal,
+		ProjectDirs:      projectDirs,
+		ClaudeCommand:    claudeCommand,
+		GeminiCommand:    geminiCommand,
+	}
+	t.config.UpdateTerminal(terminalCfg)
 
-    if t.storage != nil {
-        configAdapter := storage.NewConfigStorageAdapter(t.storage)
-        if err := t.config.SaveToStorage(configAdapter); err != nil {
-            return fmt.Errorf("failed to save terminal config: %w", err)
-        }
-    }
+	if t.storage != nil {
+		configAdapter := storage.NewConfigStorageAdapter(t.storage)
+		if err := t.config.SaveToStorage(configAdapter); err != nil {
+			return fmt.Errorf("failed to save terminal config: %w", err)
+		}
+	}
 
-    logger.Info("Terminal config saved: terminal=%s, dirs=%d, claudeCommand=%s", selectedTerminal, len(projectDirs), claudeCommand)
-    return nil
+	logger.Info("Terminal config saved: terminal=%s, dirs=%d, claudeCommand=%s, geminiCommand=%s", selectedTerminal, len(projectDirs), claudeCommand, geminiCommand)
+	return nil
 }
 
 // AddProjectDir adds a project directory
@@ -265,10 +266,42 @@ func (t *TerminalService) GetCodexSessionData(sessionID string) string {
 
 // DeleteCodexSession deletes a Codex session
 func (t *TerminalService) DeleteCodexSession(sessionID string) error {
-    return session.DeleteCodexSession(sessionID)
+	return session.DeleteCodexSession(sessionID)
 }
 
 // RenameCodexSession sets an alias for a Codex session
 func (t *TerminalService) RenameCodexSession(sessionID, alias string) error {
-    return session.RenameCodexSession(sessionID, alias)
+	return session.RenameCodexSession(sessionID, alias)
+}
+
+// ========== Gemini Terminal Bindings ==========
+
+// LaunchGeminiTerminal launches a terminal with Gemini CLI
+func (t *TerminalService) LaunchGeminiTerminal(dir string) error {
+	terminalCfg := t.config.GetTerminal()
+	terminalID := terminalCfg.SelectedTerminal
+	if terminalID == "" {
+		terminalID = "cmd"
+	}
+	geminiCmd := terminalCfg.GeminiCommand
+
+	logger.Info("Launching Gemini terminal in %s (cmd=%s)", dir, geminiCmd)
+	if geminiCmd != "" {
+		return terminal.LaunchGeminiTerminalWithCustomCmd(terminalID, dir, geminiCmd)
+	}
+	return terminal.LaunchGeminiTerminal(terminalID, dir)
+}
+
+// LaunchGeminiSessionTerminal launches a terminal with Gemini session resume
+func (t *TerminalService) LaunchGeminiSessionTerminal(dir, sessionID string) error {
+	terminalCfg := t.config.GetTerminal()
+	terminalID := terminalCfg.SelectedTerminal
+	if terminalID == "" {
+		terminalID = "cmd"
+	}
+	geminiCmd := terminalCfg.GeminiCommand
+
+	logger.Info("Launching Gemini terminal with session: %s in %s", sessionID, dir)
+	cliCmd := terminal.GetGeminiCommandForLaunch(sessionID, geminiCmd)
+	return terminal.LaunchTerminalWithCliCmd(terminalID, dir, cliCmd)
 }

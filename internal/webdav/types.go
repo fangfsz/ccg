@@ -3,8 +3,8 @@ package webdav
 import (
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/proxy"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/proxy"
 )
 
 // BackupFile 备份文件信息

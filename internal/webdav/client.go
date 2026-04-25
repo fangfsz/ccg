@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/config"
+	"github.com/fangfsz/ccg/internal/config"
 
 	"github.com/studio-b12/gowebdav"
 )

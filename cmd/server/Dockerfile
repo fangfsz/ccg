@@ -27,18 +27,24 @@ RUN go mod tidy
 RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o ccnexus-server ./cmd/server
 
 # Runtime stage
-FROM alpine:latest
+FROM alpine:3.19
 
 # Install runtime dependencies
-RUN apk add --no-cache ca-certificates sqlite-libs tzdata wget
+RUN apk add --no-cache ca-certificates sqlite-libs tzdata wget \
+    && addgroup -g 1000 ccnexus \
+    && adduser -u 1000 -G ccnexus -s /bin/sh -D ccnexus
 
 WORKDIR /app
 
-# Prepare data directory
-RUN mkdir -p /data
+# Prepare data directory with proper ownership
+RUN mkdir -p /data && chown -R ccnexus:ccnexus /app /data
 
 # Copy binary from builder
 COPY --from=builder /app/ccnexus-server /app/ccnexus-server
+
+# Copy entrypoint script
+COPY --from=builder /app/cmd/server/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 # Environment variables
 ENV CCNEXUS_DATA_DIR=/data
@@ -57,5 +63,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Volume for persistent data
 VOLUME ["/data"]
 
+# Use non-root user
+USER ccnexus
+
 # Run the headless server
-ENTRYPOINT ["/app/ccnexus-server"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

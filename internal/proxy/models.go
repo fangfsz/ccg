@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/logger"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
 )
 
 // ModelInfo represents a single model information
@@ -209,7 +209,7 @@ func (p *Proxy) getDefaultModels(ep config.Endpoint) []ModelInfo {
 // handleModels handles GET /v1/models requests
 func (p *Proxy) handleModels(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		p.writeJSONError(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -218,7 +218,7 @@ func (p *Proxy) handleModels(w http.ResponseWriter, r *http.Request) {
 	refreshEnabled := p.config.ModelsCacheRefreshEnabled
 
 	if refresh && !refreshEnabled {
-		http.Error(w, "Refresh is disabled in configuration", http.StatusForbidden)
+		p.writeJSONError(w, "Refresh is disabled in configuration", http.StatusForbidden)
 		return
 	}
 

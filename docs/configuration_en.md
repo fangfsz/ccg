@@ -71,4 +71,4 @@ Supports syncing configuration and statistics via WebDAV protocol, compatible wi
 
 ## Data Storage Location
 
-- Database: `~/.ccNexus/ccnexus.db`
+- Database: `~/.ccg/ccg.db`

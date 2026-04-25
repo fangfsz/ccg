@@ -739,6 +739,49 @@ body {
     font-weight: 500;
 }
 
+.cli-config-status {
+    font-size: 12px;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.cli-config-status.applied {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.cli-config-status.pending {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.cli-config-status.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.matching-endpoints {
+    font-size: 12px;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background: rgba(139, 92, 246, 0.1);
+    color: #7c3aed;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.matching-endpoints .matching-ep {
+    color: #16a34a;
+}
+
+.matching-endpoints .no-matching-ep {
+    color: #dc2626;
+}
+
 .form-group input,
 .form-group select {
     width: 100%;
@@ -858,6 +901,20 @@ body {
 
 .model-dropdown-toggle:hover {
     color: #667eea;
+}
+
+.model-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 1px solid var(--border-color, #ddd);
+    font-size: 13px;
+    outline: none;
+    background: transparent;
+}
+
+.model-search-input:focus {
+    background: var(--hover-bg, #f9f9f9);
 }
 
 .model-dropdown {

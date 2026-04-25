@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lich0821/ccNexus/internal/transformer"
+	"github.com/fangfsz/ccg/internal/transformer"
 )
 
 // OpenAI2ReqToGemini converts OpenAI Responses API request to Gemini request

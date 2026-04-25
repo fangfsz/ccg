@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/storage"
+	"github.com/fangfsz/ccg/internal/storage"
 )
 
 func marshalBackupListResult(success bool, message string, backups []BackupListItem) string {
@@ -61,7 +61,7 @@ func tempDir() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("get_home_dir_failed")
 	}
-	dir := filepath.Join(homeDir, ".ccNexus", "temp")
+	dir := filepath.Join(homeDir, ".ccg", "temp")
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return "", fmt.Errorf("create_temp_dir_failed")
 	}

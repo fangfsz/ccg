@@ -1,8 +1,8 @@
 package chat
 
 import (
-	"github.com/lich0821/ccNexus/internal/transformer"
-	"github.com/lich0821/ccNexus/internal/transformer/convert"
+	"github.com/fangfsz/ccg/internal/transformer"
+	"github.com/fangfsz/ccg/internal/transformer/convert"
 )
 
 // OpenAI2Transformer transforms Codex Chat requests to OpenAI Responses format

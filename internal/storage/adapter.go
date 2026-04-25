@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/lich0821/ccNexus/internal/config"
+import "github.com/fangfsz/ccg/internal/config"
 
 // ConfigStorageAdapter adapts SQLiteStorage to config.StorageAdapter interface
 type ConfigStorageAdapter struct {

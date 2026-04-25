@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/logger"
+	"github.com/fangfsz/ccg/internal/logger"
 )
 
 // DailyStats represents statistics for a single day

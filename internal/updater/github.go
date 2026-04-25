@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	githubAPIURL = "https://api.github.com/repos/lich0821/ccNexus/releases/latest"
+	githubAPIURL = "https://api.github.com/repos/fangfsz/ccg/releases/latest"
 	httpTimeout  = 30 * time.Second
 )
 
@@ -50,7 +50,7 @@ func GetLatestRelease(proxyURL string) (*ReleaseInfo, error) {
 	}
 
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
-	req.Header.Set("User-Agent", "ccNexus-Updater")
+	req.Header.Set("User-Agent", "ccg-Updater")
 
 	resp, err := client.Do(req)
 	if err != nil {

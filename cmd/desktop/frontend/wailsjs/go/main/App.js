@@ -262,6 +262,14 @@ export function LaunchTerminal(arg1) {
   return window['go']['main']['App']['LaunchTerminal'](arg1);
 }
 
+export function LaunchGeminiTerminal(arg1) {
+  return window['go']['main']['App']['LaunchGeminiTerminal'](arg1);
+}
+
+export function LaunchGeminiSessionTerminal(arg1, arg2) {
+  return window['go']['main']['App']['LaunchGeminiSessionTerminal'](arg1, arg2);
+}
+
 export function ListArchives() {
   return window['go']['main']['App']['ListArchives']();
 }
@@ -436,6 +444,22 @@ export function UpdatePort(arg1) {
 
 export function UpdateS3BackupConfig(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) {
   return window['go']['main']['App']['UpdateS3BackupConfig'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+
+export function ApplyCLIConfig(arg1) {
+  return window['go']['main']['App']['ApplyCLIConfig'](arg1);
+}
+
+export function RestoreCLIConfigs() {
+  return window['go']['main']['App']['RestoreCLIConfigs']();
+}
+
+export function GetMatchingEndpointsForCLI(arg1) {
+  return window['go']['main']['App']['GetMatchingEndpointsForCLI'](arg1);
+}
+
+export function IsCLIConfigModified(arg1) {
+  return window['go']['main']['App']['IsCLIConfigModified'](arg1);
 }
 
 export function UpdateWebDAVConfig(arg1, arg2, arg3) {

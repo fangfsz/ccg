@@ -4,7 +4,7 @@
   <img src="images/ccNexus.svg" alt="Claude Code & Codex CLI 智能端点轮换代理" width="720" />
 </p>
 
-[![Build Status](https://github.com/lich0821/ccNexus/workflows/Build%20and%20Release/badge.svg)](https://github.com/lich0821/ccNexus/actions)
+[![Build Status](https://github.com/fangfsz/ccg/workflows/Build%20and%20Release/badge.svg)](https://github.com/fangfsz/ccg/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go)](https://go.dev/)
 [![Wails](https://img.shields.io/badge/Wails-v2-blue)](https://wails.io/)
@@ -35,11 +35,11 @@
 
 ### 1. Download and Install
 
-[Download Latest Release](https://github.com/lich0821/ccNexus/releases/latest)
+[Download Latest Release](https://github.com/fangfsz/ccg/releases/latest)
 
-- **Windows**: Extract and run `ccNexus.exe`
+- **Windows**: Extract and run `ccg.exe`
 - **macOS**: Move to Applications, right-click → Open for first run
-- **Linux**: `tar -xzf ccNexus-linux-amd64.tar.gz && ./ccNexus`
+- **Linux**: `tar -xzf ccg-linux-amd64.tar.gz && ./ccg`
 
 ### 2. Add Endpoints
 
@@ -62,23 +62,19 @@ For Codex Token Pool mode:
     "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000", // Some models may not support 64k
   }
   // Other settings
-}
-
 ```
 
 #### Codex CLI
 Just configure `~/.codex/config.toml`:
 ```toml
-model_provider = "ccNexus"
+model_provider = "ccg"
 model = "gpt-5-codex"
 preferred_auth_method = "apikey"
 
-[model_providers.ccNexus]
-name = "ccNexus"
+[model_providers.ccg]
+name = "ccg"
 base_url = "http://localhost:3000/v1"
 wire_api = "responses"  # or "chat"
-
-# Other settings
 ```
 
 `~/.codex/auth.json` can be ignored.

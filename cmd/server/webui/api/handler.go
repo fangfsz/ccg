@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/proxy"
-	"github.com/lich0821/ccNexus/internal/storage"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/proxy"
+	"github.com/fangfsz/ccg/internal/storage"
 )
 
 // Handler handles API requests

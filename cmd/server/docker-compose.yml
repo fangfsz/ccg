@@ -3,20 +3,36 @@ services:
     build:
       context: ../..
       dockerfile: cmd/server/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     container_name: ccnexus
     restart: unless-stopped
     ports:
       - "3021:3000"
     volumes:
-      - ./ccnexus/:/data
+      - ccnexus-data:/data
     environment:
       - CCNEXUS_PORT=3000
       - CCNEXUS_DATA_DIR=/data
       - CCNEXUS_DB_PATH=/data/ccnexus.db
       - TZ=Asia/Shanghai
+      - CCNEXUS_BASIC_AUTH_ENABLED=${CCNEXUS_BASIC_AUTH_ENABLED:-true}
+      - CCNEXUS_BASIC_AUTH_USERNAME=${CCNEXUS_BASIC_AUTH_USERNAME:-admin}
+      - CCNEXUS_BASIC_AUTH_PASSWORD=${CCNEXUS_BASIC_AUTH_PASSWORD:-changeme}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks:
+      - ccnexus-network
+
+volumes:
+  ccnexus-data:
+    driver: local
+
+networks:
+  ccnexus-network:
+    driver: bridge

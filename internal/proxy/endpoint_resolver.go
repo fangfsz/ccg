@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/logger"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
 )
 
 // EndpointResolver 负责从 HTTP 请求中解析客户端指定的端点

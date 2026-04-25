@@ -42,6 +42,23 @@ func LaunchCodexTerminalWithSession(terminalID, dir, sessionID string) error {
 	return launchTerminalWithCli(terminalID, dir, cliCmd)
 }
 
+// LaunchGeminiTerminal launches a terminal with Gemini CLI
+func LaunchGeminiTerminal(terminalID, dir string) error {
+	return LaunchGeminiTerminalWithSession(terminalID, dir, "")
+}
+
+// LaunchGeminiTerminalWithSession launches a terminal with Gemini CLI and optional session
+func LaunchGeminiTerminalWithSession(terminalID, dir, sessionID string) error {
+	cliCmd := getGeminiCommand(sessionID, "")
+	return launchTerminalWithCli(terminalID, dir, cliCmd)
+}
+
+// LaunchGeminiTerminalWithCustomCmd launches a terminal with a custom Gemini CLI command
+func LaunchGeminiTerminalWithCustomCmd(terminalID, dir, customCmd string) error {
+	cliCmd := getGeminiCommand("", customCmd)
+	return launchTerminalWithCli(terminalID, dir, cliCmd)
+}
+
 // launchTerminalWithCli is the common implementation for launching terminals
 func launchTerminalWithCli(terminalID, dir, cliCmd string) error {
 	// Validate directory exists
@@ -126,6 +143,32 @@ func getCodexCommand(sessionID string) string {
 		return "npm --version >/dev/null 2>&1; " + cmd
 	}
 	return cmd
+}
+
+// getGeminiCommand returns the gemini command with optional session resume
+func getGeminiCommand(sessionID, customCmd string) string {
+	base := "gemini"
+	if customCmd != "" {
+		base = customCmd
+	}
+	cmd := base
+	if sessionID != "" {
+		cmd = fmt.Sprintf("%s -r %s", base, shellEscape(sessionID))
+	}
+	if runtime.GOOS == "darwin" {
+		return "npm --version >/dev/null 2>&1; " + cmd
+	}
+	return cmd
+}
+
+// GetGeminiCommandForLaunch is an exported wrapper for getGeminiCommand
+func GetGeminiCommandForLaunch(sessionID, customCmd string) string {
+	return getGeminiCommand(sessionID, customCmd)
+}
+
+// LaunchTerminalWithCliCmd is an exported wrapper for launchTerminalWithCli
+func LaunchTerminalWithCliCmd(terminalID, dir, cliCmd string) error {
+	return launchTerminalWithCli(terminalID, dir, cliCmd)
 }
 
 // getUserShell returns the user's default shell, validated to exist

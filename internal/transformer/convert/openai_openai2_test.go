@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/lich0821/ccNexus/internal/transformer"
+	"github.com/fangfsz/ccg/internal/transformer"
 )
 
 func TestOpenAIReqToOpenAI2DefaultsToolChoiceAutoWhenToolsPresent(t *testing.T) {

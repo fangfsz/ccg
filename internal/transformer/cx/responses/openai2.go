@@ -1,7 +1,7 @@
 package responses
 
 import (
-	"github.com/lich0821/ccNexus/internal/transformer"
+	"github.com/fangfsz/ccg/internal/transformer"
 )
 
 // OpenAI2Transformer is a passthrough transformer for Codex Responses → OpenAI Responses

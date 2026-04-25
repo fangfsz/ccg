@@ -1,6 +1,6 @@
 export default {
     app: {
-        title: 'ccNexus',
+        title: 'ccg',
         version: 'Version'
     },
     header: {
@@ -90,6 +90,10 @@ export default {
         togglePassword: 'Show/Hide Key',
         transformer: 'Transformer',
         transformerHelp: 'Select the API format for this endpoint',
+        transformerOptionClaude: 'Claude Passthrough - Native Claude API format, for Claude API official endpoints',
+        transformerOptionOpenAI: 'OpenAI Transform - Converts Claude requests to OpenAI Chat format (/v1/chat/completions)',
+        transformerOptionOpenAI2: 'OpenAI2 Transform - Converts Claude requests to OpenAI Responses format (/v1/responses), for Codex',
+        transformerOptionGemini: 'Gemini Transform - Converts Claude requests to Google Gemini API format',
         model: 'Model',
         modelPlaceholder: 'e.g., claude-sonnet-4-5-20250929',
         modelHelp: 'Optional: Override the model specified in requests',
@@ -126,7 +130,9 @@ export default {
         tokenPoolOnlyForTokenMode: 'Token pool can only be managed in Token Pool mode',
         fetchModelsSuccess: 'Successfully fetched {count} models',
         fetchModelsFailed: 'Failed to fetch models',
-        fetchModelsEmpty: 'No models found'
+        fetchModelsEmpty: 'No models found',
+        modelSearchPlaceholder: 'Search models...',
+        modelNoResults: 'No matching results'
     },
     logs: {
         title: 'Logs',
@@ -155,9 +161,9 @@ export default {
         notSupportedMessage: 'This endpoint not support test API, try using it directly in the client'
     },
     welcome: {
-        title: 'Welcome to ccNexus!',
-        titleWithVersion: '👋 Welcome to ccNexus v{version}',
-        message: 'ccNexus is a smart API endpoint round-robin proxy for Claude Code',
+        title: 'Welcome to ccg!',
+        titleWithVersion: '👋 Welcome to ccg v{version}',
+        message: 'ccg is a smart API endpoint round-robin proxy for Claude Code',
         features: 'Features',
         feature1: 'Automatic failover between multiple API endpoints',
         feature2: 'Support for Claude, OpenAI, and Gemini API formats',
@@ -395,7 +401,7 @@ export default {
             regionPlaceholder: 'e.g. us-east-1',
             bucket: 'Bucket',
             prefix: 'Prefix',
-            prefixPlaceholder: 'e.g. ccNexus/',
+            prefixPlaceholder: 'e.g. ccg/',
             accessKey: 'Access Key',
             secretKey: 'Secret Key',
             sessionToken: 'Session Token',
@@ -456,9 +462,9 @@ export default {
         autoCheckHelp: 'Select the frequency of automatic update checks',
         extractComplete: 'Extraction Complete',
         extractPath: 'File Location',
-        install_instructions_windows: '1. Close current ccNexus application<br>2. Run the new ccNexus.exe',
-        install_instructions_macos: '1. Close current ccNexus application<br>2. Drag the new ccNexus.app to Applications folder',
-        install_instructions_linux: '1. Close current ccNexus application<br>2. Run the new ccNexus executable',
+        install_instructions_windows: '1. Close current ccg application<br>2. Run the new ccg.exe',
+        install_instructions_macos: '1. Close current ccg application<br>2. Drag the new ccg.app to Applications folder',
+        install_instructions_linux: '1. Close current ccg application<br>2. Run the new ccg executable',
         readyToUpdate: 'New version is ready, click the button below to update now',
         applyUpdate: 'Update Now',
         applying: 'Applying update...',
@@ -471,6 +477,7 @@ export default {
         selectTerminal: 'Select Terminal',
         selectTerminalHelp: 'Choose the terminal to launch Claude Code',
         selectTerminalHelpCodex: 'Choose the terminal to launch Codex',
+        selectTerminalHelpGemini: 'Choose the terminal to launch Gemini CLI',
         projectDirs: 'Project Directories',
         projectDirsHelp: 'Add frequently used project directories for quick terminal launch',
         addDir: 'Add Directory',
@@ -488,6 +495,11 @@ export default {
         dirExists: 'Directory already exists',
         launcherCommand: 'Launcher Command',
         launcherCommandHelp: 'Custom CLI command to launch Claude Code, defaults to claude (e.g., hapi)',
+        geminiCommand: 'Gemini Command',
+        geminiCommandHelp: 'Custom Gemini CLI command, defaults to gemini',
+        cliTypeClaude: 'Claude Code',
+        cliTypeCodex: 'Codex',
+        cliTypeGemini: 'Gemini CLI',
         // Error messages
         errors: {
             directory_already_exists: 'Directory already exists'

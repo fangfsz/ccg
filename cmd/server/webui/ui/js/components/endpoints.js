@@ -302,7 +302,7 @@ class Endpoints {
 
     getTestStatus(endpointName) {
         try {
-            const statusMap = JSON.parse(localStorage.getItem('ccNexus_endpointTestStatus') || '{}');
+            const statusMap = JSON.parse(localStorage.getItem('ccg_endpointTestStatus') || '{}');
             return statusMap[endpointName];
         } catch {
             return undefined;
@@ -311,9 +311,9 @@ class Endpoints {
 
     saveTestStatus(endpointName, success) {
         try {
-            const statusMap = JSON.parse(localStorage.getItem('ccNexus_endpointTestStatus') || '{}');
+            const statusMap = JSON.parse(localStorage.getItem('ccg_endpointTestStatus') || '{}');
             statusMap[endpointName] = success;
-            localStorage.setItem('ccNexus_endpointTestStatus', JSON.stringify(statusMap));
+            localStorage.setItem('ccg_endpointTestStatus', JSON.stringify(statusMap));
         } catch (error) {
             console.error('Failed to save test status:', error);
         }

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/logger"
-	"github.com/lich0821/ccNexus/internal/tokencount"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
+	"github.com/fangfsz/ccg/internal/tokencount"
 )
 
 // handleHealth handles health check requests
@@ -59,7 +59,7 @@ func (p *Proxy) GetStats() *Stats {
 // handleCountTokens handles token counting requests
 func (p *Proxy) handleCountTokens(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		p.writeJSONError(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (p *Proxy) handleCountTokens(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.Error("Failed to decode count_tokens request: %v", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		p.writeJSONError(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 

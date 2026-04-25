@@ -1,7 +1,7 @@
 package chat
 
 import (
-	"github.com/lich0821/ccNexus/internal/transformer"
+	"github.com/fangfsz/ccg/internal/transformer"
 )
 
 // OpenAITransformer is a passthrough transformer for Codex Chat → OpenAI Chat

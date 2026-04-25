@@ -131,6 +131,10 @@ export function LaunchSessionTerminal(arg1:string,arg2:string):Promise<void>;
 
 export function LaunchTerminal(arg1:string):Promise<void>;
 
+export function LaunchGeminiTerminal(arg1:string):Promise<boolean>;
+
+export function LaunchGeminiSessionTerminal(arg1:string,arg2:string):Promise<boolean>;
+
 export function ListArchives():Promise<string>;
 
 export function ListBackups(arg1:string):Promise<string>;
@@ -220,3 +224,11 @@ export function UpdatePort(arg1:number):Promise<void>;
 export function UpdateS3BackupConfig(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:string,arg7:string,arg8:boolean,arg9:boolean):Promise<void>;
 
 export function UpdateWebDAVConfig(arg1:string,arg2:string,arg3:string):Promise<void>;
+
+export function ApplyCLIConfig(arg1:string):Promise<boolean>;
+
+export function RestoreCLIConfigs():Promise<void>;
+
+export function GetMatchingEndpointsForCLI(arg1:string):Promise<string>;
+
+export function IsCLIConfigModified(arg1:string):Promise<boolean>;

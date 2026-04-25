@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/transformer"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/transformer"
 )
 
 type noUsageStreamTransformer struct{}

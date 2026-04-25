@@ -4,10 +4,12 @@
   <img src="docs/images/ccNexus.svg" alt="Claude Code & Codex CLI 智能端点轮换代理" width="720" />
 </p>
 
-[![构建状态](https://github.com/lich0821/ccNexus/workflows/Build%20and%20Release/badge.svg)](https://github.com/lich0821/ccNexus/actions)
+[![构建状态](https://github.com/fangfsz/ccg/workflows/Build%20and%20Release/badge.svg)](https://github.com/fangfsz/ccg/actions)
 [![许可证: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go 版本](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go)](https://go.dev/)
 [![Wails](https://img.shields.io/badge/Wails-v2-blue)](https://wails.io/)
+
+> ⚠️ 本项目基于 [ccNexus](https://github.com/lich0821/ccNexus)（by [lich0821](https://github.com/lich0821)）重构，保留对原作者的引用与致敬。
 
 [English](docs/README_EN.md) | [简体中文](README.md)
 
@@ -36,11 +38,11 @@
 
 ### 1. 下载安装
 
-[下载最新版本](https://github.com/lich0821/ccNexus/releases/latest)
+[下载最新版本](https://github.com/fangfsz/ccg/releases/latest)
 
-- **Windows**: 解压后运行 `ccNexus.exe`
+- **Windows**: 解压后运行 `ccg.exe`
 - **macOS**: 移动到「应用程序」，首次运行右键点击 → 打开
-- **Linux**: `tar -xzf ccNexus-linux-amd64.tar.gz && ./ccNexus`
+- **Linux**: `tar -xzf ccg-linux-amd64.tar.gz && ./ccg`
 
 ### 2. 添加端点
 
@@ -70,12 +72,12 @@
 #### Codex CLI
 只需要配置 `~/.codex/config.toml`：
 ```toml
-model_provider = "ccNexus"
+model_provider = "ccg"
 model = "gpt-5-codex"
 preferred_auth_method = "apikey"
 
-[model_providers.ccNexus]
-name = "ccNexus"
+[model_providers.ccg]
+name = "ccg"
 base_url = "http://localhost:3000/v1"
 wire_api = "responses"  # 或 "chat"
 

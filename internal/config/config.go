@@ -150,6 +150,7 @@ type TerminalConfig struct {
 	SelectedTerminal string   `json:"selectedTerminal"` // Selected terminal ID
 	ProjectDirs      []string `json:"projectDirs"`      // Project directories
 	ClaudeCommand    string   `json:"claudeCommand"`    // Custom launcher command, defaults to "claude"
+	GeminiCommand    string   `json:"geminiCommand"`    // Custom Gemini CLI command, defaults to "gemini"
 }
 
 // ProxyConfig represents HTTP proxy configuration

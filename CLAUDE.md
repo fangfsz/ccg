@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-ccNexus 是一个智能 API 端点轮换代理，专为 Claude Code 和 Codex CLI 设计。
+ccg 是一个智能 API 端点轮换代理，专为 Claude Code 和 Codex CLI 设计。
 
 **核心功能：**
 - 多端点轮换与自动故障转移
@@ -66,7 +66,7 @@ go mod tidy     # 清理依赖
 
 ### 目录结构
 ```
-ccNexus/
+ccg/
 ├── cmd/
 │   ├── desktop/          # 桌面应用入口（Wails）
 │   │   ├── frontend/     # Vue.js 前端
@@ -103,7 +103,7 @@ ccNexus/
 - 线程安全操作
 
 ### 关键文件路径
-- 数据库：`~/.ccNexus/ccnexus.db`
+- 数据库：`~/.ccg/ccg.db`
 - 配置常量：`internal/config/config.go`（第 13-20 行：认证模式和端点 URL）
 - 代理路由：`internal/proxy/proxy.go`（第 108-114 行）
 

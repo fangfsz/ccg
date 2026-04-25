@@ -127,7 +127,7 @@ function init() {
     // Initialize real-time updates
     initRealtime();
 
-    console.log('ccNexus Admin initialized');
+    console.log('ccg Admin initialized');
 }
 
 // Start application when DOM is ready

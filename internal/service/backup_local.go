@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/logger"
-	"github.com/lich0821/ccNexus/internal/storage"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
+	"github.com/fangfsz/ccg/internal/storage"
 )
 
 func (b *BackupService) getLocalDir() (string, error) {

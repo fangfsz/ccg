@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/logger"
-	"github.com/lich0821/ccNexus/internal/storage"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
+	"github.com/fangfsz/ccg/internal/storage"
 )
 
 // SSEEvent represents a Server-Sent Event
@@ -32,6 +33,170 @@ type APIResponse struct {
 	Usage Usage `json:"usage"`
 }
 
+// CircuitBreakerState represents the state of a circuit breaker
+type CircuitBreakerState int
+
+const (
+	CircuitClosed CircuitBreakerState = iota
+	CircuitOpen
+	CircuitHalfOpen
+)
+
+func (s CircuitBreakerState) String() string {
+	switch s {
+	case CircuitClosed:
+		return "closed"
+	case CircuitOpen:
+		return "open"
+	case CircuitHalfOpen:
+		return "half-open"
+	default:
+		return "unknown"
+	}
+}
+
+// startDrainingEndpoint 开始排空指定端点，新请求将不再路由到该端点
+// 已在该端点上的请求将等待完成或超时
+func (p *Proxy) startDrainingEndpoint(endpointName string) {
+	p.drainMu.Lock()
+	defer p.drainMu.Unlock()
+
+	deadline := time.Now().Add(p.drainTimeout)
+	p.drainingEndpoints[endpointName] = deadline
+	logger.Info("[Drain] 端点 %s 开始排空，截止时间: %v", endpointName, deadline.Format("15:04:05"))
+}
+
+// stopDrainingEndpoint 停止排空指定端点
+func (p *Proxy) stopDrainingEndpoint(endpointName string) {
+	p.drainMu.Lock()
+	defer p.drainMu.Unlock()
+
+	if _, exists := p.drainingEndpoints[endpointName]; exists {
+		delete(p.drainingEndpoints, endpointName)
+		logger.Debug("[Drain] 端点 %s 排空已停止", endpointName)
+	}
+}
+
+// isDraining 检查端点是否正在排空
+func (p *Proxy) isDraining(endpointName string) bool {
+	p.drainMu.RLock()
+	defer p.drainMu.RUnlock()
+
+	if deadline, exists := p.drainingEndpoints[endpointName]; exists {
+		if time.Now().After(deadline) {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
+// cleanupStaleDrainingEndpoints 清理过期的排空端点
+func (p *Proxy) cleanupStaleDrainingEndpoints() int {
+	p.drainMu.Lock()
+	defer p.drainMu.Unlock()
+
+	now := time.Now()
+	cleaned := 0
+	for endpointName, deadline := range p.drainingEndpoints {
+		if now.After(deadline) {
+			delete(p.drainingEndpoints, endpointName)
+			cleaned++
+			logger.Debug("[Drain] 端点 %s 排空已过期，已清理", endpointName)
+		}
+	}
+	return cleaned
+}
+
+// GetDrainingEndpoints 返回当前正在排空的端点列表
+func (p *Proxy) GetDrainingEndpoints() []string {
+	p.drainMu.RLock()
+	defer p.drainMu.RUnlock()
+
+	result := make([]string, 0, len(p.drainingEndpoints))
+	now := time.Now()
+	for endpointName, deadline := range p.drainingEndpoints {
+		if now.Before(deadline) {
+			result = append(result, endpointName)
+		}
+	}
+	return result
+}
+
+// CircuitBreaker tracks failures for an endpoint and can open the circuit
+type CircuitBreaker struct {
+	mu               sync.RWMutex
+	failures         int           // consecutive failure count
+	threshold        int           // number of failures before opening circuit
+	halfOpenSuccesses int         // successful calls needed to close circuit from half-open
+	halfOpenRequired int         // successful calls needed to close circuit
+	openTime         time.Time     // when the circuit was opened
+	recoveryTimeout  time.Duration // how long to wait before trying again
+	state            CircuitBreakerState
+}
+
+// ShouldAllow checks if a request should be allowed through
+func (cb *CircuitBreaker) ShouldAllow() bool {
+	cb.mu.Lock()
+	defer cb.mu.Unlock()
+
+	switch cb.state {
+	case CircuitClosed:
+		return true
+	case CircuitOpen:
+		if time.Since(cb.openTime) > cb.recoveryTimeout {
+			cb.state = CircuitHalfOpen
+			cb.halfOpenSuccesses = 0
+			logger.Debug("[CircuitBreaker] Transitioning to half-open state")
+			return true
+		}
+		return false
+	case CircuitHalfOpen:
+		return true
+	default:
+		return true
+	}
+}
+
+// RecordSuccess records a successful request
+func (cb *CircuitBreaker) RecordSuccess() {
+	cb.mu.Lock()
+	defer cb.mu.Unlock()
+
+	switch cb.state {
+	case CircuitClosed:
+		cb.failures = 0
+	case CircuitHalfOpen:
+		cb.halfOpenSuccesses++
+		if cb.halfOpenSuccesses >= cb.halfOpenRequired {
+			cb.state = CircuitClosed
+			cb.failures = 0
+			cb.halfOpenSuccesses = 0
+			logger.Info("[CircuitBreaker] Circuit closed, service recovered")
+		}
+	}
+}
+
+// RecordFailure records a failed request
+func (cb *CircuitBreaker) RecordFailure() {
+	cb.mu.Lock()
+	defer cb.mu.Unlock()
+
+	switch cb.state {
+	case CircuitClosed:
+		cb.failures++
+		if cb.failures >= cb.threshold {
+			cb.state = CircuitOpen
+			cb.openTime = time.Now()
+			logger.Warn("[CircuitBreaker] Circuit opened due to %d consecutive failures", cb.failures)
+		}
+	case CircuitHalfOpen:
+		cb.state = CircuitOpen
+		cb.openTime = time.Now()
+		logger.Warn("[CircuitBreaker] Request failed in half-open state, circuit reopened")
+	}
+}
+
 // Proxy represents the proxy server
 type Proxy struct {
 	config            *config.Config
@@ -49,6 +214,24 @@ type Proxy struct {
 	onEndpointSuccess func(endpointName string)     // callback when endpoint request succeeds
 	modelsCache       *ModelsCache                  // Cache for /v1/models endpoint
 	resolver          *EndpointResolver             // 端点解析器，用于解析客户端指定的端点
+
+	// 会话粘性：客户端IP+APIKey hash -> 端点名称
+	clientEndpointMap map[string]string
+	stickyMu         sync.RWMutex
+	stickyLastAccess map[string]time.Time // 记录每个粘性映射的最后访问时间
+	stickyExpiry      time.Duration       // 粘性映射过期时间，默认 30 分钟
+
+	// 熔断器：端点名称 -> 熔断器状态
+	circuitBreakers map[string]*CircuitBreaker
+	circuitBreakerMu sync.RWMutex
+
+	// 连接排空：端点名称 -> 排空截止时间
+	drainingEndpoints map[string]time.Time
+	drainMu           sync.RWMutex
+	drainTimeout      time.Duration // 排空超时，默认 30 秒
+
+	// 后台任务停止通道
+	stopCh chan struct{}
 }
 
 // New creates a new Proxy instance
@@ -83,12 +266,278 @@ func New(cfg *config.Config, statsStorage StatsStorage, sqliteStorage *storage.S
 		endpointCancel: make(map[string]context.CancelFunc),
 		modelsCache:    NewModelsCache(cfg.ModelsCacheTTL),
 		resolver:       NewEndpointResolverWithFunc(cfg.GetEndpoints),
+		clientEndpointMap: make(map[string]string),
+		stickyLastAccess: make(map[string]time.Time),
+		stickyExpiry:      30 * time.Minute,
+		circuitBreakers:  make(map[string]*CircuitBreaker),
+		drainingEndpoints: make(map[string]time.Time),
+		drainTimeout:      30 * time.Second,
+		stopCh:           make(chan struct{}),
 	}
 }
 
 // SetOnEndpointSuccess sets the callback for successful endpoint requests
 func (p *Proxy) SetOnEndpointSuccess(callback func(endpointName string)) {
 	p.onEndpointSuccess = callback
+}
+
+// generateClientID 根据请求生成客户端唯一标识符
+// 使用 IP + API Key 的组合哈希，用于会话粘性
+func (p *Proxy) generateClientID(r *http.Request, bodyBytes []byte) string {
+	var apiKey string
+	var clientIP string
+	var hashInput string
+
+	// 优先从 Authorization Header 获取 API Key
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "" {
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) == 2 && (strings.ToLower(parts[0]) == "bearer" || strings.ToLower(parts[0]) == "apikey") {
+			apiKey = parts[1]
+		}
+	}
+
+	// 其次从 X-API-Key Header 获取
+	if apiKey == "" {
+		apiKey = r.Header.Get("X-API-Key")
+	}
+
+	// 如果都没有，才从请求体中解析（这对于某些 CLI 工具是必要的）
+	// 注意：这里只解析 model 字段用于生成 clientID，不再完整解析请求体
+	if apiKey == "" && len(bodyBytes) > 0 {
+		if idx := bytes.Index(bodyBytes, []byte(`"model"`)); idx >= 0 {
+			endIdx := idx + len(`"model"`)
+			if endIdx < len(bodyBytes) && bodyBytes[endIdx] == ':' {
+				start := endIdx + 1
+				for start < len(bodyBytes) && (bodyBytes[start] == ' ' || bodyBytes[start] == '"') {
+					start++
+				}
+				end := start
+				for end < len(bodyBytes) && bodyBytes[end] != ',' && bodyBytes[end] != '"' && bodyBytes[end] != '}' {
+					end++
+				}
+				if end > start {
+					modelValue := string(bodyBytes[start:end])
+					modelValue = strings.TrimSpace(modelValue)
+					clientIP = r.RemoteAddr
+					if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
+						clientIP = strings.Split(forwarded, ",")[0]
+					}
+					hashInput = fmt.Sprintf("%s|%s|%s", clientIP, apiKey, modelValue)
+					return fmt.Sprintf("%x", hashInput)
+				}
+			}
+		}
+	}
+
+	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
+		clientIP = strings.Split(forwarded, ",")[0]
+	} else {
+		clientIP = r.RemoteAddr
+	}
+
+	hashInput = fmt.Sprintf("%s|%s", clientIP, apiKey)
+	return fmt.Sprintf("%x", hashInput)
+}
+
+// getStickyEndpoint 获取客户端的粘性端点（带过期检查）
+func (p *Proxy) getStickyEndpoint(clientID string) string {
+	p.stickyMu.Lock()
+	defer p.stickyMu.Unlock()
+
+	// 检查是否过期
+	if lastAccess, exists := p.stickyLastAccess[clientID]; exists {
+		if time.Since(lastAccess) > p.stickyExpiry {
+			// 已过期，删除映射
+			delete(p.clientEndpointMap, clientID)
+			delete(p.stickyLastAccess, clientID)
+			logger.Debug("[Sticky] 客户端 %s 粘性映射已过期", clientID)
+			return ""
+		}
+	}
+
+	endpointName := p.clientEndpointMap[clientID]
+	if endpointName != "" {
+		// 更新最后访问时间
+		p.stickyLastAccess[clientID] = time.Now()
+	}
+	return endpointName
+}
+
+// setStickyEndpoint 设置客户端的粘性端点
+func (p *Proxy) setStickyEndpoint(clientID, endpointName string) {
+	p.stickyMu.Lock()
+	defer p.stickyMu.Unlock()
+	p.clientEndpointMap[clientID] = endpointName
+	p.stickyLastAccess[clientID] = time.Now()
+	logger.Debug("[Sticky] 客户端 %s 绑定到端点 %s", clientID, endpointName)
+}
+
+// clearStickyEndpoint 清除客户端的粘性端点
+func (p *Proxy) clearStickyEndpoint(clientID string) {
+	p.stickyMu.Lock()
+	defer p.stickyMu.Unlock()
+	delete(p.clientEndpointMap, clientID)
+	delete(p.stickyLastAccess, clientID)
+}
+
+// clearStickyEndpointsForEndpoint 清除所有绑定到指定端点的粘性映射
+// 用于当端点不可用时调用
+func (p *Proxy) clearStickyEndpointsForEndpoint(endpointName string) {
+	p.stickyMu.Lock()
+	defer p.stickyMu.Unlock()
+
+	clearedCount := 0
+	for clientID, boundEndpoint := range p.clientEndpointMap {
+		if boundEndpoint == endpointName {
+			delete(p.clientEndpointMap, clientID)
+			delete(p.stickyLastAccess, clientID)
+			clearedCount++
+		}
+	}
+
+	if clearedCount > 0 {
+		logger.Info("[Sticky] 端点 %s 不可用，清除了 %d 个粘性映射", endpointName, clearedCount)
+	}
+}
+
+// clearStickyEndpointsForEndpointExcept 清除所有绑定到指定端点的粘性映射，但保留指定客户端ID的绑定
+// 用于端点轮换时，只清除其他客户端的绑定，保留当前正在处理的客户端
+func (p *Proxy) clearStickyEndpointsForEndpointExcept(endpointName string, exceptClientID string) {
+	p.stickyMu.Lock()
+	defer p.stickyMu.Unlock()
+
+	clearedCount := 0
+	for clientID, boundEndpoint := range p.clientEndpointMap {
+		if boundEndpoint == endpointName && clientID != exceptClientID {
+			delete(p.clientEndpointMap, clientID)
+			delete(p.stickyLastAccess, clientID)
+			clearedCount++
+		}
+	}
+
+	if clearedCount > 0 {
+		logger.Debug("[Sticky] 端点 %s 不可用，清除了 %d 个其他客户端的粘性映射（保留当前客户端 %s）", endpointName, clearedCount, exceptClientID)
+	}
+}
+
+// recordStickyEndpoint 记录成功的端点分配（用于会话粘性）
+func (p *Proxy) recordStickyEndpoint(clientID, endpointName string) {
+	if clientID != "" && endpointName != "" {
+		p.setStickyEndpoint(clientID, endpointName)
+	}
+}
+
+// cleanupExpiredStickyMappings 清理所有过期的粘性映射
+// 由后台 goroutine 定期调用
+func (p *Proxy) cleanupExpiredStickyMappings() int {
+	p.stickyMu.Lock()
+	defer p.stickyMu.Unlock()
+
+	now := time.Now()
+	clearedCount := 0
+
+	for clientID, lastAccess := range p.stickyLastAccess {
+		if now.Sub(lastAccess) > p.stickyExpiry {
+			delete(p.clientEndpointMap, clientID)
+			delete(p.stickyLastAccess, clientID)
+			clearedCount++
+		}
+	}
+
+	if clearedCount > 0 {
+		logger.Debug("[Sticky] 清理了 %d 个过期的粘性映射", clearedCount)
+	}
+
+	return clearedCount
+}
+
+// startStickyCleanupRoutine 启动后台清理过期粘性映射的 goroutine
+func (p *Proxy) startStickyCleanupRoutine(interval time.Duration) {
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-p.stopCh:
+				logger.Info("[Sticky] 粘性映射后台清理已停止")
+				return
+			case <-ticker.C:
+				p.cleanupExpiredStickyMappings()
+				p.cleanupStaleDrainingEndpoints()
+			}
+		}
+	}()
+	logger.Info("[Sticky] 粘性映射后台清理已启动，间隔: %v", interval)
+}
+
+// getCircuitBreaker 获取指定端点的熔断器，不存在则创建
+func (p *Proxy) getCircuitBreaker(endpointName string) *CircuitBreaker {
+	p.circuitBreakerMu.Lock()
+	defer p.circuitBreakerMu.Unlock()
+
+	if cb, exists := p.circuitBreakers[endpointName]; exists {
+		return cb
+	}
+
+	cb := &CircuitBreaker{
+		failures:         0,
+		threshold:        5,              // 连续失败 5 次后打开断路器
+		halfOpenSuccesses: 0,
+		halfOpenRequired: 2,              // 半开状态下需要 2 次成功才能关闭
+		openTime:         time.Time{},
+		recoveryTimeout:  30 * time.Second, // 30 秒后尝试恢复
+		state:            CircuitClosed,
+	}
+	p.circuitBreakers[endpointName] = cb
+	return cb
+}
+
+// shouldSkipEndpoint 检查端点是否应该被跳过（断路器开启）
+func (p *Proxy) shouldSkipEndpoint(endpointName string) bool {
+	cb := p.getCircuitBreaker(endpointName)
+	if !cb.ShouldAllow() {
+		logger.Debug("[CircuitBreaker] 端点 %s 断路器开启，跳过", endpointName)
+		return true
+	}
+	return false
+}
+
+// recordEndpointSuccess 记录端点成功
+func (p *Proxy) recordEndpointSuccess(endpointName string) {
+	cb := p.getCircuitBreaker(endpointName)
+	cb.RecordSuccess()
+}
+
+// recordEndpointFailure 记录端点失败
+func (p *Proxy) recordEndpointFailure(endpointName string) {
+	cb := p.getCircuitBreaker(endpointName)
+	cb.RecordFailure()
+}
+
+// resetCircuitBreaker 重置端点的熔断器状态
+func (p *Proxy) resetCircuitBreaker(endpointName string) {
+	p.circuitBreakerMu.Lock()
+	defer p.circuitBreakerMu.Unlock()
+
+	if cb, exists := p.circuitBreakers[endpointName]; exists {
+		cb.mu.Lock()
+		cb.failures = 0
+		cb.state = CircuitClosed
+		cb.halfOpenSuccesses = 0
+		cb.mu.Unlock()
+		logger.Info("[CircuitBreaker] 端点 %s 熔断器已重置", endpointName)
+	}
+}
+
+// clearCircuitBreaker 清除端点的熔断器
+func (p *Proxy) clearCircuitBreaker(endpointName string) {
+	p.circuitBreakerMu.Lock()
+	defer p.circuitBreakerMu.Unlock()
+
+	delete(p.circuitBreakers, endpointName)
+	logger.Debug("[CircuitBreaker] 端点 %s 熔断器已清除", endpointName)
 }
 
 // Start starts the proxy server
@@ -98,6 +547,9 @@ func (p *Proxy) Start() error {
 
 // StartWithMux starts the proxy server with an optional custom mux
 func (p *Proxy) StartWithMux(customMux *http.ServeMux) error {
+	// 启动粘性映射后台清理任务（每 5 分钟清理一次）
+	p.startStickyCleanupRoutine(5 * time.Minute)
+
 	port := p.config.GetPort()
 
 	var mux *http.ServeMux
@@ -125,8 +577,9 @@ func (p *Proxy) StartWithMux(customMux *http.ServeMux) error {
 	return p.server.ListenAndServe()
 }
 
-// Stop stops the proxy server
+// Stop stops the proxy server and all background goroutines
 func (p *Proxy) Stop() error {
+	close(p.stopCh)
 	if p.server != nil {
 		return p.server.Close()
 	}
@@ -215,21 +668,12 @@ func (p *Proxy) cancelEndpointRequests(endpointName string) {
 }
 
 // rotateEndpoint switches to the next endpoint (thread-safe)
-// waitForActive: if true, waits briefly for active requests to complete before switching
+// Uses connection draining to gracefully handle ongoing requests on the old endpoint
 func (p *Proxy) rotateEndpoint() config.Endpoint {
-	// First, check if we need to wait for active requests
 	oldEndpoint := p.getCurrentEndpoint()
-	if p.hasActiveRequests(oldEndpoint.Name) {
-		logger.Debug("[SWITCH] Waiting for active requests on %s to complete...", oldEndpoint.Name)
 
-		// Wait outside of the main lock to avoid blocking other operations
-		for i := 0; i < 10; i++ { // Check 10 times, 50ms each = 500ms max
-			time.Sleep(50 * time.Millisecond)
-			if !p.hasActiveRequests(oldEndpoint.Name) {
-				break
-			}
-		}
-	}
+	// 清除绑定到旧端点的所有粘性映射（保留当前客户端的绑定）
+	p.clearStickyEndpointsForEndpointExcept(oldEndpoint.Name, "")
 
 	// Now acquire lock and perform the rotation
 	p.mu.Lock()
@@ -248,7 +692,9 @@ func (p *Proxy) rotateEndpoint() config.Endpoint {
 
 	newEndpoint := endpoints[p.currentIndex]
 	if len(endpoints) > 1 && oldEndpoint.Name != newEndpoint.Name {
-		logger.Debug("[SWITCH] %s → %s (#%d)", oldEndpoint.Name, newEndpoint.Name, p.currentIndex+1)
+		// 开始排空旧端点，而不是立即取消请求
+		p.startDrainingEndpoint(oldEndpoint.Name)
+		logger.Debug("[SWITCH] %s → %s (#%d) (旧端点开始排空)", oldEndpoint.Name, newEndpoint.Name, p.currentIndex+1)
 	}
 
 	return newEndpoint
@@ -262,7 +708,7 @@ func (p *Proxy) GetCurrentEndpointName() string {
 
 // SetCurrentEndpoint manually switches to a specific endpoint by name
 // Returns error if endpoint not found or not enabled
-// Thread-safe and cancels ongoing requests on the old endpoint
+// Thread-safe and gracefully drains the old endpoint before switching
 func (p *Proxy) SetCurrentEndpoint(targetName string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -277,11 +723,14 @@ func (p *Proxy) SetCurrentEndpoint(targetName string) error {
 		if ep.Name == targetName {
 			oldEndpoint := endpoints[p.currentIndex%len(endpoints)]
 			if oldEndpoint.Name != targetName {
-				// Cancel all requests on the old endpoint
-				p.cancelEndpointRequests(oldEndpoint.Name)
+				// 开始排空旧端点，而不是立即取消请求
+				// 这样可以让正在进行的请求继续完成，同时新请求会路由到新端点
+				p.startDrainingEndpoint(oldEndpoint.Name)
+				// 重置旧端点的熔断器，使其可以重新尝试
+				p.resetCircuitBreaker(oldEndpoint.Name)
 			}
 			p.currentIndex = i
-			logger.Info("[MANUAL SWITCH] %s → %s", oldEndpoint.Name, ep.Name)
+			logger.Info("[MANUAL SWITCH] %s → %s (旧端点开始排空)", oldEndpoint.Name, ep.Name)
 			return nil
 		}
 	}
@@ -315,7 +764,7 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		logger.Error("Failed to read request body: %v", err)
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		p.writeJSONError(w, "Failed to read request body", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
@@ -343,7 +792,7 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 	endpoints := p.getEnabledEndpoints()
 	if len(endpoints) == 0 {
 		logger.Error("No enabled endpoints available")
-		http.Error(w, "No enabled endpoints configured", http.StatusServiceUnavailable)
+		p.writeJSONError(w, "No enabled endpoints configured", http.StatusServiceUnavailable)
 		return
 	}
 
@@ -373,24 +822,90 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 		logger.Debug("[Resolver] 使用指定端点: %s", specifiedEndpoint.Name)
 	}
 
+	// 生成客户端标识符（用于会话粘性）
+	clientID := p.generateClientID(r, bodyBytes)
+
 	maxRetries := p.computeMaxRetries(endpoints)
 	endpointAttempts := 0
 	lastEndpointName := ""
 	refreshedCredentialAttempts := make(map[int64]bool)
+	fallbackModel := ""
+	fallbackOriginalModel := ""
+	hasTriedFallback := false
+
+	// 会话粘性：检查是否有已分配的端点
+	stickyEndpointName := ""
+	if !useSpecificEndpoint {
+		stickyEndpointName = p.getStickyEndpoint(clientID)
+		if stickyEndpointName != "" {
+			logger.Debug("[Sticky] 客户端 %s 使用粘性端点: %s", clientID, stickyEndpointName)
+		}
+	}
 
 	for retry := 0; retry < maxRetries; retry++ {
 		var endpoint config.Endpoint
 		if useSpecificEndpoint {
 			// 使用指定的端点，不进行轮询
 			endpoint = *specifiedEndpoint
+		} else if stickyEndpointName != "" {
+			// 使用粘性端点（如果仍然可用且未在排空）
+			found := false
+			for _, ep := range endpoints {
+				if ep.Name == stickyEndpointName {
+					// 检查端点是否在排空
+					if p.isDraining(ep.Name) {
+						logger.Warn("[Sticky] 粘性端点 %s 正在排空，切换到轮询", stickyEndpointName)
+						p.clearStickyEndpoint(clientID)
+						stickyEndpointName = ""
+						endpoint = p.getCurrentEndpoint()
+					} else {
+						endpoint = ep
+						found = true
+					}
+					break
+				}
+			}
+			if !found && stickyEndpointName != "" {
+				// 粘性端点已不可用，清除并使用轮询
+				// 保留当前客户端的绑定（会在下次请求时自然失效），只清除其他客户端
+				logger.Warn("[Sticky] 粘性端点 %s 不可用，切换到轮询", stickyEndpointName)
+				p.clearStickyEndpoint(clientID)
+				p.clearStickyEndpointsForEndpointExcept(stickyEndpointName, clientID)
+				stickyEndpointName = ""
+				endpoint = p.getCurrentEndpoint()
+			}
 		} else {
 			// 使用轮询机制
 			endpoint = p.getCurrentEndpoint()
 		}
 
 		if endpoint.Name == "" {
-			http.Error(w, "No enabled endpoints available", http.StatusServiceUnavailable)
+			p.writeJSONError(w, "No enabled endpoints available", http.StatusServiceUnavailable)
 			return
+		}
+
+		// 熔断器检查：如果端点的断路器开启，跳过该端点
+		if p.shouldSkipEndpoint(endpoint.Name) {
+			logger.Warn("[CircuitBreaker] 端点 %s 断路器开启", endpoint.Name)
+			p.markRequestInactive(endpoint.Name)
+			if useSpecificEndpoint {
+				p.writeJSONError(w, fmt.Sprintf("Endpoint %s is unavailable (circuit breaker open)", endpoint.Name), http.StatusServiceUnavailable)
+				return
+			}
+			p.rotateEndpoint()
+			continue
+		}
+
+		// 排空检查：如果端点正在排空，跳过该端点
+		if p.isDraining(endpoint.Name) {
+			logger.Warn("[Drain] 端点 %s 正在排空", endpoint.Name)
+			p.markRequestInactive(endpoint.Name)
+			if useSpecificEndpoint {
+				p.writeJSONError(w, fmt.Sprintf("Endpoint %s is draining and unavailable", endpoint.Name), http.StatusServiceUnavailable)
+				return
+			}
+			p.rotateEndpoint()
+			continue
 		}
 
 		// Reset attempts counter if endpoint changed (e.g., manual switch)
@@ -489,24 +1004,49 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 			logger.DebugLog("[%s] 应用模型覆盖后的请求: %s", endpoint.Name, string(transformedBody))
 		}
 
+		// 如果有 fallback 模型（模型不支持时的降级），应用到转换后的请求体中
+		if fallbackModel != "" && config.NormalizeAuthMode(authMode) != config.AuthModeCodexTokenPool {
+			transformedBody = overrideModelInPayload(transformedBody, fallbackModel)
+			logger.DebugLog("[%s] 应用 fallback 模型后的请求: %s", endpoint.Name, string(transformedBody))
+		}
+
 		cleanedBody, err := cleanIncompleteToolCalls(transformedBody)
 		if err != nil {
 			logger.Warn("[%s] Failed to clean tool calls: %v", endpoint.Name, err)
 			cleanedBody = transformedBody
 		}
 		transformedBody = cleanedBody
-		if config.NormalizeAuthMode(endpoint.AuthMode) == config.AuthModeCodexTokenPool {
-			transformedBody = overrideModelInPayload(transformedBody, endpoint.Model)
-		}
 
-		// 处理模型名称：优先使用模型覆盖值，然后是请求中的模型，最后是端点配置的模型
 		modelName := strings.TrimSpace(streamReq.Model)
+		originalModelName := modelName
+
 		if modelOverride != "" {
-			// 使用解析器提供的模型覆盖值
 			modelName = modelOverride
 			logger.Debug("[%s] 使用模型覆盖值: %s", endpoint.Name, modelName)
-		} else if modelName == "" || (authMode == config.AuthModeCodexTokenPool && strings.TrimSpace(endpoint.Model) != "") {
+		} else if fallbackModel != "" {
+			modelName = fallbackModel
+			logger.Debug("[%s] 使用 fallback 模型: %s", endpoint.Name, modelName)
+		} else if endpoint.Model != "" && modelName != endpoint.Model {
 			modelName = endpoint.Model
+			logger.Info("[%s] 动态模型映射: %s → %s (根据端点配置自动替换)", endpoint.Name, originalModelName, modelName)
+		} else if modelName == "" {
+			modelName = endpoint.Model
+		}
+
+		if modelName != originalModelName {
+			transformedBody = overrideModelInPayload(transformedBody, modelName)
+			var reason string
+			switch {
+			case authMode == config.AuthModeCodexTokenPool:
+				reason = "CodexTokenPool"
+			case modelOverride != "":
+				reason = "模型覆盖"
+			case fallbackModel != "":
+				reason = "fallback"
+			default:
+				reason = "动态映射"
+			}
+			logger.Debug("[%s] 替换请求体中的模型(%s): %s → %s", endpoint.Name, reason, originalModelName, modelName)
 		}
 
 		var thinkingEnabled bool
@@ -594,6 +1134,7 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 				if p.onEndpointSuccess != nil {
 					p.onEndpointSuccess(endpoint.Name)
 				}
+				p.recordStickyEndpoint(clientID, endpoint.Name)
 				totalElapsed := time.Since(requestStart).Round(time.Millisecond)
 				logger.Debug("[%s] Requested tokens=%d/%d latency=%s cred_id=%d", endpoint.Name, inputTokens, outputTokens, totalElapsed, credentialID)
 				return
@@ -623,9 +1164,11 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 			p.recordCredentialUsage(credentialID, endpoint.Name, 1, 0, inputTokens, outputTokens)
 			p.markCredentialSuccess(credentialID)
 			p.markRequestInactive(endpoint.Name)
+			p.recordEndpointSuccess(endpoint.Name)
 			if p.onEndpointSuccess != nil {
 				p.onEndpointSuccess(endpoint.Name)
 			}
+			p.recordStickyEndpoint(clientID, endpoint.Name)
 			totalElapsed := time.Since(requestStart).Round(time.Millisecond)
 			logger.Debug("[%s] Requested tokens=%d/%d latency=%s cred_id=%d", endpoint.Name, inputTokens, outputTokens, totalElapsed, credentialID)
 			return
@@ -638,14 +1181,16 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 				p.stats.RecordTokens(endpoint.Name, inputTokens, outputTokens)
 				p.recordCredentialUsage(credentialID, endpoint.Name, 1, 0, inputTokens, outputTokens)
 				p.markCredentialSuccess(credentialID)
-			p.markRequestInactive(endpoint.Name)
-			if p.onEndpointSuccess != nil {
-				p.onEndpointSuccess(endpoint.Name)
+				p.markRequestInactive(endpoint.Name)
+				p.recordEndpointSuccess(endpoint.Name)
+				if p.onEndpointSuccess != nil {
+					p.onEndpointSuccess(endpoint.Name)
+				}
+				p.recordStickyEndpoint(clientID, endpoint.Name)
+				totalElapsed := time.Since(requestStart).Round(time.Millisecond)
+				logger.Debug("[%s] Requested tokens=%d/%d latency=%s cred_id=%d", endpoint.Name, inputTokens, outputTokens, totalElapsed, credentialID)
+				return
 			}
-			totalElapsed := time.Since(requestStart).Round(time.Millisecond)
-			logger.Debug("[%s] Requested tokens=%d/%d latency=%s cred_id=%d", endpoint.Name, inputTokens, outputTokens, totalElapsed, credentialID)
-			return
-		}
 		}
 
 		if shouldRetry(resp.StatusCode) {
@@ -665,6 +1210,7 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 			p.markCredentialFailure(credentialID, resp.StatusCode, errMsg)
 			p.recordCredentialUsage(credentialID, endpoint.Name, 0, 1, 0, 0)
 			p.stats.RecordError(endpoint.Name)
+			p.recordEndpointFailure(endpoint.Name)
 			p.markRequestInactive(endpoint.Name)
 			if endpointAttempts >= 2 {
 				p.rotateEndpoint()
@@ -725,8 +1271,9 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 
 		p.markRequestInactive(endpoint.Name)
 		// Log non-200 responses for debugging
+		var errMsg string
 		if resp.StatusCode != http.StatusOK {
-			errMsg := string(respBody)
+			errMsg = string(respBody)
 			if len(errMsg) > 500 {
 				errMsg = errMsg[:500] + "..."
 			}
@@ -744,6 +1291,37 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 			}
 			logger.Warn("[%s] Response %d: %s", endpoint.Name, resp.StatusCode, errMsg)
 			logger.DebugLog("[%s] Response %d: %s", endpoint.Name, resp.StatusCode, errMsg)
+			if resp.StatusCode == http.StatusBadRequest && isUnsupportedModelError(errMsg) {
+				if fallbackModel == "" {
+					if hasTriedFallback {
+						logger.Warn("[%s] Model fallback exhausted, both endpoint default and original models failed, trying next endpoint", endpoint.Name)
+						p.markRequestInactive(endpoint.Name)
+						endpointAttempts = 0
+						continue
+					} else if endpoint.Model != "" && endpoint.Model != originalModelName {
+						logger.Info("[%s] Model '%s' not supported, falling back to endpoint default model: %s", endpoint.Name, modelName, endpoint.Model)
+						fallbackModel = endpoint.Model
+						fallbackOriginalModel = originalModelName
+						hasTriedFallback = true
+						p.markRequestInactive(endpoint.Name)
+						endpointAttempts = 0
+						continue
+					} else if originalModelName != "" {
+						logger.Info("[%s] Model '%s' not supported, trying original model: %s", endpoint.Name, modelName, originalModelName)
+						fallbackModel = originalModelName
+						hasTriedFallback = true
+						p.markRequestInactive(endpoint.Name)
+						endpointAttempts = 0
+						continue
+					}
+				} else if fallbackOriginalModel != "" && fallbackModel != fallbackOriginalModel {
+					logger.Info("[%s] Endpoint default model '%s' not supported, trying original model: %s", endpoint.Name, fallbackModel, fallbackOriginalModel)
+					fallbackModel = fallbackOriginalModel
+					p.markRequestInactive(endpoint.Name)
+					endpointAttempts = 0
+					continue
+				}
+			}
 		}
 		// Remove Content-Encoding header since we've decompressed
 		for key, values := range resp.Header {
@@ -756,10 +1334,25 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(resp.StatusCode)
 		w.Write(respBody)
+		p.recordEndpointSuccess(endpoint.Name)
 		return
 	}
 
-	http.Error(w, "All endpoints failed", http.StatusServiceUnavailable)
+	p.writeJSONError(w, "All endpoints failed", http.StatusServiceUnavailable)
+}
+
+func (p *Proxy) writeJSONError(w http.ResponseWriter, message string, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	errorResp := map[string]interface{}{
+		"error": map[string]interface{}{
+			"type":    "upstream_error",
+			"message": message,
+		},
+	}
+	if jsonBytes, err := json.Marshal(errorResp); err == nil {
+		w.Write(jsonBytes)
+	}
 }
 
 func (p *Proxy) selectCredential(endpointName string) (*storage.EndpointCredential, error) {

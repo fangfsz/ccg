@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/lich0821/ccNexus/internal/logger"
+	"github.com/fangfsz/ccg/internal/logger"
 )
 
 // handleEvents handles Server-Sent Events for real-time updates

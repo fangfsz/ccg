@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/lich0821/ccNexus/internal/logger"
-	"github.com/lich0821/ccNexus/internal/tokencount"
+	"github.com/fangfsz/ccg/internal/logger"
+	"github.com/fangfsz/ccg/internal/tokencount"
 )
 
 // normalizeAPIUrl ensures the API URL has a protocol prefix
@@ -22,6 +22,31 @@ func shouldRetry(statusCode int) bool {
 	return statusCode != http.StatusOK &&
 		statusCode != http.StatusBadRequest &&
 		statusCode != http.StatusUnauthorized
+}
+
+// isUnsupportedModelError checks if the error message indicates an unsupported model error
+func isUnsupportedModelError(errMsg string) bool {
+	errLower := strings.ToLower(errMsg)
+	modelErrorIndicators := []string{
+		"model not found",
+		"model not available",
+		"model not support",
+		"unsupported model",
+		"invalid model",
+		"unknown model",
+		"model does not exist",
+		"model unavailable",
+		"model is not available",
+		"is not a valid model",
+		"is not supported",
+		"model_id",
+	}
+	for _, indicator := range modelErrorIndicators {
+		if strings.Contains(errLower, indicator) {
+			return true
+		}
+	}
+	return false
 }
 
 // cleanIncompleteToolCalls removes incomplete tool_use blocks from request

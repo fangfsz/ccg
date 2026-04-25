@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/logger"
-	"github.com/lich0821/ccNexus/internal/proxy"
-	"github.com/lich0821/ccNexus/internal/storage"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
+	"github.com/fangfsz/ccg/internal/proxy"
+	"github.com/fangfsz/ccg/internal/storage"
 )
 
 func main() {
@@ -127,7 +127,7 @@ func resolveDataDir() string {
 		return dir
 	}
 	if home, err := os.UserHomeDir(); err == nil {
-		return filepath.Join(home, ".ccNexus")
+		return filepath.Join(home, ".ccg")
 	}
 	return "/data"
 }

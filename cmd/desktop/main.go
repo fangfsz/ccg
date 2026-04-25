@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/lich0821/ccNexus/internal/singleinstance"
-	"github.com/lich0821/ccNexus/internal/storage"
+	"github.com/fangfsz/ccg/internal/singleinstance"
+	"github.com/fangfsz/ccg/internal/storage"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -56,7 +56,7 @@ func main() {
 	windowWidth, windowHeight := 1024, 768 // defaults
 	homeDir, err := os.UserHomeDir()
 	if err == nil {
-		dbPath := filepath.Join(homeDir, ".ccNexus", "ccnexus.db")
+		dbPath := filepath.Join(homeDir, ".ccg", "ccg.db")
 		if sqliteStorage, err := storage.NewSQLiteStorage(dbPath); err == nil {
 			if w, err := sqliteStorage.GetConfig("windowWidth"); err == nil && w != "" {
 				if width, err := strconv.Atoi(w); err == nil && width > 0 {

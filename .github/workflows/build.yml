@@ -20,6 +20,9 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             arch: amd64
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
           - os: macos-latest
             platform: darwin
             arch: amd64
@@ -42,7 +45,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: '1.24'
           cache: true
 
       - name: Setup Node.js
@@ -149,37 +152,75 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           cd cmd/desktop/build/bin
-          tar -czf ccNexus-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ccNexus
-          mv ccNexus-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ../../../../
+          tar -czf ccg-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ccg
+          mv ccg-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ../../../../
+        shell: bash
 
       - name: Package application (macOS)
         if: matrix.platform == 'darwin'
         run: |
           cd cmd/desktop/build/bin
-          if [ -d "ccNexus.app" ]; then
-            zip -r ccNexus-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip "ccNexus.app"
+          if [ -d "ccg.app" ]; then
+            zip -r ccg-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip "ccg.app"
           else
-            tar -czf ccNexus-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ccNexus
+            tar -czf ccg-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ccg
           fi
-          mv ccNexus-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.* ../../../../
+          mv ccg-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.* ../../../../
+        shell: bash
 
       - name: Package application (Windows)
         if: matrix.platform == 'windows'
         run: |
           cd cmd/desktop/build/bin
-          Compress-Archive -Path ccNexus.exe -DestinationPath ../../../../ccNexus-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
+          Compress-Archive -Path ccg.exe -DestinationPath ../../../../ccg-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
         shell: pwsh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ccNexus-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: ccg-${{ steps.get_version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: |
-            ccNexus-*.tar.gz
-            ccNexus-*.zip
+            ccg-*.tar.gz
+            ccg-*.zip
+
+  docker:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: fangfsz/ccg
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha,prefix=
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./cmd/server/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   release:
-    needs: build
+    needs: [build, docker]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
 

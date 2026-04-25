@@ -5,10 +5,10 @@ import (
     "fmt"
     "time"
 
-    "github.com/lich0821/ccNexus/internal/config"
-    "github.com/lich0821/ccNexus/internal/logger"
-    "github.com/lich0821/ccNexus/internal/storage"
-    "github.com/lich0821/ccNexus/internal/updater"
+    "github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
+	"github.com/fangfsz/ccg/internal/storage"
+	"github.com/fangfsz/ccg/internal/updater"
 )
 
 // UpdateService handles auto-update operations

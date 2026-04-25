@@ -14,11 +14,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/lich0821/ccNexus/internal/config"
-	"github.com/lich0821/ccNexus/internal/logger"
-	"github.com/lich0821/ccNexus/internal/proxy"
-	"github.com/lich0821/ccNexus/internal/storage"
-	"github.com/lich0821/ccNexus/internal/transformer/convert"
+	"github.com/fangfsz/ccg/internal/config"
+	"github.com/fangfsz/ccg/internal/logger"
+	"github.com/fangfsz/ccg/internal/proxy"
+	"github.com/fangfsz/ccg/internal/storage"
+	"github.com/fangfsz/ccg/internal/transformer/convert"
 )
 
 // createHTTPClient creates an HTTP client with optional proxy support

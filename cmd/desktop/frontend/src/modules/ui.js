@@ -359,7 +359,7 @@ export function initUI() {
         <div class="footer">
             <div class="footer-content">
                 <div class="footer-left">
-                    <span style="opacity: 0.8;">© 2025 ccNexus</span>
+                    <span style="opacity: 0.8;">© 2025 ccg</span>
                 </div>
                 <div class="footer-center">
                     <div class="tips-container">
@@ -418,10 +418,10 @@ export function initUI() {
                     <div class="form-group">
                         <label><span class="required">*</span>${t('modal.transformer')}</label>
                         <select id="endpointTransformer" onchange="window.handleTransformerChange()">
-                            <option value="claude">Claude (Default)</option>
-                            <option value="openai">OpenAI</option>
-                            <option value="openai2">OpenAI2 (Responses API)</option>
-                            <option value="gemini">Gemini</option>
+                            <option value="claude" title="${t('modal.transformerOptionClaude')}">Claude (Default)</option>
+                            <option value="openai" title="${t('modal.transformerOptionOpenAI')}">OpenAI</option>
+                            <option value="openai2" title="${t('modal.transformerOptionOpenAI2')}">OpenAI2 (Responses API)</option>
+                            <option value="gemini" title="${t('modal.transformerOptionGemini')}">Gemini</option>
                         </select>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
                             ${t('modal.transformerHelp')}
@@ -472,20 +472,29 @@ export function initUI() {
                         <div class="form-label-row">
                             <label><span class="required">*</span>${t('terminal.selectTerminal')}</label>
                             <div class="cli-type-switcher">
-                                <button class="cli-type-btn active" data-cli="claude" onclick="window.switchCliType('claude')">Claude Code</button>
-                                <button class="cli-type-btn" data-cli="codex" onclick="window.switchCliType('codex')">Codex</button>
+                                <button class="cli-type-btn active" data-cli="claude" onclick="window.switchCliType('claude')">${t('terminal.cliTypeClaude')}</button>
+                                <button class="cli-type-btn" data-cli="codex" onclick="window.switchCliType('codex')">${t('terminal.cliTypeCodex')}</button>
+                                <button class="cli-type-btn" data-cli="gemini" onclick="window.switchCliType('gemini')">${t('terminal.cliTypeGemini')}</button>
                             </div>
                         </div>
+                        <div id="cliConfigStatus" class="cli-config-status"></div>
+                        <div id="matchingEndpoints" class="matching-endpoints" style="display: none;"></div>
                         <select id="terminalSelect" onchange="window.onTerminalChange()">
                             <option value="">Loading...</option>
                         </select>
                         <small class="form-help" id="terminalSelectHelp">${t('terminal.selectTerminalHelp')}</small>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="claudeCommandGroup">
                         <label>${t('terminal.launcherCommand')}</label>
                         <input type="text" id="claudeCommandInput" placeholder="claude"
                                oninput="window.onClaudeCommandChange()">
                         <small class="form-help">${t('terminal.launcherCommandHelp')}</small>
+                    </div>
+                    <div class="form-group" id="geminiCommandGroup" style="display: none;">
+                        <label>${t('terminal.geminiCommand')}</label>
+                        <input type="text" id="geminiCommandInput" placeholder="gemini"
+                               oninput="window.onGeminiCommandChange()">
+                        <small class="form-help">${t('terminal.geminiCommandHelp')}</small>
                     </div>
                     <div class="form-group">
                         <label><span class="required">*</span>${t('terminal.projectDirs')}</label>

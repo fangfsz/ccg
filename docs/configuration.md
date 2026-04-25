@@ -71,4 +71,4 @@
 
 ## 数据存储位置
 
-- 数据库：`~/.ccNexus/ccnexus.db`
+- 数据库：`~/.ccg/ccg.db`
