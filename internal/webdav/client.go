@@ -35,7 +35,7 @@ type response struct {
 }
 
 type propstat struct {
-	Prop prop   `xml:"prop"`
+	Prop   prop   `xml:"prop"`
 	Status string `xml:"status"`
 }
 
@@ -72,10 +72,10 @@ func NewClient(cfg *config.WebDAVConfig) (*Client, error) {
 
 	// 设置默认路径
 	if cfg.ConfigPath == "" {
-		cfg.ConfigPath = "/ccNexus/config"
+		cfg.ConfigPath = "/ccg/config"
 	}
 	if cfg.StatsPath == "" {
-		cfg.StatsPath = "/ccNexus/stats"
+		cfg.StatsPath = "/ccg/stats"
 	}
 
 	return &Client{
@@ -181,7 +181,6 @@ func (c *Client) ListBackups(isConfig bool) ([]BackupFile, error) {
 	}
 	defer resp.Body.Close()
 
-
 	// 检查状态码
 	if resp.StatusCode == 404 {
 		return []BackupFile{}, nil
@@ -197,13 +196,11 @@ func (c *Client) ListBackups(isConfig bool) ([]BackupFile, error) {
 		return nil, fmt.Errorf("Failed to read response: %v", err)
 	}
 
-
 	// 解析 XML
 	var propfind propfindResponse
 	if err := xml.Unmarshal(body, &propfind); err != nil {
 		return nil, fmt.Errorf("Failed to parse XML: %v", err)
 	}
-
 
 	// 转换为 BackupFile 列表
 	var backups []BackupFile

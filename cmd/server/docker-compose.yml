@@ -1,38 +1,46 @@
 services:
-  ccnexus:
+  ccg:
     build:
       context: ../..
       dockerfile: cmd/server/Dockerfile
       platforms:
         - linux/amd64
         - linux/arm64
-    container_name: ccnexus
+    container_name: ccg
     restart: unless-stopped
     ports:
       - "3021:3000"
     volumes:
-      - ccnexus-data:/data
+      - ccg-data:/data
     environment:
-      - CCNEXUS_PORT=3000
-      - CCNEXUS_DATA_DIR=/data
-      - CCNEXUS_DB_PATH=/data/ccnexus.db
+      - CCG_PORT=3000
+      - CCG_DATA_DIR=/data
+      - CCG_DB_PATH=/data/ccg.db
       - TZ=Asia/Shanghai
-      - CCNEXUS_BASIC_AUTH_ENABLED=${CCNEXUS_BASIC_AUTH_ENABLED:-true}
-      - CCNEXUS_BASIC_AUTH_USERNAME=${CCNEXUS_BASIC_AUTH_USERNAME:-admin}
-      - CCNEXUS_BASIC_AUTH_PASSWORD=${CCNEXUS_BASIC_AUTH_PASSWORD:-changeme}
+      - CCG_BASIC_AUTH_ENABLED=${CCG_BASIC_AUTH_ENABLED:-true}
+      - CCG_BASIC_AUTH_USERNAME=${CCG_BASIC_AUTH_USERNAME:-admin}
+      - CCG_BASIC_AUTH_PASSWORD=${CCG_BASIC_AUTH_PASSWORD:-changeme}
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
     networks:
-      - ccnexus-network
+      - ccg-network
 
 volumes:
-  ccnexus-data:
+  ccg-data:
     driver: local
 
 networks:
-  ccnexus-network:
+  ccg-network:
     driver: bridge

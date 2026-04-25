@@ -28,9 +28,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	dbPath := os.Getenv("CCNEXUS_DB_PATH")
+	dbPath := os.Getenv("CCG_DB_PATH")
 	if dbPath == "" {
-		dbPath = filepath.Join(dataDir, "ccnexus.db")
+		dbPath = filepath.Join(dataDir, "ccg.db")
 	}
 
 	sqliteStorage, err := storage.NewSQLiteStorage(dbPath)
@@ -101,7 +101,7 @@ func main() {
 		errCh <- p.StartWithMux(mux)
 	}()
 
-	logger.Info("ccNexus headless API listening on :%d (data dir: %s, db: %s)", cfg.GetPort(), dataDir, dbPath)
+	logger.Info("ccg headless API listening on :%d (data dir: %s, db: %s)", cfg.GetPort(), dataDir, dbPath)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
@@ -119,11 +119,11 @@ func main() {
 		}
 	}
 
-	logger.Info("ccNexus stopped")
+	logger.Info("ccg stopped")
 }
 
 func resolveDataDir() string {
-	if dir := os.Getenv("CCNEXUS_DATA_DIR"); dir != "" {
+	if dir := os.Getenv("CCG_DATA_DIR"); dir != "" {
 		return dir
 	}
 	if home, err := os.UserHomeDir(); err == nil {

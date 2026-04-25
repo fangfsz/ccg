@@ -125,14 +125,14 @@ func (p *Proxy) GetDrainingEndpoints() []string {
 
 // CircuitBreaker tracks failures for an endpoint and can open the circuit
 type CircuitBreaker struct {
-	mu               sync.RWMutex
-	failures         int           // consecutive failure count
-	threshold        int           // number of failures before opening circuit
-	halfOpenSuccesses int         // successful calls needed to close circuit from half-open
-	halfOpenRequired int         // successful calls needed to close circuit
-	openTime         time.Time     // when the circuit was opened
-	recoveryTimeout  time.Duration // how long to wait before trying again
-	state            CircuitBreakerState
+	mu                sync.RWMutex
+	failures          int           // consecutive failure count
+	threshold         int           // number of failures before opening circuit
+	halfOpenSuccesses int           // successful calls needed to close circuit from half-open
+	halfOpenRequired  int           // successful calls needed to close circuit
+	openTime          time.Time     // when the circuit was opened
+	recoveryTimeout   time.Duration // how long to wait before trying again
+	state             CircuitBreakerState
 }
 
 // ShouldAllow checks if a request should be allowed through
@@ -217,12 +217,12 @@ type Proxy struct {
 
 	// 会话粘性：客户端IP+APIKey hash -> 端点名称
 	clientEndpointMap map[string]string
-	stickyMu         sync.RWMutex
-	stickyLastAccess map[string]time.Time // 记录每个粘性映射的最后访问时间
-	stickyExpiry      time.Duration       // 粘性映射过期时间，默认 30 分钟
+	stickyMu          sync.RWMutex
+	stickyLastAccess  map[string]time.Time // 记录每个粘性映射的最后访问时间
+	stickyExpiry      time.Duration        // 粘性映射过期时间，默认 30 分钟
 
 	// 熔断器：端点名称 -> 熔断器状态
-	circuitBreakers map[string]*CircuitBreaker
+	circuitBreakers  map[string]*CircuitBreaker
 	circuitBreakerMu sync.RWMutex
 
 	// 连接排空：端点名称 -> 排空截止时间
@@ -256,23 +256,23 @@ func New(cfg *config.Config, statsStorage StatsStorage, sqliteStorage *storage.S
 	}
 
 	return &Proxy{
-		config:         cfg,
-		storage:        sqliteStorage,
-		stats:          stats,
-		currentIndex:   0,
-		httpClient:     httpClient,
-		activeRequests: make(map[string]bool),
-		endpointCtx:    make(map[string]context.Context),
-		endpointCancel: make(map[string]context.CancelFunc),
-		modelsCache:    NewModelsCache(cfg.ModelsCacheTTL),
-		resolver:       NewEndpointResolverWithFunc(cfg.GetEndpoints),
+		config:            cfg,
+		storage:           sqliteStorage,
+		stats:             stats,
+		currentIndex:      0,
+		httpClient:        httpClient,
+		activeRequests:    make(map[string]bool),
+		endpointCtx:       make(map[string]context.Context),
+		endpointCancel:    make(map[string]context.CancelFunc),
+		modelsCache:       NewModelsCache(cfg.ModelsCacheTTL),
+		resolver:          NewEndpointResolverWithFunc(cfg.GetEndpoints),
 		clientEndpointMap: make(map[string]string),
-		stickyLastAccess: make(map[string]time.Time),
+		stickyLastAccess:  make(map[string]time.Time),
 		stickyExpiry:      30 * time.Minute,
-		circuitBreakers:  make(map[string]*CircuitBreaker),
+		circuitBreakers:   make(map[string]*CircuitBreaker),
 		drainingEndpoints: make(map[string]time.Time),
 		drainTimeout:      30 * time.Second,
-		stopCh:           make(chan struct{}),
+		stopCh:            make(chan struct{}),
 	}
 }
 
@@ -482,13 +482,13 @@ func (p *Proxy) getCircuitBreaker(endpointName string) *CircuitBreaker {
 	}
 
 	cb := &CircuitBreaker{
-		failures:         0,
-		threshold:        5,              // 连续失败 5 次后打开断路器
+		failures:          0,
+		threshold:         5, // 连续失败 5 次后打开断路器
 		halfOpenSuccesses: 0,
-		halfOpenRequired: 2,              // 半开状态下需要 2 次成功才能关闭
-		openTime:         time.Time{},
-		recoveryTimeout:  30 * time.Second, // 30 秒后尝试恢复
-		state:            CircuitClosed,
+		halfOpenRequired:  2, // 半开状态下需要 2 次成功才能关闭
+		openTime:          time.Time{},
+		recoveryTimeout:   30 * time.Second, // 30 秒后尝试恢复
+		state:             CircuitClosed,
 	}
 	p.circuitBreakers[endpointName] = cb
 	return cb
@@ -571,7 +571,7 @@ func (p *Proxy) StartWithMux(customMux *http.ServeMux) error {
 		Handler: mux,
 	}
 
-	logger.Info("ccNexus starting on port %d", port)
+	logger.Info("ccg starting on port %d", port)
 	logger.Info("Configured %d endpoints", len(p.config.GetEndpoints()))
 
 	return p.server.ListenAndServe()

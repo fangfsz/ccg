@@ -24,34 +24,34 @@ COPY . ./
 RUN go mod tidy
 
 # Build the headless API server (webui is embedded via go:embed)
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o ccnexus-server ./cmd/server
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o ccg-server ./cmd/server
 
 # Runtime stage
 FROM alpine:3.19
 
 # Install runtime dependencies
 RUN apk add --no-cache ca-certificates sqlite-libs tzdata wget \
-    && addgroup -g 1000 ccnexus \
-    && adduser -u 1000 -G ccnexus -s /bin/sh -D ccnexus
+    && addgroup -g 1000 ccg \
+    && adduser -u 1000 -G ccg -s /bin/sh -D ccg
 
 WORKDIR /app
 
 # Prepare data directory with proper ownership
-RUN mkdir -p /data && chown -R ccnexus:ccnexus /app /data
+RUN mkdir -p /data && chown -R ccg:ccg /app /data
 
 # Copy binary from builder
-COPY --from=builder /app/ccnexus-server /app/ccnexus-server
+COPY --from=builder /app/ccg-server /app/ccg-server
 
 # Copy entrypoint script
 COPY --from=builder /app/cmd/server/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 # Environment variables
-ENV CCNEXUS_DATA_DIR=/data
-ENV CCNEXUS_PORT=3000
-ENV CCNEXUS_DB_PATH=/data/ccnexus.db
-ENV CCNEXUS_BASIC_AUTH_ENABLED=true
-ENV CCNEXUS_BASIC_AUTH_USERNAME=admin
+ENV CCG_DATA_DIR=/data
+ENV CCG_PORT=3000
+ENV CCG_DB_PATH=/data/ccg.db
+ENV CCG_BASIC_AUTH_ENABLED=true
+ENV CCG_BASIC_AUTH_USERNAME=admin
 
 # Expose HTTP API port
 EXPOSE 3000
@@ -64,7 +64,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 VOLUME ["/data"]
 
 # Use non-root user
-USER ccnexus
+USER ccg
 
 # Run the headless server
 ENTRYPOINT ["/docker-entrypoint.sh"]

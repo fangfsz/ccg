@@ -97,14 +97,14 @@ func BasicAuthMiddleware(auth AuthConfig) func(http.Handler) http.Handler {
 
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
-				w.Header().Set("WWW-Authenticate", `Basic realm="ccNexus"`)
+				w.Header().Set("WWW-Authenticate", `Basic realm="ccg"`)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
 			const prefix = "Basic "
 			if !strings.HasPrefix(authHeader, prefix) {
-				w.Header().Set("WWW-Authenticate", `Basic realm="ccNexus"`)
+				w.Header().Set("WWW-Authenticate", `Basic realm="ccg"`)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
@@ -112,7 +112,7 @@ func BasicAuthMiddleware(auth AuthConfig) func(http.Handler) http.Handler {
 			encoded := strings.TrimPrefix(authHeader, prefix)
 			decoded, err := base64.StdEncoding.DecodeString(encoded)
 			if err != nil {
-				w.Header().Set("WWW-Authenticate", `Basic realm="ccNexus"`)
+				w.Header().Set("WWW-Authenticate", `Basic realm="ccg"`)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
@@ -120,7 +120,7 @@ func BasicAuthMiddleware(auth AuthConfig) func(http.Handler) http.Handler {
 			credentials := string(decoded)
 			colonIndex := strings.Index(credentials, ":")
 			if colonIndex < 0 {
-				w.Header().Set("WWW-Authenticate", `Basic realm="ccNexus"`)
+				w.Header().Set("WWW-Authenticate", `Basic realm="ccg"`)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
@@ -130,7 +130,7 @@ func BasicAuthMiddleware(auth AuthConfig) func(http.Handler) http.Handler {
 
 			if subtle.ConstantTimeCompare([]byte(auth.Username), []byte(username)) != 1 ||
 				subtle.ConstantTimeCompare([]byte(auth.Password), []byte(password)) != 1 {
-				w.Header().Set("WWW-Authenticate", `Basic realm="ccNexus"`)
+				w.Header().Set("WWW-Authenticate", `Basic realm="ccg"`)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}

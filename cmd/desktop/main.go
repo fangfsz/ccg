@@ -27,11 +27,11 @@ var trayIconOther []byte
 
 func main() {
 	// Check for single instance
-	mutex, err := singleinstance.CreateMutex("Global\\ccNexus-SingleInstance-Mutex")
+	mutex, err := singleinstance.CreateMutex("Global\\ccg-SingleInstance-Mutex")
 	if err != nil {
 		// Another instance is already running, try to show it
 		log.Printf("Another instance is already running, attempting to show existing window...")
-		if singleinstance.FindAndShowExistingWindow("ccNexus") {
+		if singleinstance.FindAndShowExistingWindow("ccg") {
 			log.Printf("Successfully brought existing window to foreground")
 		} else {
 			log.Printf("Could not find existing window, but another instance is running")
@@ -73,7 +73,7 @@ func main() {
 	}
 
 	err = wails.Run(&options.App{
-		Title:       "ccNexus",
+		Title:       "ccg",
 		Width:       windowWidth,
 		Height:      windowHeight,
 		StartHidden: false,
@@ -104,8 +104,8 @@ func main() {
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
 			About: &mac.AboutInfo{
-				Title:   "ccNexus",
-				Message: "© 2024 ccNexus\n\nA smart API endpoint rotation proxy for Claude Code",
+				Title:   "ccg",
+				Message: "© 2025 ccg\n\nBased on ccNexus by lich0821\nA smart API endpoint rotation proxy for Claude Code",
 			},
 		},
 		Windows: &windows.Options{

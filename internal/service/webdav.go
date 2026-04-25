@@ -30,8 +30,8 @@ func (w *WebDAVService) UpdateWebDAVConfig(url, username, password string) error
 		URL:        url,
 		Username:   username,
 		Password:   password,
-		ConfigPath: "/ccNexus/config",
-		StatsPath:  "/ccNexus/stats",
+		ConfigPath: "/ccg/config",
+		StatsPath:  "/ccg/stats",
 	}
 
 	w.config.UpdateWebDAV(webdavConfig)
