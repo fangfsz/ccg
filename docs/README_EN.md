@@ -79,21 +79,6 @@ wire_api = "responses"  # or "chat"
 
 `~/.codex/auth.json` can be ignored.
 
-## Get Help
-
-<table>
-  <tr>
-    <td align="center"><img src="https://gitee.com/hea7en/images/raw/master/group/chat.png" alt="WeChat Group" width="200"></td>
-    <td align="center"><img src="../cmd/desktop/frontend/public/WeChat.jpg" alt="Official Account" width="200"></td>
-    <td align="center"><img src="../cmd/desktop/frontend/public/ME.png" alt="Personal WeChat" width="200"></td>
-  </tr>
-  <tr>
-    <td align="center">Join group for feedback</td>
-    <td align="center">Official Account</td>
-    <td align="center">Add me if group expired</td>
-  </tr>
-</table>
-
 ## Documentation
 
 - [Configuration Guide](configuration_en.md)
