@@ -65,6 +65,16 @@ func (u *Updater) CheckForUpdates() (*UpdateInfo, error) {
 		return nil, fmt.Errorf("failed to check updates: %w", err)
 	}
 
+	// 如果返回 nil, nil 表示仓库没有发布版本
+	if release == nil {
+		return &UpdateInfo{
+			CurrentVersion: u.currentVersion,
+			LatestVersion:  u.currentVersion,
+			HasUpdate:      false,
+			Changelog:      "当前已是最新版本",
+		}, nil
+	}
+
 	info := &UpdateInfo{
 		CurrentVersion: u.currentVersion,
 		LatestVersion:  release.TagName,

@@ -65,6 +65,10 @@ func GetLatestRelease(proxyURL string) (*ReleaseInfo, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
+		// 404 表示仓库没有发布版本，视为无新版本
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("GitHub API error: %d - %s", resp.StatusCode, string(body))
 	}
 
