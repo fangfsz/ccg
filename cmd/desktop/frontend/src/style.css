@@ -532,14 +532,33 @@ body {
 
 .endpoint-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 15px;
+}
+
+/* 动态列数布局 */
+.endpoint-list.cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.endpoint-list.cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.endpoint-list.cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 /* Responsive: single column on smaller screens */
 @media (max-width: 900px) {
   .endpoint-list {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .endpoint-list.cols-3,
+  .endpoint-list.cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -632,6 +651,60 @@ body {
   align-items: flex-start;
   min-width: 60px;
   flex-shrink: 0;
+}
+
+/* 多列布局下端点项优化 */
+.endpoint-list.cols-3 .endpoint-item,
+.endpoint-list.cols-4 .endpoint-item {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 15px;
+}
+
+.endpoint-list.cols-3 .endpoint-info,
+.endpoint-list.cols-4 .endpoint-info {
+  margin-bottom: 10px;
+}
+
+.endpoint-list.cols-3 .endpoint-actions,
+.endpoint-list.cols-4 .endpoint-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.endpoint-list.cols-3 .endpoint-actions .btn,
+.endpoint-list.cols-4 .endpoint-actions .btn {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.endpoint-list.cols-3 .endpoint-actions .toggle-switch,
+.endpoint-list.cols-4 .endpoint-actions .toggle-switch {
+  width: 40px;
+  height: 20px;
+}
+
+.endpoint-list.cols-3 .endpoint-info h3,
+.endpoint-list.cols-4 .endpoint-info h3 {
+  font-size: 14px;
+}
+
+.endpoint-list.cols-3 .endpoint-info p,
+.endpoint-list.cols-4 .endpoint-info p {
+  font-size: 12px;
+}
+
+/* 三列布局下的信息压缩显示 */
+.endpoint-list.cols-3 .endpoint-info p,
+.endpoint-list.cols-4 .endpoint-info p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .endpoint-actions .toggle-switch {

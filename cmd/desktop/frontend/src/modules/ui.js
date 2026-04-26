@@ -207,7 +207,8 @@ export function initUI() {
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <h2 style="margin: 0;">🔗 ${t("endpoints.title")}</h2>
+                        <h2 style="margin: 0;">🔗 <span id="endpointTitle">${t("endpoints.title")}</span></h2>
+                        <span id="endpointCount" style="font-size: 14px; color: #666; font-weight: normal;"></span>
                         <button class="endpoint-toggle-btn" onclick="window.toggleEndpointPanel()">
                             <span id="endpointToggleIcon">🔼</span> <span id="endpointToggleText">${t("endpoints.collapse")}</span>
                         </button>
