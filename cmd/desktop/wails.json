@@ -25,6 +25,6 @@
     "productName": "ccg",
     "productVersion": "1.0.0",
     "copyright": "Copyright © 2025 fangfsz",
-    "comments": "Based on ccNexus by lich0821 - A smart API endpoint rotation proxy"
+    "comments": "A smart API endpoint rotation proxy"
   }
 }

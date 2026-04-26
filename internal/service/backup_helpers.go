@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/storage"
+	"ccg/internal/storage"
 )
 
 func marshalBackupListResult(success bool, message string, backups []BackupListItem) string {

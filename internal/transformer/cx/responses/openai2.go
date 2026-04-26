@@ -1,7 +1,7 @@
 package responses
 
 import (
-	"github.com/fangfsz/ccg/internal/transformer"
+	"ccg/internal/transformer"
 )
 
 // OpenAI2Transformer is a passthrough transformer for Codex Responses → OpenAI Responses

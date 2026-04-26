@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/logger"
+	"ccg/internal/logger"
 )
 
 // handleEvents handles Server-Sent Events for real-time updates

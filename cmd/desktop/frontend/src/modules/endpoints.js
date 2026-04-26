@@ -17,8 +17,8 @@ function extractBaseName(name) {
     return baseName;
 }
 
-const ENDPOINT_TEST_STATUS_KEY = 'ccNexus_endpointTestStatus';
-const ENDPOINT_VIEW_MODE_KEY = 'ccNexus_endpointViewMode';
+const ENDPOINT_TEST_STATUS_KEY = 'ccg_endpointTestStatus';
+const ENDPOINT_VIEW_MODE_KEY = 'ccg_endpointViewMode';
 
 // 获取端点测试状态
 export function getEndpointTestStatus(endpointName) {
@@ -1630,6 +1630,8 @@ function renderCompactView(sortedEndpoints, container, currentEndpointName, isFi
 
         // 截断 URL 显示
         const displayUrl = ep.apiUrl.length > 40 ? ep.apiUrl.substring(0, 40) + '...' : ep.apiUrl;
+        const displayModel = model && model.length > 15 ? model.substring(0, 15) + '...' : (model || '');
+        const displayRemark = ep.remark && ep.remark.length > 12 ? ep.remark.substring(0, 12) + '...' : (ep.remark || '');
 
         // 构建统计详情提示
         const totalTokens = stats.inputTokens + stats.outputTokens;
@@ -1652,6 +1654,8 @@ function renderCompactView(sortedEndpoints, container, currentEndpointName, isFi
             ${isCurrentEndpoint ? '<span class="btn btn-primary compact-badge-btn">' + t('endpoints.current') + '</span>' : (enabled ? '<button class="btn btn-primary compact-badge-btn" data-action="switch" data-name="' + ep.name + '">' + t('endpoints.switchTo') + '</button>' : '<span class="btn btn-primary compact-badge-btn compact-badge-disabled">' + t('endpoints.disabled') + '</span>')}
             <span class="compact-url" title="${ep.apiUrl}"><span class="compact-url-icon">🌐</span>${displayUrl}</span>
             <span class="compact-transformer">🔄 ${transformer}</span>
+            ${model ? `<span class="compact-model" title="${t('modal.model')}: ${model}">🤖 ${displayModel}</span>` : ''}
+            ${ep.remark ? `<span class="compact-remark" title="${t('modal.remark')}: ${ep.remark}">💬 ${displayRemark}</span>` : ''}
             <span class="compact-stats" title="${statsTooltip}">📊 ${stats.requests} | 🎯 ${formatTokens(stats.inputTokens + stats.outputTokens)}</span>
             <div class="compact-actions">
                 <label class="toggle-switch">

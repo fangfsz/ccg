@@ -851,7 +851,7 @@ export function closeTestResultModal() {
 // External URLs
 export function openGitHub() {
   if (window.go?.main?.App) {
-    window.go.main.App.OpenURL("https://github.com/lich0821/ccNexus");
+    window.go.main.App.OpenURL("https://github.com/fangfsz/ccg");
   }
 }
 

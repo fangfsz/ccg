@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fangfsz/ccg/internal/transformer"
+	"ccg/internal/transformer"
 )
 
 func TestOpenAI2RespToClaudeWithThinking(t *testing.T) {

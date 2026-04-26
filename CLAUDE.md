@@ -30,7 +30,7 @@ wails build -platform darwin/amd64   # macOS
 wails build -platform windows/amd64  # Windows
 
 # 构建服务器
-cd cmd/server && go build -ldflags="-s -w" -o ccnexus-server .
+cd cmd/server && go build -ldflags="-s -w" -o ccg-server .
 
 # 运行服务器
 cd cmd/server && go run main.go
@@ -49,7 +49,7 @@ cd internal/transformer/convert && go test -v ./...
 ### Docker
 ```bash
 # 构建镜像
-docker build -f cmd/server/Dockerfile -t ccnexus .
+docker build -f cmd/server/Dockerfile -t ccg .
 
 # 使用 docker-compose
 cd cmd/server && docker-compose up -d

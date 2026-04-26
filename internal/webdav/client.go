@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/config"
+	"ccg/internal/config"
 
 	"github.com/studio-b12/gowebdav"
 )

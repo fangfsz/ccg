@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
-	"github.com/fangfsz/ccg/internal/tray"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/storage"
+	"ccg/internal/tray"
 )
 
 // SettingsService handles settings operations
@@ -31,8 +31,8 @@ func (s *SettingsService) GetConfig() string {
 
 // UpdateConfig updates the configuration
 func (s *SettingsService) UpdateConfig(configJSON string, proxy interface{ UpdateConfig(*config.Config) error }) error {
-	var newConfig config.Config
-	if err := json.Unmarshal([]byte(configJSON), &newConfig); err != nil {
+	newConfig := &config.Config{}
+	if err := json.Unmarshal([]byte(configJSON), newConfig); err != nil {
 		return fmt.Errorf("invalid config format: %w", err)
 	}
 
@@ -40,7 +40,7 @@ func (s *SettingsService) UpdateConfig(configJSON string, proxy interface{ Updat
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
-	if err := proxy.UpdateConfig(&newConfig); err != nil {
+	if err := proxy.UpdateConfig(newConfig); err != nil {
 		return err
 	}
 
@@ -51,7 +51,7 @@ func (s *SettingsService) UpdateConfig(configJSON string, proxy interface{ Updat
 		}
 	}
 
-	*s.config = newConfig
+	s.config = newConfig
 	return nil
 }
 

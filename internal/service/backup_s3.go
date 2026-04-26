@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/storage"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -277,7 +277,7 @@ func (b *BackupService) restoreFromS3(filename, choice string, reloadConfig func
 		return fmt.Errorf("load_config_failed")
 	}
 
-	*b.config = *newConfig
+	b.config = newConfig
 	if err := reloadConfig(newConfig); err != nil {
 		logger.Error("Failed to reload config: %v", err)
 		return fmt.Errorf("update_proxy_config_failed")

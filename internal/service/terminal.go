@@ -4,11 +4,11 @@ import (
     "encoding/json"
     "fmt"
 
-    "github.com/fangfsz/ccg/internal/config"
-    "github.com/fangfsz/ccg/internal/logger"
-    "github.com/fangfsz/ccg/internal/session"
-    "github.com/fangfsz/ccg/internal/storage"
-    "github.com/fangfsz/ccg/internal/terminal"
+    "ccg/internal/config"
+    "ccg/internal/logger"
+    "ccg/internal/session"
+    "ccg/internal/storage"
+    "ccg/internal/terminal"
 )
 
 // TerminalService handles terminal and session operations

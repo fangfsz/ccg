@@ -5,10 +5,10 @@ import (
     "fmt"
     "time"
 
-    "github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
-	"github.com/fangfsz/ccg/internal/updater"
+    "ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/storage"
+	"ccg/internal/updater"
 )
 
 // UpdateService handles auto-update operations

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/logger"
+	"ccg/internal/logger"
 )
 
 // ErrorResponse represents an API error response

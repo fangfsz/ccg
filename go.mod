@@ -1,4 +1,4 @@
-module github.com/fangfsz/ccg
+module ccg
 
 go 1.24.0
 

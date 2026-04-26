@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/tokencount"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/tokencount"
 )
 
 // handleHealth handles health check requests

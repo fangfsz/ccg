@@ -160,47 +160,47 @@ type ProxyConfig struct {
 
 // Config represents the application configuration
 type Config struct {
-	Port                  int             `json:"port"`
-	PortLocked            bool            `json:"-"` // CLI forced port, cannot be changed via API
-	BasicAuthEnabled     bool            `json:"basicAuthEnabled"`
-	BasicAuthUsername     string          `json:"basicAuthUsername"`
-	BasicAuthPassword    string          `json:"basicAuthPassword"`
-	Endpoints            []Endpoint      `json:"endpoints"`
-	LogLevel                  int             `json:"logLevel"`                      // 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
-	Language                  string          `json:"language"`                      // UI language: en, zh-CN
-	Theme                     string          `json:"theme"`                         // UI theme: light, dark
-	ThemeAuto                 bool            `json:"themeAuto"`                     // Auto switch theme based on time
-	AutoLightTheme            string          `json:"autoLightTheme,omitempty"`      // Theme to use in daytime when auto mode is on
-	AutoDarkTheme             string          `json:"autoDarkTheme,omitempty"`       // Theme to use in nighttime when auto mode is on
-	WindowWidth               int             `json:"windowWidth"`                   // Window width in pixels
-	WindowHeight              int             `json:"windowHeight"`                  // Window height in pixels
-	CloseWindowBehavior       string          `json:"closeWindowBehavior,omitempty"` // "quit", "minimize", "ask"
-	ClaudeNotificationEnabled bool            `json:"claudeNotificationEnabled"`     // Enable Claude Code task completion notification
-	ClaudeNotificationType    string          `json:"claudeNotificationType"`        // Notification type: toast, dialog, disabled
-	ModelsCacheTTL            int             `json:"modelsCacheTTL,omitempty"`      // /v1/models cache TTL in minutes, default 30
+	Port                      int             `json:"port"`
+	PortLocked                bool            `json:"-"` // CLI forced port, cannot be changed via API
+	BasicAuthEnabled          bool            `json:"basicAuthEnabled"`
+	BasicAuthUsername         string          `json:"basicAuthUsername"`
+	BasicAuthPassword         string          `json:"basicAuthPassword"`
+	Endpoints                 []Endpoint      `json:"endpoints"`
+	LogLevel                  int             `json:"logLevel"`                            // 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
+	Language                  string          `json:"language"`                            // UI language: en, zh-CN
+	Theme                     string          `json:"theme"`                               // UI theme: light, dark
+	ThemeAuto                 bool            `json:"themeAuto"`                           // Auto switch theme based on time
+	AutoLightTheme            string          `json:"autoLightTheme,omitempty"`            // Theme to use in daytime when auto mode is on
+	AutoDarkTheme             string          `json:"autoDarkTheme,omitempty"`             // Theme to use in nighttime when auto mode is on
+	WindowWidth               int             `json:"windowWidth"`                         // Window width in pixels
+	WindowHeight              int             `json:"windowHeight"`                        // Window height in pixels
+	CloseWindowBehavior       string          `json:"closeWindowBehavior,omitempty"`       // "quit", "minimize", "ask"
+	ClaudeNotificationEnabled bool            `json:"claudeNotificationEnabled"`           // Enable Claude Code task completion notification
+	ClaudeNotificationType    string          `json:"claudeNotificationType"`              // Notification type: toast, dialog, disabled
+	ModelsCacheTTL            int             `json:"modelsCacheTTL,omitempty"`            // /v1/models cache TTL in minutes, default 30
 	ModelsCacheRefreshEnabled bool            `json:"modelsCacheRefreshEnabled,omitempty"` // Enable ?refresh=true parameter, default false
-	WebDAV                    *WebDAVConfig   `json:"webdav,omitempty"`              // WebDAV synchronization config
-	Backup                    *BackupConfig   `json:"backup,omitempty"`              // Backup/sync configuration
-	Update                    *UpdateConfig   `json:"update,omitempty"`              // Update configuration
-	Terminal                  *TerminalConfig `json:"terminal,omitempty"`            // Terminal launcher config
-	Proxy                     *ProxyConfig    `json:"proxy,omitempty"`               // HTTP proxy config
-	CodexProxy                *ProxyConfig    `json:"codexProxy,omitempty"`          // Codex dedicated proxy config
+	WebDAV                    *WebDAVConfig   `json:"webdav,omitempty"`                    // WebDAV synchronization config
+	Backup                    *BackupConfig   `json:"backup,omitempty"`                    // Backup/sync configuration
+	Update                    *UpdateConfig   `json:"update,omitempty"`                    // Update configuration
+	Terminal                  *TerminalConfig `json:"terminal,omitempty"`                  // Terminal launcher config
+	Proxy                     *ProxyConfig    `json:"proxy,omitempty"`                     // HTTP proxy config
+	CodexProxy                *ProxyConfig    `json:"codexProxy,omitempty"`                // Codex dedicated proxy config
 	mu                        sync.RWMutex
 }
 
 // DefaultConfig returns a default configuration
 func DefaultConfig() *Config {
 	return &Config{
-		Port:               3000,
-		BasicAuthEnabled:   true,
-		BasicAuthUsername:  "admin",
-		BasicAuthPassword: "",
-		LogLevel:          1,       // Default to INFO level
-		Language:     "zh-CN", // Default to Chinese
-		WindowWidth:  1024,    // Default window width
-		WindowHeight: 768,     // Default window height
-		ModelsCacheTTL:              30,    // Default 30 minutes
-		ModelsCacheRefreshEnabled:  false, // Default disabled
+		Port:                      3000,
+		BasicAuthEnabled:          true,
+		BasicAuthUsername:         "admin",
+		BasicAuthPassword:         "",
+		LogLevel:                  1,       // Default to INFO level
+		Language:                  "zh-CN", // Default to Chinese
+		WindowWidth:               1024,    // Default window width
+		WindowHeight:              768,     // Default window height
+		ModelsCacheTTL:            30,      // Default 30 minutes
+		ModelsCacheRefreshEnabled: false,   // Default disabled
 		Endpoints: []Endpoint{
 			{
 				Name:        "Claude Official",
@@ -623,12 +623,20 @@ func LoadFromStorage(storage StorageAdapter) (*Config, error) {
 		if port, err := strconv.Atoi(portStr); err == nil {
 			config.Port = port
 		}
+	} else if portStr, err := storage.GetConfig("ccnexus_port"); err == nil && portStr != "" {
+		if port, err := strconv.Atoi(portStr); err == nil {
+			config.Port = port
+		}
 	}
 	if config.Port == 0 {
 		config.Port = 3000
 	}
 
 	if logLevelStr, err := storage.GetConfig("logLevel"); err == nil && logLevelStr != "" {
+		if logLevel, err := strconv.Atoi(logLevelStr); err == nil {
+			config.LogLevel = logLevel
+		}
+	} else if logLevelStr, err := storage.GetConfig("ccnexus_log_level"); err == nil && logLevelStr != "" {
 		if logLevel, err := strconv.Atoi(logLevelStr); err == nil {
 			config.LogLevel = logLevel
 		}
@@ -648,6 +656,8 @@ func LoadFromStorage(storage StorageAdapter) (*Config, error) {
 	}
 
 	if lang, err := storage.GetConfig("language"); err == nil {
+		config.Language = lang
+	} else if lang, err := storage.GetConfig("ccnexus_language"); err == nil {
 		config.Language = lang
 	}
 
@@ -672,6 +682,8 @@ func LoadFromStorage(storage StorageAdapter) (*Config, error) {
 	// Load close window behavior
 	if behaviorStr, err := storage.GetConfig("closeWindowBehavior"); err == nil && behaviorStr != "" {
 		config.CloseWindowBehavior = behaviorStr
+	} else if behaviorStr, err := storage.GetConfig("ccnexus_closeWindowBehavior"); err == nil && behaviorStr != "" {
+		config.CloseWindowBehavior = behaviorStr
 	}
 	// Default to "ask" if not set
 	if config.CloseWindowBehavior == "" {
@@ -681,6 +693,8 @@ func LoadFromStorage(storage StorageAdapter) (*Config, error) {
 	// Load theme
 	if theme, err := storage.GetConfig("theme"); err == nil && theme != "" {
 		config.Theme = theme
+	} else if theme, err := storage.GetConfig("ccnexus_theme"); err == nil && theme != "" {
+		config.Theme = theme
 	}
 	// Default to "light" if not set
 	if config.Theme == "" {
@@ -689,6 +703,8 @@ func LoadFromStorage(storage StorageAdapter) (*Config, error) {
 
 	// Load themeAuto
 	if themeAuto, err := storage.GetConfig("themeAuto"); err == nil && themeAuto != "" {
+		config.ThemeAuto = themeAuto == "true"
+	} else if themeAuto, err := storage.GetConfig("ccnexus_themeAuto"); err == nil && themeAuto != "" {
 		config.ThemeAuto = themeAuto == "true"
 	}
 
@@ -724,27 +740,73 @@ func LoadFromStorage(storage StorageAdapter) (*Config, error) {
 			ConfigPath: configPath,
 			StatsPath:  statsPath,
 		}
+	} else if url, err := storage.GetConfig("ccnexus_webdav_url"); err == nil && url != "" {
+		username, _ := storage.GetConfig("ccnexus_webdav_username")
+		password, _ := storage.GetConfig("ccnexus_webdav_password")
+		configPath, _ := storage.GetConfig("ccnexus_webdav_configPath")
+		statsPath, _ := storage.GetConfig("ccnexus_webdav_statsPath")
+
+		config.WebDAV = &WebDAVConfig{
+			URL:        url,
+			Username:   username,
+			Password:   password,
+			ConfigPath: configPath,
+			StatsPath:  statsPath,
+		}
 	}
 
 	// Load Backup config
 	provider, _ := storage.GetConfig("backup_provider")
+	if provider == "" {
+		provider, _ = storage.GetConfig("ccnexus_backup_provider")
+	}
 	if provider != "" {
 		config.Backup = &BackupConfig{Provider: provider}
 	}
 	if provider == "local" {
 		backupDir, _ := storage.GetConfig("backup_local_dir")
+		if backupDir == "" {
+			backupDir, _ = storage.GetConfig("ccnexus_backup_local_dir")
+		}
 		config.Backup.Local = &LocalBackupConfig{Dir: backupDir}
 	}
 	if provider == "s3" {
 		s3Endpoint, _ := storage.GetConfig("backup_s3_endpoint")
+		if s3Endpoint == "" {
+			s3Endpoint, _ = storage.GetConfig("ccnexus_backup_s3_endpoint")
+		}
 		s3Region, _ := storage.GetConfig("backup_s3_region")
+		if s3Region == "" {
+			s3Region, _ = storage.GetConfig("ccnexus_backup_s3_region")
+		}
 		s3Bucket, _ := storage.GetConfig("backup_s3_bucket")
+		if s3Bucket == "" {
+			s3Bucket, _ = storage.GetConfig("ccnexus_backup_s3_bucket")
+		}
 		s3Prefix, _ := storage.GetConfig("backup_s3_prefix")
+		if s3Prefix == "" {
+			s3Prefix, _ = storage.GetConfig("ccnexus_backup_s3_prefix")
+		}
 		s3AccessKey, _ := storage.GetConfig("backup_s3_accessKey")
+		if s3AccessKey == "" {
+			s3AccessKey, _ = storage.GetConfig("ccnexus_backup_s3_accessKey")
+		}
 		s3SecretKey, _ := storage.GetConfig("backup_s3_secretKey")
+		if s3SecretKey == "" {
+			s3SecretKey, _ = storage.GetConfig("ccnexus_backup_s3_secretKey")
+		}
 		s3SessionToken, _ := storage.GetConfig("backup_s3_sessionToken")
+		if s3SessionToken == "" {
+			s3SessionToken, _ = storage.GetConfig("ccnexus_backup_s3_sessionToken")
+		}
 		s3UseSSLStr, _ := storage.GetConfig("backup_s3_useSSL")
+		if s3UseSSLStr == "" {
+			s3UseSSLStr, _ = storage.GetConfig("ccnexus_backup_s3_useSSL")
+		}
 		s3ForcePathStyleStr, _ := storage.GetConfig("backup_s3_forcePathStyle")
+		if s3ForcePathStyleStr == "" {
+			s3ForcePathStyleStr, _ = storage.GetConfig("ccnexus_backup_s3_forcePathStyle")
+		}
 
 		config.Backup.S3 = &S3BackupConfig{
 			Endpoint:       s3Endpoint,
@@ -766,8 +828,14 @@ func LoadFromStorage(storage StorageAdapter) (*Config, error) {
 	}
 	if autoCheckStr, err := storage.GetConfig("update_autoCheck"); err == nil && autoCheckStr != "" {
 		config.Update.AutoCheck = autoCheckStr == "true"
+	} else if autoCheckStr, err := storage.GetConfig("ccnexus_update_autoCheck"); err == nil && autoCheckStr != "" {
+		config.Update.AutoCheck = autoCheckStr == "true"
 	}
 	if intervalStr, err := storage.GetConfig("update_checkInterval"); err == nil && intervalStr != "" {
+		if interval, err := strconv.Atoi(intervalStr); err == nil {
+			config.Update.CheckInterval = interval
+		}
+	} else if intervalStr, err := storage.GetConfig("ccnexus_update_checkInterval"); err == nil && intervalStr != "" {
 		if interval, err := strconv.Atoi(intervalStr); err == nil {
 			config.Update.CheckInterval = interval
 		}

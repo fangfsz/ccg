@@ -58,18 +58,21 @@
 .endpoint-item-compact {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 10px;
+    padding: 10px 14px;
     background: var(--bg-secondary, #f8f9fa);
     border-radius: 8px;
     transition: all 0.2s ease;
     cursor: grab;
+    -webkit-user-select: none;
     user-select: none;
+    border: 1px solid transparent;
 }
 
 .endpoint-item-compact:hover {
     background: var(--hover-bg, #f0f0f0);
     box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.08));
+    border-color: var(--border-light, #e0e0e0);
 }
 
 .endpoint-item-compact:active {
@@ -87,6 +90,19 @@
 .endpoint-item-compact.drag-over {
     border: 2px dashed var(--primary-color, #667eea);
     background: rgba(102, 126, 234, 0.05);
+}
+
+/* 当前端点样式 */
+.endpoint-item-compact .compact-badge-btn:not(.compact-badge-disabled) {
+    background: linear-gradient(135deg, var(--primary-color, #667eea), #764ba2) !important;
+    color: white !important;
+    font-weight: 600;
+}
+
+/* 当前端点整行高亮 */
+.endpoint-item-compact:has(.compact-badge-btn:not(.compact-badge-disabled)) {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.05));
+    border-color: rgba(102, 126, 234, 0.3);
 }
 
 /* 拖拽时其他元素的平滑移动 */
@@ -181,6 +197,12 @@
     overflow: hidden;
     text-overflow: ellipsis;
     flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+/* 当前端点名称样式 */
+.endpoint-item-compact:has(.compact-badge-btn:not(.compact-badge-disabled)) .compact-name {
+    color: var(--primary-color, #667eea);
 }
 
 .compact-badge-btn {
@@ -236,6 +258,41 @@ span.compact-badge-btn:hover {
     border-radius: 4px;
     flex-shrink: 0;
     width: 80px;
+}
+
+.compact-model {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--primary-color, #667eea);
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 4px;
+    flex-shrink: 0;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-remark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--text-tertiary, #999);
+    font-size: 11px;
+    padding: 3px 8px;
+    background: var(--bg-tertiary, #e9ecef);
+    border-radius: 4px;
+    flex-shrink: 0;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-style: italic;
 }
 
 .compact-stats {

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/proxy"
+	"ccg/internal/config"
+	"ccg/internal/proxy"
 )
 
 // StatsService handles statistics operations

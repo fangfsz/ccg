@@ -3,8 +3,8 @@ package webdav
 import (
 	"time"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/proxy"
+	"ccg/internal/config"
+	"ccg/internal/proxy"
 )
 
 // BackupFile 备份文件信息

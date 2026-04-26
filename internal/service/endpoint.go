@@ -14,11 +14,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/proxy"
-	"github.com/fangfsz/ccg/internal/storage"
-	"github.com/fangfsz/ccg/internal/transformer/convert"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/proxy"
+	"ccg/internal/storage"
+	"ccg/internal/transformer/convert"
 )
 
 // createHTTPClient creates an HTTP client with optional proxy support
@@ -1534,9 +1534,7 @@ func (e *EndpointService) fetchGeminiModels(apiUrl, apiKey string) ([]string, er
 	models := make([]string, 0, len(result.Models))
 	for _, m := range result.Models {
 		name := m.Name
-		if strings.HasPrefix(name, "models/") {
-			name = strings.TrimPrefix(name, "models/")
-		}
+		name = strings.TrimPrefix(name, "models/")
 		models = append(models, name)
 	}
 

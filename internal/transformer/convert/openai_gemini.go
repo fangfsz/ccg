@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/transformer"
+	"ccg/internal/transformer"
 )
 
 // OpenAIReqToGemini converts OpenAI Chat request to Gemini request

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/transformer"
+	"ccg/internal/transformer"
 )
 
 // ClaudeReqToOpenAI2 converts Claude request to OpenAI Responses API request

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/fangfsz/ccg/internal/config"
+	"ccg/internal/config"
 )
 
 func TestEnsureCodexResponsesPayload(t *testing.T) {

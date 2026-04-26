@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/fangfsz/ccg/internal/singleinstance"
-	"github.com/fangfsz/ccg/internal/storage"
+	"ccg/internal/singleinstance"
+	"ccg/internal/storage"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -105,7 +105,7 @@ func main() {
 			WindowIsTranslucent:  false,
 			About: &mac.AboutInfo{
 				Title:   "ccg",
-				Message: "© 2025 ccg\n\nBased on ccNexus by lich0821\nA smart API endpoint rotation proxy for Claude Code",
+				Message: "© 2025 ccg\n\nA smart API endpoint rotation proxy for Claude Code",
 			},
 		},
 		Windows: &windows.Options{

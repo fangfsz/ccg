@@ -3,7 +3,7 @@ package convert
 import (
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/transformer"
+	"ccg/internal/transformer"
 )
 
 const (

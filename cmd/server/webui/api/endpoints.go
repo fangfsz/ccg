@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/storage"
 )
 
 // handleEndpoints handles GET (list) and POST (create) for endpoints

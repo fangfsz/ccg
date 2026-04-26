@@ -4,15 +4,15 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleName</key>
-	<string>ccNexus</string>
+	<string>ccg</string>
 	<key>CFBundleExecutable</key>
-	<string>ccNexus</string>
+	<string>ccg</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.ccnexus.app</string>
+	<string>com.ccg.app</string>
 	<key>CFBundleVersion</key>
 	<string>5.2.0</string>
 	<key>CFBundleGetInfoString</key>
-	<string>ccNexus</string>
+	<string>ccg</string>
 	<key>CFBundleShortVersionString</key>
 	<string>5.2.0</string>
 	<key>CFBundleIconFile</key>

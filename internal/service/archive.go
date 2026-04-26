@@ -5,8 +5,8 @@ import (
     "fmt"
     "time"
 
-    "github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
+    "ccg/internal/logger"
+	"ccg/internal/storage"
 )
 
 // ArchiveService handles archive data operations

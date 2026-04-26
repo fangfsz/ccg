@@ -1,7 +1,7 @@
 <div align="center">
 
 <p align="center">
-  <img src="images/ccNexus.svg" alt="Claude Code & Codex CLI 智能端点轮换代理" width="720" />
+  <img src="images/ccg.svg" alt="Claude Code & Codex CLI 智能端点轮换代理" width="720" />
 </p>
 
 [![Build Status](https://github.com/fangfsz/ccg/workflows/Build%20and%20Release/badge.svg)](https://github.com/fangfsz/ccg/actions)
@@ -24,13 +24,6 @@
 - **WebDAV Sync**: Sync configuration and data across devices
 - **Cross-Platform**: Windows, macOS, Linux
 
-<table>
-  <tr>
-    <td align="center"><img src="images/EN-Light.png" alt="Light Theme" width="400"></td>
-    <td align="center"><img src="images/EN-Dark.png" alt="Dark Theme" width="400"></td>
-  </tr>
-</table>
-
 ## Quick Start
 
 ### 1. Download and Install
@@ -48,7 +41,7 @@ Click "Add Endpoint", fill in API URL, key, and select transformer (claude/opena
 For Codex Token Pool mode:
 - Set auth mode to `Codex Token Pool`
 - Import token JSON records in the Token Pool page (`access_token` + `refresh_token`)
-- ccNexus will handle token rotation, 401-triggered refresh, and lifecycle statuses (active/expiring/need_refresh/invalid, etc.)
+- ccg will handle token rotation, 401-triggered refresh, and lifecycle statuses (active/expiring/need_refresh/invalid, etc.)
 
 ### 3. Configure CC
 

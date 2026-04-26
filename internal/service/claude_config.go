@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
+	"ccg/internal/config"
+	"ccg/internal/logger"
 )
 
 // ClaudeSettings represents ~/.claude/settings.json structure

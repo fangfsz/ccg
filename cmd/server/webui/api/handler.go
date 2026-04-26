@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/proxy"
-	"github.com/fangfsz/ccg/internal/storage"
+	"ccg/internal/config"
+	"ccg/internal/proxy"
+	"ccg/internal/storage"
 )
 
 // Handler handles API requests

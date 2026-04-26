@@ -1,8 +1,8 @@
 package responses
 
 import (
-	"github.com/fangfsz/ccg/internal/transformer"
-	"github.com/fangfsz/ccg/internal/transformer/convert"
+	"ccg/internal/transformer"
+	"ccg/internal/transformer/convert"
 )
 
 // OpenAITransformer transforms Codex Responses requests to OpenAI Chat format

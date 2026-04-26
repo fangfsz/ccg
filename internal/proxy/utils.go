@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/tokencount"
+	"ccg/internal/logger"
+	"ccg/internal/tokencount"
 )
 
 // normalizeAPIUrl ensures the API URL has a protocol prefix

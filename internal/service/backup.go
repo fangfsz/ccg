@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/storage"
+	"ccg/internal/config"
+	"ccg/internal/storage"
 )
 
 type BackupService struct {

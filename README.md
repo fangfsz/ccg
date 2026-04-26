@@ -1,7 +1,7 @@
 <div align="center">
 
 <p align="center">
-  <img src="docs/images/ccNexus.svg" alt="Claude Code & Codex CLI 智能端点轮换代理" width="720" />
+  <img src="docs/images/ccg.svg" alt="Claude Code & Codex CLI 智能端点轮换代理" width="720" />
 </p>
 
 [![构建状态](https://github.com/fangfsz/ccg/workflows/Build%20and%20Release/badge.svg)](https://github.com/fangfsz/ccg/actions)
@@ -9,7 +9,7 @@
 [![Go 版本](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go)](https://go.dev/)
 [![Wails](https://img.shields.io/badge/Wails-v2-blue)](https://wails.io/)
 
-> ⚠️ 本项目基于 [ccNexus](https://github.com/lich0821/ccNexus)（by [lich0821](https://github.com/lich0821)）重构，保留对原作者的引用与致敬。
+> ⚠️ 本项目基于 [ccNexus](https://github.com/lich0821/ccNexus) 重构。
 
 [English](docs/README_EN.md) | [简体中文](README.md)
 
@@ -27,13 +27,6 @@
 - **跨平台**：Windows、macOS、Linux
 - **[Docker](docs/README_DOCKER.md)**：纯后端 HTTP 服务，并提供容器化运行
 
-<table>
-  <tr>
-    <td align="center"><img src="docs/images/CN-Light.png" alt="明亮主题" width="400"></td>
-    <td align="center"><img src="docs/images/CN-Dark.png" alt="暗黑主题" width="400"></td>
-  </tr>
-</table>
-
 ## 快速开始
 
 ### 1. 下载安装
@@ -49,6 +42,7 @@
 点击「添加端点」，填写 API 地址、密钥、选择转换器（claude/openai/gemini/openai2）。
 
 如需使用 Codex Token Pool：
+
 - 认证方式选择 `Codex Token Pool`
 - 在 Token Pool 页面导入一批 token JSON（支持 `access_token` + `refresh_token`）
 - 系统会自动进行 token 轮换、401 后刷新与状态管理（active/expiring/need_refresh/invalid 等）
@@ -56,21 +50,24 @@
 ### 3. 配置 CC
 
 #### Claude Code
+
 `~/.claude/settings.json`
+
 ```json
 {
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "随便写，不重要",
     "ANTHROPIC_BASE_URL": "http://127.0.0.1:3000",
-    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000", // 有些模型可能不支持 64k
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000" // 有些模型可能不支持 64k
   }
   // 其他配置
 }
-
 ```
 
 #### Codex CLI
+
 只需要配置 `~/.codex/config.toml`：
+
 ```toml
 model_provider = "ccg"
 model = "gpt-5-codex"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/transformer"
+	"ccg/internal/transformer"
 )
 
 // OpenAIReqToOpenAI2 converts OpenAI Chat request to OpenAI Responses request

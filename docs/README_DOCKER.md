@@ -1,18 +1,18 @@
 ## Headless Docker Service Summary
 
-本次调整将 ccNexus 从 Wails 桌面应用改造为纯后端 HTTP 服务，并提供容器化运行方式。核心改动要点：
+本次调整将 ccg 从 Wails 桌面应用改造为纯后端 HTTP 服务，并提供容器化运行方式。核心改动要点：
 
 1. 新增无头入口
-	- 新增 [app/cmd/server/main.go](app/cmd/server/main.go) 作为 headless 入口：仅启动 HTTP 代理（无 GUI），支持优雅退出，读取 `CCNEXUS_DATA_DIR`、`CCNEXUS_DB_PATH`、`CCNEXUS_PORT`、`CCNEXUS_LOG_LEVEL` 环境变量。
-	- 若存储中无任何 endpoint，会自动写入默认示例 endpoint，避免 “no endpoints configured” 直接退出。请尽快替换为真实 API 配置。
+	- 新增 [cmd/server/main.go](../cmd/server/main.go) 作为 headless 入口：仅启动 HTTP 代理（无 GUI），支持优雅退出，读取 `CCG_DATA_DIR`、`CCG_DB_PATH`、`CCG_PORT`、`CCG_LOG_LEVEL` 环境变量。
+	- 若存储中无任何 endpoint，会自动写入默认示例 endpoint，避免 "no endpoints configured" 直接退出。请尽快替换为真实 API 配置。
 
 2. 镜像与构建
-	- [Dockerfile](../app/Dockerfile) 仅构建后端二进制 `ccnexus-server`，移除前端构建。暴露端口仅 `3000`（HTTP API）。
+	- [Dockerfile](../cmd/server/Dockerfile) 仅构建后端二进制 `ccg-server`，移除前端构建。暴露端口仅 `3000`（HTTP API）。
 	- 构建阶段执行 `go mod tidy` 以生成 `go.sum`，并启用 CGO 支持 SQLite。
 
 3. 运行与编排
-	- [docker-compose.yml](../app/docker-compose.yml) 仅映射 API 端口（示例 `3021:3000`），挂载数据卷 `/data`，健康检查指向 `/health`。
-	- 默认环境：`CCNEXUS_DATA_DIR=/data`，`CCNEXUS_DB_PATH=/data/ccnexus.db`，`CCNEXUS_PORT=3000`。
+	- [docker-compose.yml](../cmd/server/docker-compose.yml) 仅映射 API 端口（示例 `3021:3000`），挂载数据卷 `/data`，健康检查指向 `/health`。
+	- 默认环境：`CCG_DATA_DIR=/data`，`CCG_DB_PATH=/data/ccg.db`，`CCG_PORT=3000`。
 
 4. 使用快速指引
 	- 端口占用时可改成 `HOST_PORT:3000`（例如 `3021:3000`）。
@@ -24,22 +24,25 @@
 ## 文件结构
 
 ```
-ccNexus/
-├── app/
-│   ├── cmd/
-│   │   ├── server/
-│   │   │   ├── main.go              # 主程序（不需要修改）
-│   │   │   └── webui_plugin.go      # Web UI 插件接口
-│   │   └── webui/                   # 🔌 Web UI 插件（整个文件夹）
-│   │       ├── webui.go
-│   │       ├── api/
-│   │       └── ui/
+## 文件结构
+
+```
+ccg/
+├── cmd/
+│   ├── server/
+│   │   ├── main.go              # 主程序（不需要修改）
+│   │   └── webui_plugin.go      # Web UI 插件接口
+│   └── webui/                   # 🔌 Web UI 插件（整个文件夹）
+│       ├── webui.go
+│       ├── api/
+│       └── ui/
+```
 ```
 ---
 
 ## Web 管理界面
 
-ccNexus 现已内置 Web 管理界面，提供可视化的端点管理和监控功能。
+ccg 现已内置 Web 管理界面，提供可视化的端点管理和监控功能。
 
 ### 访问方式
 
@@ -153,22 +156,22 @@ curl -X POST http://localhost:3021/api/endpoints \
 
 #### UI 无法访问
 - 检查容器是否正常运行：`docker ps`
-- 查看容器日志：`docker compose logs ccnexus`
+- 查看容器日志：`docker compose logs ccg`
 - 确认端口映射正确：检查 docker-compose.yml 中的 ports 配置
 - 验证防火墙规则是否允许访问
 
 #### API 返回错误
-- 查看详细日志：`docker compose logs -f ccnexus`
+- 查看详细日志：`docker compose logs -f ccg`
 - 检查数据库文件权限：确保 `/data` 目录可写
 - 验证端点配置：通过 Web 界面或 API 检查端点设置是否正确
 - **OpenAI 端点需填写 model**：`transformer=openai` 时若 `model` 为空会导致启动反复报错。
-  - 直接在宿主修复 DB（假设宿主挂载 `/data/ccnexus`，错误端点 id=5）：
-	- 备份：`cp /data/ccnexus.db /data/ccnexus.db.bak-$(date +%Y%m%d%H%M%S)`
-	- 临时进入工具容器：`docker run --rm -it -v /data/ccnexus:/data alpine sh`
+  - 直接在宿主修复 DB（假设宿主挂载 `/data/ccg`，错误端点 id=5）：
+	- 备份：`cp /data/ccg.db /data/ccg.db.bak-$(date +%Y%m%d%H%M%S)`
+	- 临时进入工具容器：`docker run --rm -it -v /data/ccg:/data alpine sh`
 	- 安装 sqlite：`apk add --no-cache sqlite`
-	- 查看端点：`sqlite3 /data/ccnexus.db "SELECT id,name,transformer,model FROM endpoints;"`
-	- 方案A补模型：`sqlite3 /data/ccnexus.db "UPDATE endpoints SET model='gpt-4o' WHERE id=5;"`
-	- 方案B删除端点：`sqlite3 /data/ccnexus.db "DELETE FROM endpoints WHERE id=5;"`
+	- 查看端点：`sqlite3 /data/ccg.db "SELECT id,name,transformer,model FROM endpoints;"`
+	- 方案A补模型：`sqlite3 /data/ccg.db "UPDATE endpoints SET model='gpt-4o' WHERE id=5;"`
+	- 方案B删除端点：`sqlite3 /data/ccg.db "DELETE FROM endpoints WHERE id=5;"`
 	- 退出容器 `exit` 后重启服务：`docker compose restart` 或 `docker restart <容器名>`
 
 ### 开发与定制
@@ -204,8 +207,8 @@ Web UI 使用原生技术栈，修改非常简单：
   - 添加端点：`curl -X POST http://localhost:3021/api/endpoints -H "Content-Type: application/json" -d '{"name":"OpenAI","apiUrl":"api.openai.com","apiKey":"sk-...","transformer":"openai","model":"gpt-4"}'`
   - 测试端点：`curl -X POST http://localhost:3021/api/endpoints/OpenAI/test`
 - **容器运维快捷命令**：
-  - 查看日志：`docker logs -f ccnexus`（测试实例：`ccnexus2`）。
+  - 查看日志：`docker logs -f ccg`（测试实例：`ccg2`）。
   - 重启：`docker compose restart`（测试用 `-f docker-compose.test.yml`）。
   - 重建：`docker compose up -d --build`（测试用 `-f docker-compose.test.yml`）。
-  - 进入容器：`docker exec -it ccnexus sh`（测试实例 `ccnexus2`）。
+  - 进入容器：`docker exec -it ccg sh`（测试实例 `ccg2`）。
 ---

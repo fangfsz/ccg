@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
+	"ccg/internal/logger"
+	"ccg/internal/storage"
 )
 
 type BasicAuthConfigRequest struct {

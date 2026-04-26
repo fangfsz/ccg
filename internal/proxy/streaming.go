@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/tokencount"
-	"github.com/fangfsz/ccg/internal/transformer"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/tokencount"
+	"ccg/internal/transformer"
 )
 
 // handleStreamingResponse processes streaming SSE responses

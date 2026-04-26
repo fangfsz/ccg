@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/storage"
 )
 
 func (b *BackupService) getLocalDir() (string, error) {
@@ -157,7 +157,7 @@ func (b *BackupService) restoreFromLocal(filename, choice string, reloadConfig f
 		logger.Error("Failed to load config from storage: %v", err)
 		return fmt.Errorf("load_config_failed")
 	}
-	*b.config = *newConfig
+	b.config = newConfig
 
 	if err := reloadConfig(newConfig); err != nil {
 		logger.Error("Failed to reload config: %v", err)

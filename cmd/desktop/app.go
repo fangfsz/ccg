@@ -14,12 +14,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/proxy"
-	"github.com/fangfsz/ccg/internal/service"
-	"github.com/fangfsz/ccg/internal/storage"
-	"github.com/fangfsz/ccg/internal/tray"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/proxy"
+	"ccg/internal/service"
+	"ccg/internal/storage"
+	"ccg/internal/tray"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -67,15 +67,15 @@ type App struct {
 	trayIcon []byte
 
 	// Services
-	stats      *service.StatsService
-	endpoint   *service.EndpointService
-	settings   *service.SettingsService
-	webdav     *service.WebDAVService
-	backup     *service.BackupService
-	archive    *service.ArchiveService
-	update     *service.UpdateService
-	terminal   *service.TerminalService
-	cliConfig  *service.CLIConfigService
+	stats     *service.StatsService
+	endpoint  *service.EndpointService
+	settings  *service.SettingsService
+	webdav    *service.WebDAVService
+	backup    *service.BackupService
+	archive   *service.ArchiveService
+	update    *service.UpdateService
+	terminal  *service.TerminalService
+	cliConfig *service.CLIConfigService
 }
 
 // NewApp creates a new App application struct
@@ -107,7 +107,7 @@ func (a *App) startup(ctx context.Context) {
 		logger.Error("Failed to create config directory: %v", err)
 	}
 
-	dbPath := filepath.Join(configDir, "ccnexus.db")
+	dbPath := filepath.Join(configDir, "ccg.db")
 
 	sqliteStorage, err := storage.NewSQLiteStorage(dbPath)
 	if err != nil {

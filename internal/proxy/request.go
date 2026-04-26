@@ -14,13 +14,13 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/net/proxy"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
-	"github.com/fangfsz/ccg/internal/transformer"
-	"github.com/fangfsz/ccg/internal/transformer/cc"
-	"github.com/fangfsz/ccg/internal/transformer/cx/chat"
-	"github.com/fangfsz/ccg/internal/transformer/cx/responses"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/storage"
+	"ccg/internal/transformer"
+	"ccg/internal/transformer/cc"
+	"ccg/internal/transformer/cx/chat"
+	"ccg/internal/transformer/cx/responses"
 )
 
 const (

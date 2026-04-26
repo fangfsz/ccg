@@ -5,7 +5,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/fangfsz/ccg/internal/logger"
+	"ccg/internal/logger"
 )
 
 var (

@@ -5,10 +5,10 @@ import (
 	"io/fs"
 	"net/http"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/proxy"
-	"github.com/fangfsz/ccg/internal/storage"
-	"github.com/fangfsz/ccg/cmd/server/webui/api"
+	"ccg/internal/config"
+	"ccg/internal/proxy"
+	"ccg/internal/storage"
+	"ccg/cmd/server/webui/api"
 )
 
 //go:embed ui

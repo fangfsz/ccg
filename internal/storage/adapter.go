@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/fangfsz/ccg/internal/config"
+import "ccg/internal/config"
 
 // ConfigStorageAdapter adapts SQLiteStorage to config.StorageAdapter interface
 type ConfigStorageAdapter struct {

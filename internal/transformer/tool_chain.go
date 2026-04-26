@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/fangfsz/ccg/internal/logger"
+	"ccg/internal/logger"
 )
 
 // ToolChainHandler handles tool chain execution

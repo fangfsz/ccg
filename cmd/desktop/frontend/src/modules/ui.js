@@ -1,36 +1,33 @@
-import { t } from '../i18n/index.js';
+import { t } from "../i18n/index.js";
 
 export function initUI() {
-    const platform = navigator.platform.toLowerCase();
-    const isShowBtn = platform.includes('win') || platform.includes('mac');
+  const platform = navigator.platform.toLowerCase();
+  const isShowBtn = platform.includes("win") || platform.includes("mac");
 
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <!-- 页面右上角斜拉横幅 -->
-        <div class="ribbon-banner hidden" onclick="window.showSponsorModal()" title="${t('sponsor.ribbonTip')}">${t('sponsor.ribbon')}</div>
-
+  const app = document.getElementById("app");
+  app.innerHTML = `
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <div>
-                    <h1>🚀 ${t('app.title')}<span id="broadcast-banner" class="broadcast-banner hidden"></span></h1>
-                    <p>${t('header.title')}<span id="festivalToggle" class="festival-toggle hidden" onclick="window.toggleFestivalEffect(); event.stopPropagation();" title="${t('festival.toggle') || '切换氛围效果'}"><span class="festival-toggle-name" id="festivalToggleName"></span><span class="festival-toggle-switch" id="festivalToggleSwitch"></span></span></p>
+                    <h1>🚀 ${t("app.title")}<span id="broadcast-banner" class="broadcast-banner hidden"></span></h1>
+                    <p>${t("header.title")}<span id="festivalToggle" class="festival-toggle hidden" onclick="window.toggleFestivalEffect(); event.stopPropagation();" title="${t("festival.toggle") || "切换氛围效果"}"><span class="festival-toggle-name" id="festivalToggleName"></span><span class="festival-toggle-switch" id="festivalToggleSwitch"></span></span></p>
                 </div>
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <div class="port-display" onclick="window.showEditPortModal()" title="${t('header.port')}">
-                        <span style="color: #666; font-size: 15px; position: relative; top: -0.3px;">${t('header.port')}: </span>
+                    <div class="port-display" onclick="window.showEditPortModal()" title="${t("header.port")}">
+                        <span style="color: #666; font-size: 15px; position: relative; top: -0.3px;">${t("header.port")}: </span>
                         <span class="port-number" id="proxyPort">3000</span>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <button class="header-link" onclick="window.openGitHub()" title="${t('header.githubRepo')}">
+                        <button class="header-link" onclick="window.openGitHub()" title="${t("header.githubRepo")}">
                             <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
                                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                             </svg>
                         </button>
-                        <button class="header-link about-btn" id="aboutBtn" onclick="window.showWelcomeModal()" title="${t('header.about')}">
+                        <button class="header-link about-btn" id="aboutBtn" onclick="window.showWelcomeModal()" title="${t("header.about")}">
                             📖
                             <span class="update-badge" id="updateBadge"></span>
                         </button>
-                        <button class="header-link" onclick="window.showSettingsModal()" title="${t('settings.title')}">
+                        <button class="header-link" onclick="window.showSettingsModal()" title="${t("settings.title")}">
                             <span style="position: relative; left: 1.2px;">⚙️</span>
                         </button>
                     </div>
@@ -42,22 +39,22 @@ export function initUI() {
             <!-- Statistics -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="margin: 0;">📊 ${t('statistics.title')}</h2>
+                    <h2 style="margin: 0;">📊 ${t("statistics.title")}</h2>
                     <div class="stats-tabs">
                         <button class="stats-tab-btn active" data-period="daily" onclick="window.switchStatsPeriod('daily')">
-                            📅 ${t('statistics.daily')}
+                            📅 ${t("statistics.daily")}
                         </button>
                         <button class="stats-tab-btn" data-period="yesterday" onclick="window.switchStatsPeriod('yesterday')">
-                            📆 ${t('statistics.yesterday')}
+                            📆 ${t("statistics.yesterday")}
                         </button>
                         <button class="stats-tab-btn" data-period="weekly" onclick="window.switchStatsPeriod('weekly')">
-                            📊 ${t('statistics.weekly')}
+                            📊 ${t("statistics.weekly")}
                         </button>
                         <button class="stats-tab-btn" data-period="monthly" onclick="window.switchStatsPeriod('monthly')">
-                            📈 ${t('statistics.monthly')}
+                            📈 ${t("statistics.monthly")}
                         </button>
                         <button class="stats-tab-btn" data-period="history" onclick="window.switchStatsPeriod('history')">
-                            📚 ${t('statistics.history')}
+                            📚 ${t("statistics.history")}
                         </button>
                     </div>
                 </div>
@@ -67,18 +64,18 @@ export function initUI() {
                     <div class="stats-grid">
                     <div class="stat-box">
                         <div class="stat-header">
-                            <div class="stat-label">${t('statistics.endpoints')}</div>
+                            <div class="stat-label">${t("statistics.endpoints")}</div>
                         </div>
                         <div class="stat-value">
                             <span id="activeEndpointsDisplay" class="stat-primary">0</span>
                             <span class="stat-secondary"> / </span>
                             <span id="totalEndpointsDisplay" class="stat-secondary">0</span>
                         </div>
-                        <div class="stat-detail">${t('statistics.activeTotal')}</div>
+                        <div class="stat-detail">${t("statistics.activeTotal")}</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-header">
-                            <div class="stat-label">${t('statistics.totalRequests')}</div>
+                            <div class="stat-label">${t("statistics.totalRequests")}</div>
                             <span class="trend" id="requestsTrend">→ 0%</span>
                         </div>
                         <div class="stat-value">
@@ -86,15 +83,15 @@ export function initUI() {
                         </div>
                         <div class="stat-detail">
                             <span id="periodSuccess">0</span>
-                            <span class="stat-text"> ${t('statistics.success')}</span>
+                            <span class="stat-text"> ${t("statistics.success")}</span>
                             <span class="stat-divider">/</span>
                             <span id="periodFailed">0</span>
-                            <span class="stat-text"> ${t('statistics.failed')}</span>
+                            <span class="stat-text"> ${t("statistics.failed")}</span>
                         </div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-header">
-                            <div class="stat-label">${t('statistics.totalTokens')}</div>
+                            <div class="stat-label">${t("statistics.totalTokens")}</div>
                             <span class="trend" id="tokensTrend">→ 0%</span>
                         </div>
                         <div class="stat-value">
@@ -102,10 +99,10 @@ export function initUI() {
                         </div>
                         <div class="stat-detail">
                             <span id="periodInputTokens">0</span>
-                            <span class="stat-text"> ${t('statistics.in')}</span>
+                            <span class="stat-text"> ${t("statistics.in")}</span>
                             <span class="stat-divider">/</span>
                             <span id="periodOutputTokens">0</span>
-                            <span class="stat-text"> ${t('statistics.out')}</span>
+                            <span class="stat-text"> ${t("statistics.out")}</span>
                         </div>
                     </div>
                 </div>
@@ -128,12 +125,12 @@ export function initUI() {
             <div id="historyModal" class="modal" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2>📚 ${t('history.title')}</h2>
+                        <h2>📚 ${t("history.title")}</h2>
                         <button class="modal-close" onclick="window.closeHistoryModal()">&times;</button>
                     </div>
                     <div class="modal-body">
                         <div class="history-selector">
-                            <label>${t('history.selectMonth')}:</label>
+                            <label>${t("history.selectMonth")}:</label>
                             <select id="historyMonthSelect"></select>
                         </div>
 
@@ -141,7 +138,7 @@ export function initUI() {
                             <div class="stats-grid">
                             <div class="stat-box">
                                 <div class="stat-header">
-                                    <div class="stat-label">${t('statistics.totalRequests')}</div>
+                                    <div class="stat-label">${t("statistics.totalRequests")}</div>
                                     <span class="trend" id="historyRequestsTrend">→ 0%</span>
                                 </div>
                                 <div class="stat-value">
@@ -149,15 +146,15 @@ export function initUI() {
                                 </div>
                                 <div class="stat-detail">
                                     <span id="historySuccess">0</span>
-                                    <span class="stat-text"> ${t('statistics.success')}</span>
+                                    <span class="stat-text"> ${t("statistics.success")}</span>
                                     <span class="stat-divider">/</span>
                                     <span id="historyFailed">0</span>
-                                    <span class="stat-text"> ${t('statistics.failed')}</span>
+                                    <span class="stat-text"> ${t("statistics.failed")}</span>
                                 </div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-header">
-                                    <div class="stat-label">${t('statistics.totalTokens')}</div>
+                                    <div class="stat-label">${t("statistics.totalTokens")}</div>
                                     <span class="trend" id="historyTokensTrend">→ 0%</span>
                                 </div>
                                 <div class="stat-value">
@@ -165,10 +162,10 @@ export function initUI() {
                                 </div>
                                 <div class="stat-detail">
                                     <span id="historyInputTokens">0</span>
-                                    <span class="stat-text"> ${t('statistics.in')}</span>
+                                    <span class="stat-text"> ${t("statistics.in")}</span>
                                     <span class="stat-divider">/</span>
                                     <span id="historyOutputTokens">0</span>
-                                    <span class="stat-text"> ${t('statistics.out')}</span>
+                                    <span class="stat-text"> ${t("statistics.out")}</span>
                                 </div>
                             </div>
                         </div>
@@ -176,24 +173,24 @@ export function initUI() {
 
                         <div class="history-details">
                             <div class="history-details-header">
-                                <h3>${t('history.dailyDetails')}</h3>
-                                <button id="historyDeleteBtn" class="history-delete-btn" onclick="window.deleteHistoryArchive()" title="${t('history.deleteTitle')}">
+                                <h3>${t("history.dailyDetails")}</h3>
+                                <button id="historyDeleteBtn" class="history-delete-btn" onclick="window.deleteHistoryArchive()" title="${t("history.deleteTitle")}">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
                                     </svg>
-                                    ${t('history.delete')}
+                                    ${t("history.delete")}
                                 </button>
                             </div>
                             <div class="table-container">
                                 <table id="historyDailyTable">
                                     <thead>
                                         <tr>
-                                            <th>${t('history.date')}</th>
-                                            <th>${t('history.requests')}</th>
-                                            <th>${t('history.errors')}</th>
-                                            <th>${t('history.inputTokens')}</th>
-                                            <th>${t('history.outputTokens')}</th>
-                                            <th>${t('history.totalTokens')}</th>
+                                            <th>${t("history.date")}</th>
+                                            <th>${t("history.requests")}</th>
+                                            <th>${t("history.errors")}</th>
+                                            <th>${t("history.inputTokens")}</th>
+                                            <th>${t("history.outputTokens")}</th>
+                                            <th>${t("history.totalTokens")}</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -210,12 +207,12 @@ export function initUI() {
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <h2 style="margin: 0;">🔗 ${t('endpoints.title')}</h2>
+                        <h2 style="margin: 0;">🔗 ${t("endpoints.title")}</h2>
                         <button class="endpoint-toggle-btn" onclick="window.toggleEndpointPanel()">
-                            <span id="endpointToggleIcon">🔼</span> <span id="endpointToggleText">${t('endpoints.collapse')}</span>
+                            <span id="endpointToggleIcon">🔼</span> <span id="endpointToggleText">${t("endpoints.collapse")}</span>
                         </button>
                         <div class="view-mode-tabs">
-                            <button class="view-mode-btn active" data-view="detail" onclick="window.switchEndpointViewMode('detail')" title="${t('endpoints.viewDetail')}">
+                            <button class="view-mode-btn active" data-view="detail" onclick="window.switchEndpointViewMode('detail')" title="${t("endpoints.viewDetail")}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <rect x="3" y="3" width="8" height="8" rx="1"/>
                                     <rect x="13" y="3" width="8" height="8" rx="1"/>
@@ -223,7 +220,7 @@ export function initUI() {
                                     <rect x="13" y="13" width="8" height="8" rx="1"/>
                                 </svg>
                             </button>
-                            <button class="view-mode-btn" data-view="compact" onclick="window.switchEndpointViewMode('compact')" title="${t('endpoints.viewCompact')}">
+                            <button class="view-mode-btn" data-view="compact" onclick="window.switchEndpointViewMode('compact')" title="${t("endpoints.viewCompact")}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <rect x="3" y="4" width="18" height="3" rx="1"/>
                                     <rect x="3" y="10.5" width="18" height="3" rx="1"/>
@@ -236,7 +233,7 @@ export function initUI() {
                         <div class="filter-dropdowns">
                             <!-- 类型筛选 -->
                             <div class="filter-dropdown" data-filter="types">
-                                <button class="filter-dropdown-btn" title="${t('endpoints.filterTypeTooltip')}">
+                                <button class="filter-dropdown-btn" title="${t("endpoints.filterTypeTooltip")}">
                                     <span class="filter-icon">📑</span>
                                     <span class="filter-badge hidden" id="filterBadgeTypes">0</span>
                                     <span class="filter-arrow">▼</span>
@@ -249,62 +246,66 @@ export function initUI() {
                                         <label><input type="checkbox" value="openai2"> OpenAI2</label>
                                     </div>
                                     <div class="panel-footer">
-                                        <button class="btn-clear-dimension">${t('endpoints.filterClearDimension')}</button>
-                                        <button class="btn-apply">${t('endpoints.filterApply')}</button>
+                                        <button class="btn-clear-dimension">${t("endpoints.filterClearDimension")}</button>
+                                        <button class="btn-apply">${t("endpoints.filterApply")}</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- 可用性筛选 -->
                             <div class="filter-dropdown" data-filter="availabilities">
-                                <button class="filter-dropdown-btn" title="${t('endpoints.filterAvailabilityTooltip')}">
+                                <button class="filter-dropdown-btn" title="${t("endpoints.filterAvailabilityTooltip")}">
                                     <span class="filter-icon">🔌</span>
                                     <span class="filter-badge hidden" id="filterBadgeAvailabilities">0</span>
                                     <span class="filter-arrow">▼</span>
                                 </button>
                                 <div class="filter-dropdown-panel hidden">
                                     <div class="panel-options">
-                                        <label><input type="checkbox" value="available"> ${t('endpoints.filterAvailable')}</label>
-                                        <label><input type="checkbox" value="unknown"> ${t('endpoints.filterUnknown')}</label>
-                                        <label><input type="checkbox" value="unavailable"> ${t('endpoints.filterUnavailable')}</label>
+                                        <label><input type="checkbox" value="available"> ${t("endpoints.filterAvailable")}</label>
+                                        <label><input type="checkbox" value="unknown"> ${t("endpoints.filterUnknown")}</label>
+                                        <label><input type="checkbox" value="unavailable"> ${t("endpoints.filterUnavailable")}</label>
                                     </div>
                                     <div class="panel-footer">
-                                        <button class="btn-clear-dimension">${t('endpoints.filterClearDimension')}</button>
-                                        <button class="btn-apply">${t('endpoints.filterApply')}</button>
+                                        <button class="btn-clear-dimension">${t("endpoints.filterClearDimension")}</button>
+                                        <button class="btn-apply">${t("endpoints.filterApply")}</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- 启用状态筛选 -->
                             <div class="filter-dropdown" data-filter="enabledStates">
-                                <button class="filter-dropdown-btn" title="${t('endpoints.filterEnabledTooltip')}">
+                                <button class="filter-dropdown-btn" title="${t("endpoints.filterEnabledTooltip")}">
                                     <span class="filter-icon">⚡</span>
                                     <span class="filter-badge hidden" id="filterBadgeEnabledStates">0</span>
                                     <span class="filter-arrow">▼</span>
                                 </button>
                                 <div class="filter-dropdown-panel hidden">
                                     <div class="panel-options">
-                                        <label><input type="checkbox" value="enabled"> ${t('endpoints.filterEnabled')}</label>
-                                        <label><input type="checkbox" value="disabled"> ${t('endpoints.filterDisabled')}</label>
+                                        <label><input type="checkbox" value="enabled"> ${t("endpoints.filterEnabled")}</label>
+                                        <label><input type="checkbox" value="disabled"> ${t("endpoints.filterDisabled")}</label>
                                     </div>
                                     <div class="panel-footer">
-                                        <button class="btn-clear-dimension">${t('endpoints.filterClearDimension')}</button>
-                                        <button class="btn-apply">${t('endpoints.filterApply')}</button>
+                                        <button class="btn-clear-dimension">${t("endpoints.filterClearDimension")}</button>
+                                        <button class="btn-apply">${t("endpoints.filterApply")}</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        ${isShowBtn ? `
+                        ${
+                          isShowBtn
+                            ? `
                         <button class="btn btn-secondary" onclick="window.showTerminalModal()">
-                            🖥️ ${t('terminal.title')}
-                        </button>` : ''}
+                            🖥️ ${t("terminal.title")}
+                        </button>`
+                            : ""
+                        }
                         <button class="btn btn-secondary" onclick="window.showDataSyncDialog()">
-                            🔄 ${t('webdav.dataSync')}
+                            🔄 ${t("webdav.dataSync")}
                         </button>
                         <button class="btn btn-primary" onclick="window.showAddEndpointModal()">
-                            ➕ ${t('header.addEndpoint')}
+                            ➕ ${t("header.addEndpoint")}
                         </button>
                     </div>
                 </div>
@@ -312,15 +313,15 @@ export function initUI() {
 
                 <!-- 筛选激活警告条 -->
                 <div id="filterActiveBanner" class="filter-active-banner hidden">
-                    ⚠️ ${t('endpoints.filterActiveWarning')}
+                    ⚠️ ${t("endpoints.filterActiveWarning")}
                     <button class="banner-btn" onclick="window.clearAllFilters()">
-                        ${t('endpoints.filterClearAll')}
+                        ${t("endpoints.filterClearAll")}
                     </button>
                 </div>
 
                 <div id="endpointPanel" class="endpoint-panel">
                     <div id="endpointList" class="endpoint-list">
-                        <div class="loading">${t('endpoints.title')}...</div>
+                        <div class="loading">${t("endpoints.title")}...</div>
                     </div>
                 </div>
             </div>
@@ -329,23 +330,23 @@ export function initUI() {
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <h2 style="margin: 0;">📋 ${t('logs.title')}</h2>
+                        <h2 style="margin: 0;">📋 ${t("logs.title")}</h2>
                         <button class="endpoint-toggle-btn" onclick="window.toggleLogPanel()">
-                            <span id="logToggleIcon">🔼</span> <span id="logToggleText">${t('logs.collapse')}</span>
+                            <span id="logToggleIcon">🔼</span> <span id="logToggleText">${t("logs.collapse")}</span>
                         </button>
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <select id="logLevel" class="log-level-select-btn" onchange="window.changeLogLevel()">
-                            <option value="0">🔍 ${t('logs.levels.0')}</option>
-                            <option value="1" selected>ℹ️ ${t('logs.levels.1')}</option>
-                            <option value="2">⚠️ ${t('logs.levels.2')}</option>
-                            <option value="3">❌ ${t('logs.levels.3')}</option>
+                            <option value="0">🔍 ${t("logs.levels.0")}</option>
+                            <option value="1" selected>ℹ️ ${t("logs.levels.1")}</option>
+                            <option value="2">⚠️ ${t("logs.levels.2")}</option>
+                            <option value="3">❌ ${t("logs.levels.3")}</option>
                         </select>
                         <button class="btn btn-secondary btn-sm" onclick="window.copyLogs()">
-                            📋 ${t('logs.copy')}
+                            📋 ${t("logs.copy")}
                         </button>
                         <button class="btn btn-secondary btn-sm" onclick="window.clearLogs()">
-                            🗑️ ${t('logs.clear')}
+                            🗑️ ${t("logs.clear")}
                         </button>
                     </div>
                 </div>
@@ -377,37 +378,37 @@ export function initUI() {
         <div id="endpointModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 id="modalTitle">➕ ${t('modal.addEndpoint')}</h2>
+                    <h2 id="modalTitle">➕ ${t("modal.addEndpoint")}</h2>
                     <button class="modal-close" onclick="window.closeModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('modal.name')}</label>
-                        <input type="text" id="endpointName" placeholder="${t('modal.namePlaceholder')}">
+                        <label><span class="required">*</span>${t("modal.name")}</label>
+                        <input type="text" id="endpointName" placeholder="${t("modal.namePlaceholder")}">
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('modal.authMode')}</label>
+                        <label><span class="required">*</span>${t("modal.authMode")}</label>
                         <select id="endpointAuthMode" onchange="window.handleAuthModeChange()">
-                            <option value="api_key">${t('modal.authModeApiKey')}</option>
-                            <option value="token_pool">${t('modal.authModeTokenPool')}</option>
-                            <option value="codex_token_pool">${t('modal.authModeCodexTokenPool')}</option>
+                            <option value="api_key">${t("modal.authModeApiKey")}</option>
+                            <option value="token_pool">${t("modal.authModeTokenPool")}</option>
+                            <option value="codex_token_pool">${t("modal.authModeCodexTokenPool")}</option>
                         </select>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('modal.authModeHelp')}
+                            ${t("modal.authModeHelp")}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('modal.apiUrl')}</label>
-                        <input type="text" id="endpointUrl" placeholder="${t('modal.apiUrlPlaceholder')}">
+                        <label><span class="required">*</span>${t("modal.apiUrl")}</label>
+                        <input type="text" id="endpointUrl" placeholder="${t("modal.apiUrlPlaceholder")}">
                         <p id="endpointUrlHelp" style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('modal.apiUrlHelp')}
+                            ${t("modal.apiUrlHelp")}
                         </p>
                     </div>
                     <div class="form-group" id="endpointKeyGroup">
-                        <label><span class="required">*</span>${t('modal.apiKey')}</label>
+                        <label><span class="required">*</span>${t("modal.apiKey")}</label>
                         <div class="password-input-wrapper">
-                            <input type="password" id="endpointKey" placeholder="${t('modal.apiKeyPlaceholder')}">
-                            <button type="button" class="password-toggle" onclick="window.togglePasswordVisibility()" title="${t('modal.togglePassword')}">
+                            <input type="password" id="endpointKey" placeholder="${t("modal.apiKeyPlaceholder")}">
+                            <button type="button" class="password-toggle" onclick="window.togglePasswordVisibility()" title="${t("modal.togglePassword")}">
                                 <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                     <circle cx="12" cy="12" r="3"></circle>
@@ -416,22 +417,22 @@ export function initUI() {
                         </div>
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('modal.transformer')}</label>
+                        <label><span class="required">*</span>${t("modal.transformer")}</label>
                         <select id="endpointTransformer" onchange="window.handleTransformerChange()">
-                            <option value="claude" title="${t('modal.transformerOptionClaude')}">Claude (Default)</option>
-                            <option value="openai" title="${t('modal.transformerOptionOpenAI')}">OpenAI</option>
-                            <option value="openai2" title="${t('modal.transformerOptionOpenAI2')}">OpenAI2 (Responses API)</option>
-                            <option value="gemini" title="${t('modal.transformerOptionGemini')}">Gemini</option>
+                            <option value="claude" title="${t("modal.transformerOptionClaude")}">Claude (Default)</option>
+                            <option value="openai" title="${t("modal.transformerOptionOpenAI")}">OpenAI</option>
+                            <option value="openai2" title="${t("modal.transformerOptionOpenAI2")}">OpenAI2 (Responses API)</option>
+                            <option value="gemini" title="${t("modal.transformerOptionGemini")}">Gemini</option>
                         </select>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('modal.transformerHelp')}
+                            ${t("modal.transformerHelp")}
                         </p>
                     </div>
                     <div class="form-group" id="modelFieldGroup" style="display: block;">
-                        <label><span class="required" id="modelRequired" style="display: none;">*</span>${t('modal.model')}</label>
+                        <label><span class="required" id="modelRequired" style="display: none;">*</span>${t("modal.model")}</label>
                         <div class="model-input-wrapper">
                             <div class="model-select-container">
-                                <input type="text" id="endpointModel" placeholder="${t('modal.modelPlaceholder')}" autocomplete="off">
+                                <input type="text" id="endpointModel" placeholder="${t("modal.modelPlaceholder")}" autocomplete="off">
                                 <button type="button" class="model-dropdown-toggle" onclick="window.toggleModelDropdown()">
                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
                                         <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -439,23 +440,23 @@ export function initUI() {
                                 </button>
                                 <div class="model-dropdown" id="modelDropdown"></div>
                             </div>
-                            <button type="button" class="btn btn-secondary" id="fetchModelsBtn" onclick="window.fetchModels()" title="${t('modal.fetchModels')}">
-                                <span id="fetchModelsIcon">${t('modal.fetchModelsBtn')}</span>
+                            <button type="button" class="btn btn-secondary" id="fetchModelsBtn" onclick="window.fetchModels()" title="${t("modal.fetchModels")}">
+                                <span id="fetchModelsIcon">${t("modal.fetchModelsBtn")}</span>
                             </button>
                         </div>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;" id="modelHelpText">
-                            ${t('modal.modelHelp')}
+                            ${t("modal.modelHelp")}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label>${t('modal.remark')}</label>
-                        <input type="text" id="endpointRemark" placeholder="${t('modal.remarkHelp')}">
+                        <label>${t("modal.remark")}</label>
+                        <input type="text" id="endpointRemark" placeholder="${t("modal.remarkHelp")}">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" id="manageTokenPoolBtn" style="display: none;" onclick="window.openEndpointTokenPoolFromModal()">🪪 ${t('modal.manageTokenPool')}</button>
-                    <button class="btn btn-secondary" onclick="window.closeModal()">${t('modal.cancel')}</button>
-                    <button class="btn btn-primary" onclick="window.saveEndpoint()">${t('modal.save')}</button>
+                    <button class="btn btn-secondary" id="manageTokenPoolBtn" style="display: none;" onclick="window.openEndpointTokenPoolFromModal()">🪪 ${t("modal.manageTokenPool")}</button>
+                    <button class="btn btn-secondary" onclick="window.closeModal()">${t("modal.cancel")}</button>
+                    <button class="btn btn-primary" onclick="window.saveEndpoint()">${t("modal.save")}</button>
                 </div>
             </div>
         </div>
@@ -464,17 +465,17 @@ export function initUI() {
         <div id="terminalModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>🖥️ ${t('terminal.title')}</h2>
+                    <h2>🖥️ ${t("terminal.title")}</h2>
                     <button class="modal-close" onclick="window.closeTerminalModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
                         <div class="form-label-row">
-                            <label><span class="required">*</span>${t('terminal.selectTerminal')}</label>
+                            <label><span class="required">*</span>${t("terminal.selectTerminal")}</label>
                             <div class="cli-type-switcher">
-                                <button class="cli-type-btn active" data-cli="claude" onclick="window.switchCliType('claude')">${t('terminal.cliTypeClaude')}</button>
-                                <button class="cli-type-btn" data-cli="codex" onclick="window.switchCliType('codex')">${t('terminal.cliTypeCodex')}</button>
-                                <button class="cli-type-btn" data-cli="gemini" onclick="window.switchCliType('gemini')">${t('terminal.cliTypeGemini')}</button>
+                                <button class="cli-type-btn active" data-cli="claude" onclick="window.switchCliType('claude')">${t("terminal.cliTypeClaude")}</button>
+                                <button class="cli-type-btn" data-cli="codex" onclick="window.switchCliType('codex')">${t("terminal.cliTypeCodex")}</button>
+                                <button class="cli-type-btn" data-cli="gemini" onclick="window.switchCliType('gemini')">${t("terminal.cliTypeGemini")}</button>
                             </div>
                         </div>
                         <div id="cliConfigStatus" class="cli-config-status"></div>
@@ -482,31 +483,31 @@ export function initUI() {
                         <select id="terminalSelect" onchange="window.onTerminalChange()">
                             <option value="">Loading...</option>
                         </select>
-                        <small class="form-help" id="terminalSelectHelp">${t('terminal.selectTerminalHelp')}</small>
+                        <small class="form-help" id="terminalSelectHelp">${t("terminal.selectTerminalHelp")}</small>
                     </div>
                     <div class="form-group" id="claudeCommandGroup">
-                        <label>${t('terminal.launcherCommand')}</label>
+                        <label>${t("terminal.launcherCommand")}</label>
                         <input type="text" id="claudeCommandInput" placeholder="claude"
                                oninput="window.onClaudeCommandChange()">
-                        <small class="form-help">${t('terminal.launcherCommandHelp')}</small>
+                        <small class="form-help">${t("terminal.launcherCommandHelp")}</small>
                     </div>
                     <div class="form-group" id="geminiCommandGroup" style="display: none;">
-                        <label>${t('terminal.geminiCommand')}</label>
+                        <label>${t("terminal.geminiCommand")}</label>
                         <input type="text" id="geminiCommandInput" placeholder="gemini"
                                oninput="window.onGeminiCommandChange()">
-                        <small class="form-help">${t('terminal.geminiCommandHelp')}</small>
+                        <small class="form-help">${t("terminal.geminiCommandHelp")}</small>
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('terminal.projectDirs')}</label>
-                        <small class="form-help">${t('terminal.projectDirsHelp')}</small>
+                        <label><span class="required">*</span>${t("terminal.projectDirs")}</label>
+                        <small class="form-help">${t("terminal.projectDirsHelp")}</small>
                         <div id="projectDirList" class="project-dir-list">
-                            <div class="empty-tip">${t('terminal.noDirs')}</div>
+                            <div class="empty-tip">${t("terminal.noDirs")}</div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary btn-add-dir" onclick="window.addProjectDir()">
-                        ➕ ${t('terminal.addDir')}
+                        ➕ ${t("terminal.addDir")}
                     </button>
                 </div>
             </div>
@@ -516,18 +517,18 @@ export function initUI() {
         <div id="sessionModal" class="modal">
             <div class="modal-content session-modal-content">
                 <div class="modal-header">
-                    <h2>📋 ${t('session.title')}</h2>
+                    <h2>📋 ${t("session.title")}</h2>
                     <button class="modal-close" onclick="window.closeSessionModal()">&times;</button>
                 </div>
                 <div class="modal-body session-modal-body">
-                    <div class="session-hint">${t('session.selectHint')}</div>
+                    <div class="session-hint">${t("session.selectHint")}</div>
                     <div id="sessionList" class="session-list">
-                        <div class="session-loading">${t('session.loading')}</div>
+                        <div class="session-loading">${t("session.loading")}</div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary btn-add-dir" onclick="window.confirmSessionSelection()">
-                        ✅ ${t('session.confirmAndReturn')}
+                        ✅ ${t("session.confirmAndReturn")}
                     </button>
                 </div>
             </div>
@@ -537,21 +538,21 @@ export function initUI() {
         <div id="portModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>⚙️ ${t('modal.changePort')}</h2>
+                    <h2>⚙️ ${t("modal.changePort")}</h2>
                     <button class="modal-close" onclick="window.closePortModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('modal.portLabel')}</label>
+                        <label><span class="required">*</span>${t("modal.portLabel")}</label>
                         <input type="number" id="portInput" min="1" max="65535" placeholder="3000">
                     </div>
                     <p style="color: #666; font-size: 14px; margin-top: 10px;">
-                        ⚠️ ${t('modal.portNote')}
+                        ⚠️ ${t("modal.portNote")}
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="window.closePortModal()">${t('modal.cancel')}</button>
-                    <button class="btn btn-primary" onclick="window.savePort()">${t('modal.save')}</button>
+                    <button class="btn btn-secondary" onclick="window.closePortModal()">${t("modal.cancel")}</button>
+                    <button class="btn btn-primary" onclick="window.savePort()">${t("modal.save")}</button>
                 </div>
             </div>
         </div>
@@ -560,18 +561,18 @@ export function initUI() {
         <div id="welcomeModal" class="modal">
             <div class="modal-content" style="max-width: min(600px, 90vw);">
                 <div class="modal-header">
-                    <h2>👋 ${t('welcome.title')}</h2>
+                    <h2>👋 ${t("welcome.title")}</h2>
                     <button class="modal-close" onclick="window.closeWelcomeModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                        ${t('welcome.message')}
+                        ${t("welcome.message")}
                     </p>
 
                     <div style="display: flex; justify-content: center; gap: 30px; margin: 30px 0;">
                         <div style="text-align: center;">
                             <img src="/WeChat.jpg" alt="WeChat QR Code" style="width: 200px; height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <p style="margin-top: 10px; color: #666; font-size: 14px;">${t('welcome.qrCodeTip')}</p>
+                            <p style="margin-top: 10px; color: #666; font-size: 14px;">${t("welcome.qrCodeTip")}</p>
                         </div>
                         <div style="text-align: center;">
                             <img
@@ -580,19 +581,19 @@ export function initUI() {
                                 alt="Chat Group QR Code"
                                 style="width: 200px; height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
                             >
-                            <p id="chatQRCodeTip" style="margin-top: 10px; color: #666; font-size: 14px;">${t('welcome.chatGroupFallbackTip')}</p>
+                            <p id="chatQRCodeTip" style="margin-top: 10px; color: #666; font-size: 14px;">${t("welcome.chatGroupFallbackTip")}</p>
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
                         <button class="btn btn-secondary" onclick="window.openArticle()">
-                            ${t('welcome.readArticle')}
+                            ${t("welcome.readArticle")}
                         </button>
                         <button class="btn btn-secondary" onclick="window.showChangelogModal()">
-                            ${t('welcome.changelog')}
+                            ${t("welcome.changelog")}
                         </button>
                         <button class="btn btn-secondary check-update-btn" onclick="window.checkForUpdates()">
-                            🔄 ${t('update.checkForUpdates')}
+                            🔄 ${t("update.checkForUpdates")}
                             <span class="update-badge" id="checkUpdateBadge"></span>
                         </button>
                     </div>
@@ -600,9 +601,9 @@ export function initUI() {
                 <div class="modal-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 20px;">
                     <label style="display: flex; align-items: center; cursor: pointer;">
                         <input type="checkbox" id="dontShowAgain" style="margin-right: 8px;">
-                        <span style="font-size: 14px; color: #666;">${t('welcome.dontShow')}</span>
+                        <span style="font-size: 14px; color: #666;">${t("welcome.dontShow")}</span>
                     </label>
-                    <button class="btn btn-primary" onclick="window.closeWelcomeModal()">${t('welcome.getStarted')}</button>
+                    <button class="btn btn-primary" onclick="window.closeWelcomeModal()">${t("welcome.getStarted")}</button>
                 </div>
             </div>
         </div>
@@ -611,7 +612,7 @@ export function initUI() {
         <div id="testResultModal" class="modal">
             <div class="modal-content" style="max-width: min(600px, 90vw);">
                 <div class="modal-header">
-                    <h2 id="testResultTitle">🧪 ${t('test.title')}</h2>
+                    <h2 id="testResultTitle">🧪 ${t("test.title")}</h2>
                     <button class="modal-close" onclick="window.closeTestResultModal()">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -626,7 +627,7 @@ export function initUI() {
         <div id="changelogModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>📋 ${t('changelog.title')}</h2>
+                    <h2>📋 ${t("changelog.title")}</h2>
                     <button class="modal-close" onclick="window.closeChangelogModal()">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -654,14 +655,14 @@ export function initUI() {
                         </svg>
                     </div>
                     <div class="confirm-content">
-                        <h4 class="confirm-title">${t('common.confirmDeleteTitle')}</h4>
+                        <h4 class="confirm-title">${t("common.confirmDeleteTitle")}</h4>
                         <p id="confirmMessage" class="confirm-message"></p>
                     </div>
                 </div>
                 <div class="confirm-divider"></div>
                 <div class="confirm-footer">
-                    <button class="btn-confirm-delete" onclick="window.acceptConfirm()">${t('common.delete')}</button>
-                    <button class="btn-confirm-cancel" onclick="window.cancelConfirm()">${t('common.cancel')}</button>
+                    <button class="btn-confirm-delete" onclick="window.acceptConfirm()">${t("common.delete")}</button>
+                    <button class="btn-confirm-cancel" onclick="window.cancelConfirm()">${t("common.cancel")}</button>
                 </div>
             </div>
         </div>
@@ -692,39 +693,39 @@ export function initUI() {
         <div id="settingsModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>⚙️ ${t('settings.title')}</h2>
+                    <h2>⚙️ ${t("settings.title")}</h2>
                     <button class="modal-close" onclick="window.closeSettingsModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('settings.language')}</label>
+                        <label><span class="required">*</span>${t("settings.language")}</label>
                         <select id="settingsLanguage">
-                            <option value="zh-CN">${t('settings.languages.zh-CN')}</option>
-                            <option value="en">${t('settings.languages.en')}</option>
+                            <option value="zh-CN">${t("settings.languages.zh-CN")}</option>
+                            <option value="en">${t("settings.languages.en")}</option>
                         </select>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('settings.languageHelp')}
+                            ${t("settings.languageHelp")}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('settings.theme')}</label>
+                        <label><span class="required">*</span>${t("settings.theme")}</label>
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <select id="settingsTheme" style="flex: 1;">
-                                <option value="light">${t('settings.themes.light')}</option>
-                                <option value="dark">${t('settings.themes.dark')}</option>
-                                <option value="green">${t('settings.themes.green')}</option>
-                                <option value="starry">${t('settings.themes.starry')}</option>
-                                <option value="sakura">${t('settings.themes.sakura')}</option>
-                                <option value="sunset">${t('settings.themes.sunset')}</option>
-                                <option value="ocean">${t('settings.themes.ocean')}</option>
-                                <option value="mocha">${t('settings.themes.mocha')}</option>
-                                <option value="cyberpunk">${t('settings.themes.cyberpunk')}</option>
-                                <option value="aurora">${t('settings.themes.aurora')}</option>
-                                <option value="holographic">${t('settings.themes.holographic')}</option>
-                                <option value="quantum">${t('settings.themes.quantum')}</option>
+                                <option value="light">${t("settings.themes.light")}</option>
+                                <option value="dark">${t("settings.themes.dark")}</option>
+                                <option value="green">${t("settings.themes.green")}</option>
+                                <option value="starry">${t("settings.themes.starry")}</option>
+                                <option value="sakura">${t("settings.themes.sakura")}</option>
+                                <option value="sunset">${t("settings.themes.sunset")}</option>
+                                <option value="ocean">${t("settings.themes.ocean")}</option>
+                                <option value="mocha">${t("settings.themes.mocha")}</option>
+                                <option value="cyberpunk">${t("settings.themes.cyberpunk")}</option>
+                                <option value="aurora">${t("settings.themes.aurora")}</option>
+                                <option value="holographic">${t("settings.themes.holographic")}</option>
+                                <option value="quantum">${t("settings.themes.quantum")}</option>
                             </select>
-                            <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;" title="${t('settings.themeAutoHelp')}">
-                                <span style="font-size: 13px; color: var(--text-secondary);">${t('settings.themeAuto')}</span>
+                            <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;" title="${t("settings.themeAutoHelp")}">
+                                <span style="font-size: 13px; color: var(--text-secondary);">${t("settings.themeAuto")}</span>
                                 <label class="toggle-switch" style="width: 40px; height: 20px; margin-top: 7px;">
                                     <input type="checkbox" id="settingsThemeAuto">
                                     <span class="toggle-slider" style="border-radius: 20px;"></span>
@@ -732,55 +733,55 @@ export function initUI() {
                             </div>
                         </div>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('settings.themeHelp')}
+                            ${t("settings.themeHelp")}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('settings.claudeNotification')}</label>
+                        <label><span class="required">*</span>${t("settings.claudeNotification")}</label>
                         <select id="settingsNotificationType">
-                            <option value="disabled">${t('settings.notificationOptions.disabled')}</option>
-                            <option value="toast">${t('settings.notificationOptions.toast')}</option>
-                            <option value="dialog">${t('settings.notificationOptions.dialog')}</option>
+                            <option value="disabled">${t("settings.notificationOptions.disabled")}</option>
+                            <option value="toast">${t("settings.notificationOptions.toast")}</option>
+                            <option value="dialog">${t("settings.notificationOptions.dialog")}</option>
                         </select>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('settings.notificationHelp')}
+                            ${t("settings.notificationHelp")}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('settings.closeWindowBehavior')}</label>
+                        <label><span class="required">*</span>${t("settings.closeWindowBehavior")}</label>
                         <select id="settingsCloseWindowBehavior">
-                            <option value="quit">${t('settings.closeWindowOptions.quit')}</option>
-                            <option value="ask">${t('settings.closeWindowOptions.ask')}</option>
-                            <option value="minimize">${t('settings.closeWindowOptions.minimize')}</option>
+                            <option value="quit">${t("settings.closeWindowOptions.quit")}</option>
+                            <option value="ask">${t("settings.closeWindowOptions.ask")}</option>
+                            <option value="minimize">${t("settings.closeWindowOptions.minimize")}</option>
                         </select>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('settings.closeWindowBehaviorHelp')}
+                            ${t("settings.closeWindowBehaviorHelp")}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label>${t('settings.proxy')}</label>
-                        <input type="text" id="settingsProxyUrl" placeholder="${t('settings.proxyUrlPlaceholder')}">
+                        <label>${t("settings.proxy")}</label>
+                        <input type="text" id="settingsProxyUrl" placeholder="${t("settings.proxyUrlPlaceholder")}">
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('settings.proxyHelp')}
+                            ${t("settings.proxyHelp")}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('update.autoCheck')}</label>
+                        <label><span class="required">*</span>${t("update.autoCheck")}</label>
                         <select id="check-interval">
-                            <option value="1">${t('update.everyHour')}</option>
-                            <option value="24">${t('update.everyDay')}</option>
-                            <option value="168">${t('update.everyWeek')}</option>
-                            <option value="720">${t('update.everyMonth')}</option>
-                            <option value="0">${t('update.noAutoCheck')}</option>
+                            <option value="1">${t("update.everyHour")}</option>
+                            <option value="24">${t("update.everyDay")}</option>
+                            <option value="168">${t("update.everyWeek")}</option>
+                            <option value="720">${t("update.everyMonth")}</option>
+                            <option value="0">${t("update.noAutoCheck")}</option>
                         </select>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
-                            ${t('update.autoCheckHelp')}
+                            ${t("update.autoCheckHelp")}
                         </p>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="window.closeSettingsModal()">${t('settings.cancel')}</button>
-                    <button class="btn btn-primary" onclick="window.saveSettings()">${t('settings.save')}</button>
+                    <button class="btn btn-secondary" onclick="window.closeSettingsModal()">${t("settings.cancel")}</button>
+                    <button class="btn btn-primary" onclick="window.saveSettings()">${t("settings.save")}</button>
                 </div>
             </div>
         </div>
@@ -789,80 +790,67 @@ export function initUI() {
         <div id="autoThemeConfigModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>🌓 ${t('settings.autoThemeConfigTitle')}</h2>
+                    <h2>🌓 ${t("settings.autoThemeConfigTitle")}</h2>
                     <button class="modal-close" onclick="window.closeAutoThemeConfigModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
-                        ${t('settings.autoThemeConfigDesc')}
+                        ${t("settings.autoThemeConfigDesc")}
                     </p>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('settings.lightThemeLabel')}</label>
+                        <label><span class="required">*</span>${t("settings.lightThemeLabel")}</label>
                         <select id="autoLightTheme">
-                            <option value="light">${t('settings.themes.light')}</option>
-                            <option value="green">${t('settings.themes.green')}</option>
-                            <option value="sakura">${t('settings.themes.sakura')}</option>
-                            <option value="sunset">${t('settings.themes.sunset')}</option>
-                            <option value="ocean">${t('settings.themes.ocean')}</option>
-                            <option value="mocha">${t('settings.themes.mocha')}</option>
+                            <option value="light">${t("settings.themes.light")}</option>
+                            <option value="green">${t("settings.themes.green")}</option>
+                            <option value="sakura">${t("settings.themes.sakura")}</option>
+                            <option value="sunset">${t("settings.themes.sunset")}</option>
+                            <option value="ocean">${t("settings.themes.ocean")}</option>
+                            <option value="mocha">${t("settings.themes.mocha")}</option>
                         </select>
                         <p style="color: var(--text-secondary); font-size: 12px; margin-top: 5px;">
-                            ${t('settings.lightThemeHelp')}
+                            ${t("settings.lightThemeHelp")}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label><span class="required">*</span>${t('settings.darkThemeLabel')}</label>
+                        <label><span class="required">*</span>${t("settings.darkThemeLabel")}</label>
                         <select id="autoDarkTheme">
-                            <option value="dark">${t('settings.themes.dark')}</option>
-                            <option value="starry">${t('settings.themes.starry')}</option>
-                            <option value="cyberpunk">${t('settings.themes.cyberpunk')}</option>
-                            <option value="aurora">${t('settings.themes.aurora')}</option>
-                            <option value="holographic">${t('settings.themes.holographic')}</option>
-                            <option value="quantum">${t('settings.themes.quantum')}</option>
+                            <option value="dark">${t("settings.themes.dark")}</option>
+                            <option value="starry">${t("settings.themes.starry")}</option>
+                            <option value="cyberpunk">${t("settings.themes.cyberpunk")}</option>
+                            <option value="aurora">${t("settings.themes.aurora")}</option>
+                            <option value="holographic">${t("settings.themes.holographic")}</option>
+                            <option value="quantum">${t("settings.themes.quantum")}</option>
                         </select>
                         <p style="color: var(--text-secondary); font-size: 12px; margin-top: 5px;">
-                            ${t('settings.darkThemeHelp')}
+                            ${t("settings.darkThemeHelp")}
                         </p>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="window.closeAutoThemeConfigModal()">${t('settings.cancel')}</button>
-                    <button class="btn btn-primary" onclick="window.saveAutoThemeConfig()">${t('settings.save')}</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sponsor Modal -->
-        <div id="sponsorModal" class="modal">
-            <div class="modal-content sponsor-modal-content">
-                <div class="modal-header">
-                    <h2>❤️ ${t('sponsor.title')}</h2>
-                    <button class="modal-close" onclick="window.closeSponsorModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="sponsor-grid"></div>
+                    <button class="btn btn-secondary" onclick="window.closeAutoThemeConfigModal()">${t("settings.cancel")}</button>
+                    <button class="btn btn-primary" onclick="window.saveAutoThemeConfig()">${t("settings.save")}</button>
                 </div>
             </div>
         </div>
     `;
 
-    setupModalEventListeners();
+  setupModalEventListeners();
 }
 
 function setupModalEventListeners() {
-    // Close modals on background click (endpointModal, portModal, welcomeModal do NOT close on background click)
-     document.getElementById('testResultModal').addEventListener('click', (e) => {
-        if (e.target.id === 'testResultModal') {
-            window.closeTestResultModal();
-        }
-    });
+  // Close modals on background click (endpointModal, portModal, welcomeModal do NOT close on background click)
+  document.getElementById("testResultModal").addEventListener("click", (e) => {
+    if (e.target.id === "testResultModal") {
+      window.closeTestResultModal();
+    }
+  });
 }
 
 export async function changeLanguage(lang) {
-    try {
-        await window.go.main.App.SetLanguage(lang);
-        location.reload();
-    } catch (error) {
-        console.error('Failed to change language:', error);
-    }
+  try {
+    await window.go.main.App.SetLanguage(lang);
+    location.reload();
+  } catch (error) {
+    console.error("Failed to change language:", error);
+  }
 }

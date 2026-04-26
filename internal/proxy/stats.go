@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/logger"
+	"ccg/internal/logger"
 )
 
 // DailyStats represents statistics for a single day

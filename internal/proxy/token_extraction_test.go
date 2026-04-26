@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/transformer"
+	"ccg/internal/config"
+	"ccg/internal/transformer"
 )
 
 type passthroughResponseTransformer struct{}

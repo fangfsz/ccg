@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fangfsz/ccg/internal/config"
-	"github.com/fangfsz/ccg/internal/logger"
-	"github.com/fangfsz/ccg/internal/storage"
-	"github.com/fangfsz/ccg/internal/webdav"
+	"ccg/internal/config"
+	"ccg/internal/logger"
+	"ccg/internal/storage"
+	"ccg/internal/webdav"
 )
 
 // WebDAVService handles WebDAV backup/restore operations
@@ -186,7 +186,7 @@ func (w *WebDAVService) RestoreFromWebDAV(filename, choice string, reloadConfig 
 		return fmt.Errorf("load_config_failed")
 	}
 
-	*w.config = *newConfig
+	w.config = newConfig
 
 	if err := reloadConfig(newConfig); err != nil {
 		return fmt.Errorf("update_proxy_config_failed")

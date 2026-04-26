@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fangfsz/ccg/internal/logger"
+	"ccg/internal/logger"
 )
 
 // handleStatsSummary returns overall statistics

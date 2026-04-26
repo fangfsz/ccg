@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/fangfsz/ccg/internal/config"
+	"ccg/internal/config"
 	_ "modernc.org/sqlite"
 )
 
@@ -37,6 +37,14 @@ var safeConfigKeys = []string{
 	"backup_s3_useSSL", "backup_s3_forcePathStyle",
 	// 更新设置
 	"update_autoCheck", "update_checkInterval",
+	// ccNexus 兼容配置键
+	"ccnexus_port", "ccnexus_log_level", "ccnexus_language",
+	"ccnexus_theme", "ccnexus_themeAuto", "ccnexus_closeWindowBehavior",
+	"ccnexus_webdav_url", "ccnexus_webdav_username", "ccnexus_webdav_password",
+	"ccnexus_backup_provider", "ccnexus_backup_s3_endpoint", "ccnexus_backup_s3_region",
+	"ccnexus_backup_s3_bucket", "ccnexus_backup_s3_prefix", "ccnexus_backup_s3_accessKey",
+	"ccnexus_backup_s3_secretKey", "ccnexus_backup_s3_sessionToken", "ccnexus_backup_s3_useSSL",
+	"ccnexus_backup_s3_forcePathStyle", "ccnexus_update_autoCheck", "ccnexus_update_checkInterval",
 }
 
 type SQLiteStorage struct {
