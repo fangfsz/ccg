@@ -61,7 +61,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/go/bin/wails
-          key: ${{ runner.os }}-wails-v2.10.1
+          key: ${{ runner.os }}-wails-v2.12.0
 
       - name: Get version
         id: get_version
