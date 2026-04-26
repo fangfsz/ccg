@@ -50,9 +50,9 @@ func prepareTransformerForClient(clientFormat ClientFormat, endpoint config.Endp
 // prepareCCTransformer creates transformer for Claude Code client
 func prepareCCTransformer(endpoint config.Endpoint, endpointTransformer string) (transformer.Transformer, error) {
 	switch endpointTransformer {
-	case "claude":
+	case "passthrough", "claude":
 		if endpoint.Model != "" {
-			logger.Debug("[%s] Using cc_claude with model override: %s", endpoint.Name, endpoint.Model)
+			logger.Debug("[%s] Using cc_passthrough with model override: %s", endpoint.Name, endpoint.Model)
 			return cc.NewClaudeTransformerWithModel(endpoint.Model), nil
 		}
 		return cc.NewClaudeTransformer(), nil
@@ -79,7 +79,7 @@ func prepareCCTransformer(endpoint config.Endpoint, endpointTransformer string) 
 // prepareCxChatTransformer creates transformer for Codex Chat API client
 func prepareCxChatTransformer(endpoint config.Endpoint, endpointTransformer string) (transformer.Transformer, error) {
 	switch endpointTransformer {
-	case "claude":
+	case "passthrough", "claude":
 		model := endpoint.Model
 		if model == "" {
 			model = "claude-sonnet-4-20250514"
@@ -108,7 +108,7 @@ func prepareCxChatTransformer(endpoint config.Endpoint, endpointTransformer stri
 // prepareCxRespTransformer creates transformer for Codex Responses API client
 func prepareCxRespTransformer(endpoint config.Endpoint, endpointTransformer string) (transformer.Transformer, error) {
 	switch endpointTransformer {
-	case "claude":
+	case "passthrough", "claude":
 		model := endpoint.Model
 		if model == "" {
 			model = "claude-sonnet-4-20250514"

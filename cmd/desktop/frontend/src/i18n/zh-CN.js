@@ -92,7 +92,7 @@ export default {
     togglePassword: "显示/隐藏密钥",
     transformer: "转换器",
     transformerHelp: "选择此端点的 API 格式",
-    transformerOptionClaude:
+    transformerOptionPassthrough:
       "Claude 直通 - 原生 Claude API 格式，适用于 Claude API 官方端点",
     transformerOptionOpenAI:
       "OpenAI 转换 - 将 Claude 请求转换为 OpenAI Chat 格式 (/v1/chat/completions)",

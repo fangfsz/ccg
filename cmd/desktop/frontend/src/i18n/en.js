@@ -90,7 +90,7 @@ export default {
         togglePassword: 'Show/Hide Key',
         transformer: 'Transformer',
         transformerHelp: 'Select the API format for this endpoint',
-        transformerOptionClaude: 'Claude Passthrough - Native Claude API format, for Claude API official endpoints',
+        transformerOptionPassthrough: 'Passthrough - No transformation, direct Claude format',
         transformerOptionOpenAI: 'OpenAI Transform - Converts Claude requests to OpenAI Chat format (/v1/chat/completions)',
         transformerOptionOpenAI2: 'OpenAI2 Transform - Converts Claude requests to OpenAI Responses format (/v1/responses), for Codex',
         transformerOptionGemini: 'Gemini Transform - Converts Claude requests to Google Gemini API format',

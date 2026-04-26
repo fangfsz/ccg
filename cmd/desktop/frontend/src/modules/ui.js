@@ -241,7 +241,7 @@ export function initUI() {
                                 </button>
                                 <div class="filter-dropdown-panel hidden">
                                     <div class="panel-options">
-                                        <label><input type="checkbox" value="claude"> Claude</label>
+                                        <label><input type="checkbox" value="passthrough"> Claude</label>
                                         <label><input type="checkbox" value="gemini"> Gemini</label>
                                         <label><input type="checkbox" value="openai"> OpenAI</label>
                                         <label><input type="checkbox" value="openai2"> OpenAI2</label>
@@ -420,10 +420,10 @@ export function initUI() {
                     <div class="form-group">
                         <label><span class="required">*</span>${t("modal.transformer")}</label>
                         <select id="endpointTransformer" onchange="window.handleTransformerChange()">
-                            <option value="claude" title="${t("modal.transformerOptionClaude")}">Claude (Default)</option>
-                            <option value="openai" title="${t("modal.transformerOptionOpenAI")}">OpenAI</option>
-                            <option value="openai2" title="${t("modal.transformerOptionOpenAI2")}">OpenAI2 (Responses API)</option>
-                            <option value="gemini" title="${t("modal.transformerOptionGemini")}">Gemini</option>
+                            <option value="passthrough" title="${t("modal.transformerOptionPassthrough")}">${t("modal.transformerOptionPassthrough")}</option>
+                            <option value="openai" title="${t("modal.transformerOptionOpenAI")}">${t("modal.transformerOptionOpenAI")}</option>
+                            <option value="openai2" title="${t("modal.transformerOptionOpenAI2")}">${t("modal.transformerOptionOpenAI2")}</option>
+                            <option value="gemini" title="${t("modal.transformerOptionGemini")}">${t("modal.transformerOptionGemini")}</option>
                         </select>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;">
                             ${t("modal.transformerHelp")}
