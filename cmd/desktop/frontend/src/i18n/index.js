@@ -6,7 +6,7 @@ const translations = {
     'zh-CN': zhCN
 };
 
-let currentLanguage = 'en';
+let currentLanguage = 'zh-CN';
 
 export function setLanguage(lang) {
     if (translations[lang]) {

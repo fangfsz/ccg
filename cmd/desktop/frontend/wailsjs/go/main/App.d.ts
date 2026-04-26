@@ -7,6 +7,8 @@ export function AddEndpoint(arg1:string,arg2:string,arg3:string,arg4:string,arg5
 
 export function AddProjectDir(arg1:string):Promise<void>;
 
+export function ApplyCLIConfig(arg1:string):Promise<void>;
+
 export function ApplyUpdate(arg1:string):Promise<string>;
 
 export function BackupToProvider(arg1:string,arg2:string):Promise<void>;
@@ -69,6 +71,8 @@ export function GetCodexSessions(arg1:string):Promise<string>;
 
 export function GetConfig():Promise<string>;
 
+export function GetContainerInfo():Promise<string>;
+
 export function GetCurrentEndpoint():Promise<string>;
 
 export function GetDownloadProgress():Promise<string>;
@@ -82,6 +86,8 @@ export function GetLogLevel():Promise<number>;
 export function GetLogs():Promise<string>;
 
 export function GetLogsByLevel(arg1:number):Promise<string>;
+
+export function GetMatchingEndpointsForCLI(arg1:string):Promise<string>;
 
 export function GetProxyURL():Promise<string>;
 
@@ -123,17 +129,21 @@ export function ImportEndpointCredentialsFromFiles(arg1:number,arg2:boolean):Pro
 
 export function InstallUpdate(arg1:string):Promise<string>;
 
+export function IsCLIConfigModified(arg1:string):Promise<boolean>;
+
+export function IsRunningInContainer():Promise<boolean>;
+
 export function LaunchCodexSessionTerminal(arg1:string,arg2:string):Promise<void>;
 
 export function LaunchCodexTerminal(arg1:string):Promise<void>;
 
+export function LaunchGeminiSessionTerminal(arg1:string,arg2:string):Promise<void>;
+
+export function LaunchGeminiTerminal(arg1:string):Promise<void>;
+
 export function LaunchSessionTerminal(arg1:string,arg2:string):Promise<void>;
 
 export function LaunchTerminal(arg1:string):Promise<void>;
-
-export function LaunchGeminiTerminal(arg1:string):Promise<boolean>;
-
-export function LaunchGeminiSessionTerminal(arg1:string,arg2:string):Promise<boolean>;
 
 export function ListArchives():Promise<string>;
 
@@ -157,13 +167,15 @@ export function RenameSession(arg1:string,arg2:string,arg3:string):Promise<void>
 
 export function ReorderEndpoints(arg1:Array<string>):Promise<void>;
 
+export function RestoreCLIConfigs():Promise<void>;
+
 export function RestoreFromProvider(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function RestoreFromWebDAV(arg1:string,arg2:string):Promise<void>;
 
 export function SaveSettings(arg1:string):Promise<void>;
 
-export function SaveTerminalConfig(arg1:string,arg2:Array<string>,arg3:string):Promise<void>;
+export function SaveTerminalConfig(arg1:string,arg2:Array<string>,arg3:string,arg4:string):Promise<void>;
 
 export function SelectDirectory():Promise<string>;
 
@@ -225,10 +237,4 @@ export function UpdateS3BackupConfig(arg1:string,arg2:string,arg3:string,arg4:st
 
 export function UpdateWebDAVConfig(arg1:string,arg2:string,arg3:string):Promise<void>;
 
-export function ApplyCLIConfig(arg1:string):Promise<boolean>;
-
-export function RestoreCLIConfigs():Promise<void>;
-
-export function GetMatchingEndpointsForCLI(arg1:string):Promise<string>;
-
-export function IsCLIConfigModified(arg1:string):Promise<boolean>;
+export function ValidateContainerSetup():Promise<string>;

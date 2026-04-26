@@ -70,7 +70,7 @@
 
 ```toml
 model_provider = "ccg"
-model = "gpt-5-codex"
+model = "gpt-5.4"
 preferred_auth_method = "apikey"
 
 [model_providers.ccg]

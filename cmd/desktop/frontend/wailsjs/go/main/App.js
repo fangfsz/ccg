@@ -14,6 +14,10 @@ export function AddProjectDir(arg1) {
   return window['go']['main']['App']['AddProjectDir'](arg1);
 }
 
+export function ApplyCLIConfig(arg1) {
+  return window['go']['main']['App']['ApplyCLIConfig'](arg1);
+}
+
 export function ApplyUpdate(arg1) {
   return window['go']['main']['App']['ApplyUpdate'](arg1);
 }
@@ -138,6 +142,10 @@ export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
 
+export function GetContainerInfo() {
+  return window['go']['main']['App']['GetContainerInfo']();
+}
+
 export function GetCurrentEndpoint() {
   return window['go']['main']['App']['GetCurrentEndpoint']();
 }
@@ -164,6 +172,10 @@ export function GetLogs() {
 
 export function GetLogsByLevel(arg1) {
   return window['go']['main']['App']['GetLogsByLevel'](arg1);
+}
+
+export function GetMatchingEndpointsForCLI(arg1) {
+  return window['go']['main']['App']['GetMatchingEndpointsForCLI'](arg1);
 }
 
 export function GetProxyURL() {
@@ -246,6 +258,14 @@ export function InstallUpdate(arg1) {
   return window['go']['main']['App']['InstallUpdate'](arg1);
 }
 
+export function IsCLIConfigModified(arg1) {
+  return window['go']['main']['App']['IsCLIConfigModified'](arg1);
+}
+
+export function IsRunningInContainer() {
+  return window['go']['main']['App']['IsRunningInContainer']();
+}
+
 export function LaunchCodexSessionTerminal(arg1, arg2) {
   return window['go']['main']['App']['LaunchCodexSessionTerminal'](arg1, arg2);
 }
@@ -254,20 +274,20 @@ export function LaunchCodexTerminal(arg1) {
   return window['go']['main']['App']['LaunchCodexTerminal'](arg1);
 }
 
-export function LaunchSessionTerminal(arg1, arg2) {
-  return window['go']['main']['App']['LaunchSessionTerminal'](arg1, arg2);
-}
-
-export function LaunchTerminal(arg1) {
-  return window['go']['main']['App']['LaunchTerminal'](arg1);
+export function LaunchGeminiSessionTerminal(arg1, arg2) {
+  return window['go']['main']['App']['LaunchGeminiSessionTerminal'](arg1, arg2);
 }
 
 export function LaunchGeminiTerminal(arg1) {
   return window['go']['main']['App']['LaunchGeminiTerminal'](arg1);
 }
 
-export function LaunchGeminiSessionTerminal(arg1, arg2) {
-  return window['go']['main']['App']['LaunchGeminiSessionTerminal'](arg1, arg2);
+export function LaunchSessionTerminal(arg1, arg2) {
+  return window['go']['main']['App']['LaunchSessionTerminal'](arg1, arg2);
+}
+
+export function LaunchTerminal(arg1) {
+  return window['go']['main']['App']['LaunchTerminal'](arg1);
 }
 
 export function ListArchives() {
@@ -314,6 +334,10 @@ export function ReorderEndpoints(arg1) {
   return window['go']['main']['App']['ReorderEndpoints'](arg1);
 }
 
+export function RestoreCLIConfigs() {
+  return window['go']['main']['App']['RestoreCLIConfigs']();
+}
+
 export function RestoreFromProvider(arg1, arg2, arg3) {
   return window['go']['main']['App']['RestoreFromProvider'](arg1, arg2, arg3);
 }
@@ -326,8 +350,8 @@ export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }
 
-export function SaveTerminalConfig(arg1, arg2, arg3) {
-  return window['go']['main']['App']['SaveTerminalConfig'](arg1, arg2, arg3);
+export function SaveTerminalConfig(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['SaveTerminalConfig'](arg1, arg2, arg3, arg4);
 }
 
 export function SelectDirectory() {
@@ -446,22 +470,10 @@ export function UpdateS3BackupConfig(arg1, arg2, arg3, arg4, arg5, arg6, arg7, a
   return window['go']['main']['App']['UpdateS3BackupConfig'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
-export function ApplyCLIConfig(arg1) {
-  return window['go']['main']['App']['ApplyCLIConfig'](arg1);
-}
-
-export function RestoreCLIConfigs() {
-  return window['go']['main']['App']['RestoreCLIConfigs']();
-}
-
-export function GetMatchingEndpointsForCLI(arg1) {
-  return window['go']['main']['App']['GetMatchingEndpointsForCLI'](arg1);
-}
-
-export function IsCLIConfigModified(arg1) {
-  return window['go']['main']['App']['IsCLIConfigModified'](arg1);
-}
-
 export function UpdateWebDAVConfig(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateWebDAVConfig'](arg1, arg2, arg3);
+}
+
+export function ValidateContainerSetup() {
+  return window['go']['main']['App']['ValidateContainerSetup']();
 }
