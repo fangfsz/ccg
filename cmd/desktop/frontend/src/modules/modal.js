@@ -827,7 +827,7 @@ export function openGitHub() {
 export function openArticle() {
   if (window.go?.main?.App) {
     window.go.main.App.OpenURL(
-      "https://mp.weixin.qq.com/s/ohtkyIMd5YC7So1q-gE0og",
+      "https://github.com/fangfsz/ccg",
     );
   }
 }

@@ -158,9 +158,6 @@ func checkIfContainer() bool {
 		return true
 	}
 	if runtime.GOOS == "windows" {
-		if _, err := os.Stat("C:\\Program Files\\Docker\\Docker\\resources"); err == nil {
-			return true
-		}
 		if os.Getenv("DOTNET_RUNNING_IN_CONTAINER") == "true" {
 			return true
 		}

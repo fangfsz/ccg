@@ -235,33 +235,33 @@ export async function showDataSyncDialog(tab) {
 }
 
 function renderActiveTabContent() {
-    if (selectedTab === 'local') return renderLocalTab();
-    if (selectedTab === 's3') return renderS3Tab();
-    return renderWebDAVTab();
+  if (selectedTab === "local") return renderLocalTab();
+  if (selectedTab === "s3") return renderS3Tab();
+  return renderWebDAVTab();
 }
 
 function renderWebDAVTab() {
-    return `
+  return `
         <div class="webdav-settings">
             <div class="form-group">
-                <label><span class="required-mark">*</span>${t('webdav.serverUrl')}</label>
+                <label><span class="required-mark">*</span>${t("webdav.serverUrl")}</label>
                 <input type="text" id="dataSyncUrl" class="form-input"
                        placeholder="https://dav.example.com/remote.php/dav/files/username/"
                        value="${currentWebDAVConfig.url}">
-                <small style="color: #888; font-size: 12px; margin-top: 5px;">${t('webdav.serverUrlHelp')}</small>
+                <small style="color: #888; font-size: 12px; margin-top: 5px;">${t("webdav.serverUrlHelp")}</small>
             </div>
             <div class="form-row" style="gap: 10px;">
                 <div class="form-group" style="flex: 1;">
-                    <label><span class="required-mark">*</span>${t('webdav.username')}</label>
+                    <label><span class="required-mark">*</span>${t("webdav.username")}</label>
                     <input type="text" id="dataSyncUsername" class="form-input"
-                           placeholder="${t('webdav.usernamePlaceholder')}"
+                           placeholder="${t("webdav.usernamePlaceholder")}"
                            value="${currentWebDAVConfig.username}">
                 </div>
                 <div class="form-group" style="flex: 1;">
-                    <label><span class="required-mark">*</span>${t('webdav.password')}</label>
+                    <label><span class="required-mark">*</span>${t("webdav.password")}</label>
                     <div class="password-input-wrapper">
                         <input type="password" id="dataSyncPassword" class="form-input"
-                               placeholder="${t('webdav.passwordPlaceholder')}"
+                               placeholder="${t("webdav.passwordPlaceholder")}"
                                value="${currentWebDAVConfig.password}">
                         <button type="button" class="password-toggle" onclick="window.toggleSyncPassword('dataSyncPassword', 'webdavEyeIcon')">
                             <svg id="webdavEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -274,62 +274,62 @@ function renderWebDAVTab() {
             </div>
         </div>
         <div class="data-sync-actions">
-            <button class="btn btn-secondary" onclick="window.testDataSyncConnection()">🔍 ${t('webdav.testConnection')}</button>
-            <button class="btn btn-secondary" onclick="window.saveDataSyncConfig()">💾 ${t('webdav.saveConfig')}</button>
-            <button class="btn btn-primary" onclick="window.backupToProviderFromDialog('webdav')">📤 ${t('webdav.backup')}</button>
-            <button class="btn btn-primary" onclick="window.openBackupManagerFromDialog('webdav')">📋 ${t('webdav.backupManager')}</button>
+            <button class="btn btn-secondary" onclick="window.testDataSyncConnection()">🔍 ${t("webdav.testConnection")}</button>
+            <button class="btn btn-secondary" onclick="window.saveDataSyncConfig()">💾 ${t("webdav.saveConfig")}</button>
+            <button class="btn btn-primary" onclick="window.backupToProviderFromDialog('webdav')">📤 ${t("webdav.backup")}</button>
+            <button class="btn btn-primary" onclick="window.openBackupManagerFromDialog('webdav')">📋 ${t("webdav.backupManager")}</button>
         </div>
     `;
 }
 
 function renderLocalTab() {
-    return `
+  return `
         <div class="local-settings">
             <div class="form-group">
-                <label><span class="required-mark">*</span>${t('backup.local.dir')}</label>
+                <label><span class="required-mark">*</span>${t("backup.local.dir")}</label>
                 <div class="form-row" style="gap: 10px;">
-                    <input type="text" id="backupLocalDir" class="form-input" style="flex: 1;" value="${currentBackupConfig.local.dir}" placeholder="${t('backup.local.dirPlaceholder')}" readonly>
-                    <button class="btn btn-secondary" onclick="window.selectBackupLocalDir()">📁 ${t('backup.local.chooseDir')}</button>
+                    <input type="text" id="backupLocalDir" class="form-input" style="flex: 1;" value="${currentBackupConfig.local.dir}" placeholder="${t("backup.local.dirPlaceholder")}" readonly>
+                    <button class="btn btn-secondary" onclick="window.selectBackupLocalDir()">📁 ${t("backup.local.chooseDir")}</button>
                 </div>
             </div>
         </div>
         <div class="data-sync-actions" style="display: flex; gap: 10px;">
-            <button class="btn btn-secondary" style="flex: 1;" onclick="window.saveLocalBackupConfig()">💾 ${t('backup.saveConfig')}</button>
-            <button class="btn btn-primary" style="flex: 1;" onclick="window.backupToProviderFromDialog('local')">📤 ${t('backup.backup')}</button>
-            <button class="btn btn-primary" style="flex: 1;" onclick="window.openBackupManagerFromDialog('local')">📋 ${t('backup.backupManager')}</button>
+            <button class="btn btn-secondary" style="flex: 1;" onclick="window.saveLocalBackupConfig()">💾 ${t("backup.saveConfig")}</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="window.backupToProviderFromDialog('local')">📤 ${t("backup.backup")}</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="window.openBackupManagerFromDialog('local')">📋 ${t("backup.backupManager")}</button>
         </div>
     `;
 }
 
 function renderS3Tab() {
-    const s3 = currentBackupConfig.s3;
-    return `
+  const s3 = currentBackupConfig.s3;
+  return `
         <div class="s3-settings">
             <div class="form-group">
-                <label><span class="required-mark">*</span>${t('backup.s3.endpoint')}</label>
-                <input type="text" id="backupS3Endpoint" class="form-input" value="${s3.endpoint}" placeholder="${t('backup.s3.endpointPlaceholder')}">
+                <label><span class="required-mark">*</span>${t("backup.s3.endpoint")}</label>
+                <input type="text" id="backupS3Endpoint" class="form-input" value="${s3.endpoint}" placeholder="${t("backup.s3.endpointPlaceholder")}">
             </div>
             <div class="form-row" style="gap: 10px;">
                 <div class="form-group" style="flex: 1;">
-                    <label>${t('backup.s3.region')}</label>
-                    <input type="text" id="backupS3Region" class="form-input" value="${s3.region}" placeholder="${t('backup.s3.regionPlaceholder')}">
+                    <label>${t("backup.s3.region")}</label>
+                    <input type="text" id="backupS3Region" class="form-input" value="${s3.region}" placeholder="${t("backup.s3.regionPlaceholder")}">
                 </div>
                 <div class="form-group" style="flex: 1;">
-                    <label><span class="required-mark">*</span>${t('backup.s3.bucket')}</label>
+                    <label><span class="required-mark">*</span>${t("backup.s3.bucket")}</label>
                     <input type="text" id="backupS3Bucket" class="form-input" value="${s3.bucket}">
                 </div>
             </div>
             <div class="form-group">
-                <label>${t('backup.s3.prefix')}</label>
-                <input type="text" id="backupS3Prefix" class="form-input" value="${s3.prefix}" placeholder="${t('backup.s3.prefixPlaceholder')}">
+                <label>${t("backup.s3.prefix")}</label>
+                <input type="text" id="backupS3Prefix" class="form-input" value="${s3.prefix}" placeholder="${t("backup.s3.prefixPlaceholder")}">
             </div>
             <div class="form-row" style="gap: 10px;">
                 <div class="form-group" style="flex: 1;">
-                    <label><span class="required-mark">*</span>${t('backup.s3.accessKey')}</label>
+                    <label><span class="required-mark">*</span>${t("backup.s3.accessKey")}</label>
                     <input type="text" id="backupS3AccessKey" class="form-input" value="${s3.accessKey}">
                 </div>
                 <div class="form-group" style="flex: 1;">
-                    <label><span class="required-mark">*</span>${t('backup.s3.secretKey')}</label>
+                    <label><span class="required-mark">*</span>${t("backup.s3.secretKey")}</label>
                     <div class="password-input-wrapper">
                         <input type="password" id="backupS3SecretKey" class="form-input" value="${s3.secretKey}">
                         <button type="button" class="password-toggle" onclick="window.toggleSyncPassword('backupS3SecretKey', 's3EyeIcon')">
@@ -342,31 +342,31 @@ function renderS3Tab() {
                 </div>
             </div>
             <div class="form-group">
-                <label>${t('backup.s3.sessionToken')}</label>
+                <label>${t("backup.s3.sessionToken")}</label>
                 <input type="text" id="backupS3SessionToken" class="form-input" value="${s3.sessionToken}">
             </div>
             <div class="toggle-group">
                 <label class="toggle-item">
-                    <span class="toggle-text">${t('backup.s3.useSSL')}</span>
+                    <span class="toggle-text">${t("backup.s3.useSSL")}</span>
                     <label class="toggle-switch" style="width: 40px; height: 20px;">
-                        <input type="checkbox" id="backupS3UseSSL" ${s3.useSSL ? 'checked' : ''}>
+                        <input type="checkbox" id="backupS3UseSSL" ${s3.useSSL ? "checked" : ""}>
                         <span class="toggle-slider"></span>
                     </label>
                 </label>
                 <label class="toggle-item">
-                    <span class="toggle-text">${t('backup.s3.forcePathStyle')}</span>
+                    <span class="toggle-text">${t("backup.s3.forcePathStyle")}</span>
                     <label class="toggle-switch" style="width: 40px; height: 20px;">
-                        <input type="checkbox" id="backupS3ForcePathStyle" ${s3.forcePathStyle ? 'checked' : ''}>
+                        <input type="checkbox" id="backupS3ForcePathStyle" ${s3.forcePathStyle ? "checked" : ""}>
                         <span class="toggle-slider"></span>
                     </label>
                 </label>
             </div>
         </div>
         <div class="data-sync-actions">
-            <button class="btn btn-secondary" onclick="window.testS3ConnectionFromDialog()">🔍 ${t('backup.s3.testConnection')}</button>
-            <button class="btn btn-secondary" onclick="window.saveS3BackupConfig()">💾 ${t('backup.saveConfig')}</button>
-            <button class="btn btn-primary" onclick="window.backupToProviderFromDialog('s3')">📤 ${t('backup.backup')}</button>
-            <button class="btn btn-primary" onclick="window.openBackupManagerFromDialog('s3')">📋 ${t('backup.backupManager')}</button>
+            <button class="btn btn-secondary" onclick="window.testS3ConnectionFromDialog()">🔍 ${t("backup.s3.testConnection")}</button>
+            <button class="btn btn-secondary" onclick="window.saveS3BackupConfig()">💾 ${t("backup.saveConfig")}</button>
+            <button class="btn btn-primary" onclick="window.backupToProviderFromDialog('s3')">📤 ${t("backup.backup")}</button>
+            <button class="btn btn-primary" onclick="window.openBackupManagerFromDialog('s3')">📋 ${t("backup.backupManager")}</button>
         </div>
     `;
 }
@@ -408,7 +408,7 @@ window.saveDataSyncConfig = async function () {
   } catch (error) {
     showNotification(
       t("webdav.configSaveFailed") + ": " + translateError(error),
-      "error"
+      "error",
     );
   }
 };
@@ -440,7 +440,7 @@ window.testDataSyncConnection = async function () {
     const resultStr = await window.go.main.App.TestWebDAVConnection(
       url,
       username,
-      password
+      password,
     );
     const result = JSON.parse(resultStr);
     if (result.success) {
@@ -467,7 +467,8 @@ function readS3ConfigFromDialog() {
     sessionToken:
       document.getElementById("backupS3SessionToken")?.value.trim() || "",
     useSSL: !!document.getElementById("backupS3UseSSL")?.checked,
-    forcePathStyle: !!document.getElementById("backupS3ForcePathStyle")?.checked,
+    forcePathStyle: !!document.getElementById("backupS3ForcePathStyle")
+      ?.checked,
   };
 }
 
@@ -513,7 +514,7 @@ window.saveS3BackupConfig = async function () {
       s3.secretKey,
       s3.sessionToken,
       s3.useSSL,
-      s3.forcePathStyle
+      s3.forcePathStyle,
     );
     currentBackupConfig.s3 = s3;
     showNotification(t("backup.configSaved"), "success");
@@ -538,10 +539,13 @@ window.testS3ConnectionFromDialog = async function () {
       s3.secretKey,
       s3.sessionToken,
       s3.useSSL,
-      s3.forcePathStyle
+      s3.forcePathStyle,
     );
     const result = JSON.parse(resultStr);
-    showNotification(result.message || "", result.success ? "success" : "error");
+    showNotification(
+      result.message || "",
+      result.success ? "success" : "error",
+    );
   } catch (error) {
     showNotification(translateError(error), "error");
   }
@@ -560,18 +564,21 @@ window.backupToProviderFromDialog = async function (provider = "webdav") {
 // Open backup manager from dialog
 window.openBackupManagerFromDialog = async function (provider = "webdav") {
   // 校验本地备份目录
-  if (provider === 'local') {
-    const dir = document.getElementById('backupLocalDir')?.value.trim() || currentBackupConfig.local?.dir || '';
+  if (provider === "local") {
+    const dir =
+      document.getElementById("backupLocalDir")?.value.trim() ||
+      currentBackupConfig.local?.dir ||
+      "";
     if (!dir) {
-      showNotification(t('backup.local.dirRequired'), 'error');
+      showNotification(t("backup.local.dirRequired"), "error");
       return;
     }
   }
   // 校验 S3 配置
-  if (provider === 's3') {
+  if (provider === "s3") {
     const s3 = readS3ConfigFromDialog();
     if (!s3.endpoint || !s3.bucket || !s3.accessKey || !s3.secretKey) {
-      showNotification(t('backup.s3.requiredFields'), 'error');
+      showNotification(t("backup.s3.requiredFields"), "error");
       return;
     }
   }
@@ -587,12 +594,14 @@ window.closeDataSyncDialog = function () {
 window.toggleSyncPassword = function (inputId, iconId) {
   const input = document.getElementById(inputId);
   const icon = document.getElementById(iconId);
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+  if (input.type === "password") {
+    input.type = "text";
+    icon.innerHTML =
+      '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
   } else {
-    input.type = 'password';
-    icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    input.type = "password";
+    icon.innerHTML =
+      '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
   }
 };
 
@@ -606,7 +615,7 @@ export async function testWebDAVConnection(url, username, password) {
   const resultStr = await window.go.main.App.TestWebDAVConnection(
     url,
     username,
-    password
+    password,
   );
   return JSON.parse(resultStr);
 }
@@ -645,36 +654,40 @@ async function deleteBackups(provider, filenames) {
 
 async function backupToProvider(provider) {
   // 校验本地备份目录
-  if (provider === 'local') {
-    const dir = document.getElementById('backupLocalDir')?.value.trim() || '';
+  if (provider === "local") {
+    const dir = document.getElementById("backupLocalDir")?.value.trim() || "";
     if (!dir) {
-      showNotification(t('backup.local.dirRequired'), 'error');
+      showNotification(t("backup.local.dirRequired"), "error");
       return;
     }
     // 检查配置是否已保存
     if (dir !== currentBackupConfig.local?.dir) {
-      showNotification(t('backup.local.saveFirst'), 'error');
+      showNotification(t("backup.local.saveFirst"), "error");
       return;
     }
   }
   // 校验 S3 配置
-  if (provider === 's3') {
+  if (provider === "s3") {
     const s3 = readS3ConfigFromDialog();
     if (!s3.endpoint || !s3.bucket || !s3.accessKey || !s3.secretKey) {
-      showNotification(t('backup.s3.requiredFields'), 'error');
+      showNotification(t("backup.s3.requiredFields"), "error");
       return;
     }
     // 检查配置是否已保存
     const saved = currentBackupConfig.s3;
-    if (s3.endpoint !== saved.endpoint || s3.bucket !== saved.bucket ||
-        s3.accessKey !== saved.accessKey || s3.secretKey !== saved.secretKey) {
-      showNotification(t('backup.s3.saveFirst'), 'error');
+    if (
+      s3.endpoint !== saved.endpoint ||
+      s3.bucket !== saved.bucket ||
+      s3.accessKey !== saved.accessKey ||
+      s3.secretKey !== saved.secretKey
+    ) {
+      showNotification(t("backup.s3.saveFirst"), "error");
       return;
     }
   }
   const filename = await promptFilename(
     tBackup(provider, "enterBackupName"),
-    generateBackupFilename()
+    generateBackupFilename(),
   );
   if (!filename) return;
   try {
@@ -688,14 +701,16 @@ async function backupToProvider(provider) {
 async function restoreFromProvider(provider, filename) {
   const conflictStr = await window.go.main.App.DetectBackupConflict(
     provider,
-    filename
+    filename,
   );
   const conflictResult = JSON.parse(conflictStr);
 
   if (!conflictResult.success) {
     showNotification(
-      t("webdav.conflictDetectionFailed") + ": " + (conflictResult.message || ""),
-      "error"
+      t("webdav.conflictDetectionFailed") +
+        ": " +
+        (conflictResult.message || ""),
+      "error",
     );
     return;
   }
@@ -754,22 +769,22 @@ export async function openBackupManager(provider = "webdav") {
 	                <div class="backup-manager-actions">
 	                    <button class="btn btn-secondary btn-sm" onclick="window.refreshBackupList()">🔄 ${tBackup(
                         provider,
-                        "refresh"
+                        "refresh",
                       )}</button>
 	                    <button class="btn btn-danger btn-sm" onclick="window.deleteSelectedBackups()" ${
-	                      backups.length === 0 ? "disabled" : ""
-	                    }>🗑️ ${tBackup(provider, "deleteSelected")}</button>
+                        backups.length === 0 ? "disabled" : ""
+                      }>🗑️ ${tBackup(provider, "deleteSelected")}</button>
 	                </div>
 	            </div>
 	            <div class="backup-list-container">
 	                ${
-	                  backups.length === 0
-	                    ? `<div class="empty-state">${tBackup(
-                        provider,
-                        "noBackups"
-                      )}</div>`
-	                    : renderBackupList(provider, backups)
-	                }
+                    backups.length === 0
+                      ? `<div class="empty-state">${tBackup(
+                          provider,
+                          "noBackups",
+                        )}</div>`
+                      : renderBackupList(provider, backups)
+                  }
 	            </div>
 	        </div>
 	    `;
@@ -786,7 +801,7 @@ export async function openBackupManager(provider = "webdav") {
       } else {
         showNotification(
           result.message || tBackup(provider, "refreshFailed"),
-          "error"
+          "error",
         );
       }
     } catch (error) {
@@ -797,7 +812,7 @@ export async function openBackupManager(provider = "webdav") {
   window.deleteSelectedBackups = async () => {
     const checkboxes = document.querySelectorAll(".backup-checkbox:checked");
     const selectedFiles = Array.from(checkboxes).map(
-      (cb) => cb.dataset.filename
+      (cb) => cb.dataset.filename,
     );
 
     if (selectedFiles.length === 0) {
@@ -806,7 +821,10 @@ export async function openBackupManager(provider = "webdav") {
     }
 
     const confirmed = await confirmAction(
-      tBackup(provider, "confirmDelete").replace("{count}", selectedFiles.length)
+      tBackup(provider, "confirmDelete").replace(
+        "{count}",
+        selectedFiles.length,
+      ),
     );
 
     if (!confirmed) {
@@ -819,7 +837,7 @@ export async function openBackupManager(provider = "webdav") {
 
   window.restoreBackup = async (filename) => {
     const confirmed = await confirmAction(
-      tBackup(provider, "confirmRestore").replace("{filename}", filename)
+      tBackup(provider, "confirmRestore").replace("{filename}", filename),
     );
 
     if (!confirmed) {
@@ -832,7 +850,7 @@ export async function openBackupManager(provider = "webdav") {
 
   window.deleteSingleBackup = async (filename) => {
     const confirmed = await confirmAction(
-      tBackup(provider, "confirmDelete").replace("{count}", "1")
+      tBackup(provider, "confirmDelete").replace("{count}", "1"),
     );
 
     if (!confirmed) {
@@ -872,24 +890,24 @@ function renderBackupList(provider, backups) {
                               backup.filename
                             }</div>
                             <div style="font-size: 11px; color: #888;">${formatFileSize(
-                              backup.size
+                              backup.size,
                             )}</div>
                             <div style="font-size: 11px; color: #888;">${formatDateTime(
-                              backup.modTime
+                              backup.modTime,
                             )}</div>
                         </td>
                         <td>
 	                            <div style="display: flex; flex-direction: column; gap: 4px;">
 	                                <button class="btn btn-primary btn-sm" onclick="window.restoreBackup('${
-	                                  backup.filename
-	                                }')">↩️ ${tBackup(provider, "restore")}</button>
+                                    backup.filename
+                                  }')">↩️ ${tBackup(provider, "restore")}</button>
 	                                <button class="btn btn-danger btn-sm" onclick="window.deleteSingleBackup('${
-	                                  backup.filename
-	                                }')">🗑️ ${tBackup(provider, "delete")}</button>
+                                    backup.filename
+                                  }')">🗑️ ${tBackup(provider, "delete")}</button>
 	                            </div>
 	                        </td>
 	                    </tr>
-	                `
+	                `,
                   )
                   .join("")}
             </tbody>
@@ -937,8 +955,10 @@ async function showConflictDialog(conflicts) {
                     <div class="conflict-endpoint-header">
                         <strong>📍 ${conflict.endpointName}</strong>
                         <span class="conflict-badge">${fields.length} ${
-          fields.length === 1 ? t("webdav.conflict") : t("webdav.conflicts")
-        }</span>
+                          fields.length === 1
+                            ? t("webdav.conflict")
+                            : t("webdav.conflicts")
+                        }</span>
                     </div>
                     <div class="conflict-endpoint-body">
                         <div class="conflict-fields">
@@ -952,23 +972,23 @@ async function showConflictDialog(conflicts) {
                                     <div class="conflict-field-values">
                                         <div class="conflict-value-local">
                                             <span class="conflict-value-label">${t(
-                                              "webdav.local"
+                                              "webdav.local",
                                             )}:</span>
                                             <code>${formatFieldValue(
-                                              conflict.localEndpoint[field]
+                                              conflict.localEndpoint[field],
                                             )}</code>
                                         </div>
                                         <div class="conflict-value-remote">
                                             <span class="conflict-value-label">${t(
-                                              "webdav.remote"
+                                              "webdav.remote",
                                             )}:</span>
                                             <code>${formatFieldValue(
-                                              conflict.remoteEndpoint[field]
+                                              conflict.remoteEndpoint[field],
                                             )}</code>
                                         </div>
                                     </div>
                                 </div>
-                            `
+                            `,
                               )
                               .join("")}
                         </div>
@@ -984,7 +1004,7 @@ async function showConflictDialog(conflicts) {
                 <div class="conflict-header">
                     <span class="conflict-icon">⚠️</span>
                     <span class="conflict-title">${t(
-                      "webdav.conflictTitle"
+                      "webdav.conflictTitle",
                     )}</span>
                 </div>
                 <div class="conflict-divider"></div>
@@ -992,27 +1012,29 @@ async function showConflictDialog(conflicts) {
                     <p class="conflict-message">
                         ${t("webdav.conflictDetected")}
                         <strong>${conflicts.length}</strong> ${
-      conflicts.length > 1 ? t("webdav.endpointsHave") : t("webdav.endpointHas")
-    }
+                          conflicts.length > 1
+                            ? t("webdav.endpointsHave")
+                            : t("webdav.endpointHas")
+                        }
                     </p>
                     <div class="conflict-details-container">
                         ${conflictDetailsHTML}
                     </div>
                     <div class="conflict-strategy-info">
                         <p><strong>${t("webdav.useRemote")}:</strong> ${t(
-      "webdav.useRemoteDesc"
-    )}</p>
+                          "webdav.useRemoteDesc",
+                        )}</p>
                         <p><strong>${t("webdav.keepLocal")}:</strong> ${t(
-      "webdav.keepLocalDesc"
-    )}</p>
+                          "webdav.keepLocalDesc",
+                        )}</p>
                     </div>
                 </div>
                 <div class="conflict-footer">
                     <button class="btn btn-primary" onclick="window.resolveConflict('remote')">${t(
-                      "webdav.useRemote"
+                      "webdav.useRemote",
                     )}</button>
                     <button class="btn btn-secondary" onclick="window.resolveConflict('keep_local')">${t(
-                      "webdav.keepLocal"
+                      "webdav.keepLocal",
                     )}</button>
                 </div>
             </div>
@@ -1059,10 +1081,10 @@ async function promptFilename(message, defaultValue) {
                 </div>
                 <div class="prompt-actions">
                     <button class="btn btn-primary" onclick="window.submitPrompt()">${t(
-                      "common.ok"
+                      "common.ok",
                     )}</button>
                     <button class="btn btn-secondary" onclick="window.cancelPrompt()">${t(
-                      "common.cancel"
+                      "common.cancel",
                     )}</button>
                 </div>
             </div>
@@ -1121,10 +1143,10 @@ async function confirmAction(message) {
                 <div class="confirm-divider"></div>
                 <div class="confirm-footer">
                     <button class="btn-confirm-delete" onclick="window.confirmYes()">${t(
-                      "common.yes"
+                      "common.yes",
                     )}</button>
                     <button class="btn-confirm-cancel" onclick="window.confirmNo()">${t(
-                      "common.no"
+                      "common.no",
                     )}</button>
                 </div>
             </div>

@@ -20,6 +20,7 @@ import (
 	"ccg/internal/service"
 	"ccg/internal/storage"
 	"ccg/internal/tray"
+
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -904,7 +905,23 @@ func (a *App) DetectBackupConflict(provider, filename string) string {
 }
 func (a *App) RestoreFromProvider(provider, filename, choice string) error {
 	return a.backup.RestoreFromProvider(provider, filename, choice, func(cfg *config.Config) error {
-		return a.proxy.UpdateConfig(cfg)
+		// 更新 proxy 配置
+		if err := a.proxy.UpdateConfig(cfg); err != nil {
+			return err
+		}
+		// 更新 App 全局配置
+		a.config = cfg
+		// 更新所有依赖配置的服务
+		version := a.GetVersion()
+		a.stats = service.NewStatsService(a.proxy, cfg)
+		a.endpoint = service.NewEndpointService(cfg, a.proxy, a.storage)
+		a.settings = service.NewSettingsService(cfg, a.storage)
+		a.webdav = service.NewWebDAVService(cfg, a.storage, version)
+		a.backup = service.NewBackupService(cfg, a.storage, version, a.webdav)
+		a.update = service.NewUpdateService(cfg, a.storage, version)
+		a.terminal = service.NewTerminalService(cfg, a.storage)
+		a.cliConfig = service.NewCLIConfigService(cfg)
+		return nil
 	})
 }
 func (a *App) TestS3Connection(endpoint, region, bucket, prefix, accessKey, secretKey, sessionToken string, useSSL, forcePathStyle bool) string {
