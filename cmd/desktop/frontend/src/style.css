@@ -653,60 +653,6 @@ body {
   flex-shrink: 0;
 }
 
-/* 多列布局下端点项优化 */
-.endpoint-list.cols-3 .endpoint-item,
-.endpoint-list.cols-4 .endpoint-item {
-  flex-direction: column;
-  align-items: stretch;
-  padding: 15px;
-}
-
-.endpoint-list.cols-3 .endpoint-info,
-.endpoint-list.cols-4 .endpoint-info {
-  margin-bottom: 10px;
-}
-
-.endpoint-list.cols-3 .endpoint-actions,
-.endpoint-list.cols-4 .endpoint-actions {
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 6px;
-  width: 100%;
-}
-
-.endpoint-list.cols-3 .endpoint-actions .btn,
-.endpoint-list.cols-4 .endpoint-actions .btn {
-  width: auto;
-  padding: 6px 12px;
-  font-size: 12px;
-}
-
-.endpoint-list.cols-3 .endpoint-actions .toggle-switch,
-.endpoint-list.cols-4 .endpoint-actions .toggle-switch {
-  width: 40px;
-  height: 20px;
-}
-
-.endpoint-list.cols-3 .endpoint-info h3,
-.endpoint-list.cols-4 .endpoint-info h3 {
-  font-size: 14px;
-}
-
-.endpoint-list.cols-3 .endpoint-info p,
-.endpoint-list.cols-4 .endpoint-info p {
-  font-size: 12px;
-}
-
-/* 三列布局下的信息压缩显示 */
-.endpoint-list.cols-3 .endpoint-info p,
-.endpoint-list.cols-4 .endpoint-info p {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
 .endpoint-actions .toggle-switch {
   width: 50px;
   height: 24px;
@@ -771,6 +717,55 @@ body {
 
 .btn-danger:hover {
   background: #ff2222;
+}
+
+/* 多列布局下端点项优化 */
+.endpoint-list.cols-3 .endpoint-item,
+.endpoint-list.cols-4 .endpoint-item {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 15px;
+}
+
+.endpoint-list.cols-3 .endpoint-info,
+.endpoint-list.cols-4 .endpoint-info {
+  margin-bottom: 10px;
+}
+
+.endpoint-list.cols-3 .endpoint-actions,
+.endpoint-list.cols-4 .endpoint-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.endpoint-list.cols-3 .endpoint-actions .btn,
+.endpoint-list.cols-4 .endpoint-actions .btn {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.endpoint-list.cols-3 .endpoint-actions .toggle-switch,
+.endpoint-list.cols-4 .endpoint-actions .toggle-switch {
+  width: 40px;
+  height: 20px;
+}
+
+.endpoint-list.cols-3 .endpoint-info h3,
+.endpoint-list.cols-4 .endpoint-info h3 {
+  font-size: 14px;
+}
+
+.endpoint-list.cols-3 .endpoint-info p,
+.endpoint-list.cols-4 .endpoint-info p {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .form-group {
