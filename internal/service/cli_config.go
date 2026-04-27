@@ -604,13 +604,20 @@ func (s *CLIConfigService) ApplyCodexConfig(providerName string) error {
 	output.WriteString("model = \"gpt-5.4\"\n")
 	output.WriteString("model_provider = \"" + providerName + "\"\n")
 	output.WriteString("preferred_auth_method = \"apikey\"\n")
-	output.WriteString("approval_policy = \"never\"\n\n")
+	output.WriteString("approval_policy = \"never\"\n")
+	output.WriteString("review_model = \"gpt-5.4\"\n")
+	output.WriteString("model_reasoning_summary = \"detailed\"\n")
+	output.WriteString("model_verbosity = \"high\"\n")
+	output.WriteString("model_reasoning_effort = \"high\"\n")
+	output.WriteString("model_context_window = 1050000\n")
+	output.WriteString("model_auto_compact_token_limit = 900000\n")
+	output.WriteString("tool_output_token_limit = 100000\n\n")
 
 	output.WriteString("[model_providers." + providerName + "]\n")
 	output.WriteString("name = \"" + providerName + "\"\n")
 	output.WriteString("base_url = \"" + baseURL + "/v1\"\n")
-	output.WriteString("env_key = \"OPENAI_API_KEY\"\n")
 	output.WriteString("wire_api = \"responses\"\n")
+	output.WriteString("requires_openai_auth = true\n")
 
 	dir := filepath.Dir(filePath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
@@ -625,7 +632,7 @@ func (s *CLIConfigService) ApplyCodexConfig(providerName string) error {
 	s.modified[CLITypeCodex] = true
 	s.modifiedMu.Unlock()
 
-	logger.Info("Applied Codex config with base URL: %s/v1 (wire_api=responses, env_key=OPENAI_API_KEY)", baseURL)
+	logger.Info("Applied Codex config with base URL: %s/v1 (wire_api=responses, requires_openai_auth=true)", baseURL)
 	return nil
 }
 

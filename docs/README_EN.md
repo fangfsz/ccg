@@ -60,14 +60,23 @@ For Codex Token Pool mode:
 #### Codex CLI
 Just configure `~/.codex/config.toml`:
 ```toml
+model = "gpt-5.4"
 model_provider = "ccg"
-model = "gpt-5-codex"
 preferred_auth_method = "apikey"
+approval_policy = "never"
+review_model = "gpt-5.4"
+model_reasoning_summary = "detailed"
+model_verbosity = "high"
+model_reasoning_effort = "high"
+model_context_window = 1050000
+model_auto_compact_token_limit = 900000
+tool_output_token_limit = 100000
 
 [model_providers.ccg]
 name = "ccg"
 base_url = "http://localhost:3000/v1"
 wire_api = "responses"  # or "chat"
+requires_openai_auth = true
 ```
 
 `~/.codex/auth.json` can be ignored.

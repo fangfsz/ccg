@@ -69,16 +69,23 @@
 只需要配置 `~/.codex/config.toml`：
 
 ```toml
-model_provider = "ccg"
 model = "gpt-5.4"
+model_provider = "ccg"
 preferred_auth_method = "apikey"
+approval_policy = "never"
+review_model = "gpt-5.4"
+model_reasoning_summary = "detailed"
+model_verbosity = "high"
+model_reasoning_effort = "high"
+model_context_window = 1050000
+model_auto_compact_token_limit = 900000
+tool_output_token_limit = 100000
 
 [model_providers.ccg]
 name = "ccg"
 base_url = "http://localhost:3000/v1"
 wire_api = "responses"  # 或 "chat"
-
-# 其他配置
+requires_openai_auth = true
 ```
 
 `~/.codex/auth.json` 可以忽略了。
