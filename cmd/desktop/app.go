@@ -1150,6 +1150,13 @@ func (a *App) RestoreCLIConfigs() {
 	}
 }
 
+func (a *App) RestoreCLIConfig(cliType string) error {
+	if a.cliConfig == nil {
+		return fmt.Errorf("cli config service not initialized")
+	}
+	return a.cliConfig.RestoreCLIConfig(service.CLIType(cliType))
+}
+
 func (a *App) GetMatchingEndpointsForCLI(cliType string) string {
 	endpoints := a.config.GetEndpoints()
 	var matchingEndpoints []config.Endpoint

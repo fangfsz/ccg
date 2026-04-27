@@ -12,7 +12,7 @@ import {
   LaunchGeminiSessionTerminal,
   SelectDirectory,
   ApplyCLIConfig,
-  RestoreCLIConfigs,
+  RestoreCLIConfig,
   GetMatchingEndpointsForCLI,
   IsCLIConfigModified,
 } from "../../wailsjs/go/main/App";
@@ -51,6 +51,8 @@ export function initTerminal() {
   window.removeProjectDir = removeProjectDir;
   window.launchTerminal = launchTerminal;
   window.switchCliType = switchCliType;
+  window.applyCLIConfig = applyCLIConfig;
+  window.restoreCLIConfig = restoreCLIConfig;
 
   // 监听会话选择事件，更新界面
   window.addEventListener("sessionSelected", () => {
@@ -94,44 +96,92 @@ function switchCliType(cliType) {
 async function updateCLIConfigStatus(cliType) {
   const configStatus = document.getElementById("cliConfigStatus");
   const matchingEndpoints = document.getElementById("matchingEndpoints");
+  const configBadge = document.getElementById("configStatusBadge");
   if (!configStatus) return;
 
   try {
-    // 应用CLI配置
-    await ApplyCLIConfig(cliType);
-
-    // 获取匹配的端点
     const endpointsData = await GetMatchingEndpointsForCLI(cliType);
     const endpoints = JSON.parse(endpointsData);
 
-    // 检查配置是否已被修改
     const isModified = await IsCLIConfigModified(cliType);
 
-    // 更新配置状态显示
-    const cliTypeNames = { claude: "Claude Code", codex: "Codex", gemini: "Gemini CLI" };
+    const cliTypeNames = {
+      claude: "Claude Code",
+      codex: "Codex",
+      gemini: "Gemini CLI",
+    };
+    const cliTypeName = cliTypeNames[cliType] || cliType;
+
     if (isModified) {
-      configStatus.innerHTML = `<span class="config-applied">✓ ${cliTypeNames[cliType]} 配置已应用</span>`;
+      configStatus.innerHTML = `
+        <span class="status-text config-applied">✓ ${t("terminal.configApplied")}</span>
+        <button class="btn btn-small btn-warning" onclick="window.restoreCLIConfig('${cliType}')">${t("terminal.restoreConfig")}</button>
+      `;
       configStatus.className = "cli-config-status applied";
+      if (configBadge) {
+        configBadge.className = "config-badge applied";
+        configBadge.textContent = t("terminal.configApplied");
+      }
     } else {
-      configStatus.innerHTML = `<span class="config-pending">○ 等待应用 ${cliTypeNames[cliType]} 配置</span>`;
+      configStatus.innerHTML = `
+        <span class="status-text config-not-applied">○ ${t("terminal.configNotApplied")}</span>
+        <button class="btn btn-small btn-primary" onclick="window.applyCLIConfig('${cliType}')">${t("terminal.applyConfig")}</button>
+      `;
       configStatus.className = "cli-config-status pending";
+      if (configBadge) {
+        configBadge.className = "config-badge pending";
+        configBadge.textContent = t("terminal.configNotApplied");
+      }
     }
 
-    // 更新匹配端点显示
     if (matchingEndpoints) {
       if (endpoints && endpoints.length > 0) {
-        const endpointNames = endpoints.map(ep => ep.name).join(", ");
-        matchingEndpoints.innerHTML = `<span class="matching-ep">匹配的端点: ${endpointNames}</span>`;
+        const endpointTags = endpoints
+          .map((ep) => `<span class="endpoint-tag">${ep.name}</span>`)
+          .join("");
+        matchingEndpoints.innerHTML = `
+          <div class="endpoints-title">${t("terminal.matchingEndpoints")}:</div>
+          <div class="endpoints-list">${endpointTags}</div>
+        `;
         matchingEndpoints.style.display = "block";
       } else {
-        matchingEndpoints.innerHTML = `<span class="no-matching-ep">没有找到匹配的端点（请确保已启用对应转换器的端点）</span>`;
+        matchingEndpoints.innerHTML = `
+          <div class="endpoints-title">${t("terminal.matchingEndpoints")}:</div>
+          <div class="no-matching">${t("terminal.noMatchingEndpoints")}</div>
+        `;
         matchingEndpoints.style.display = "block";
       }
     }
   } catch (err) {
     console.error("Failed to update CLI config status:", err);
-    configStatus.innerHTML = `<span class="config-error">配置应用失败: ${err.message || err}</span>`;
+    configStatus.innerHTML = `<span class="status-text config-error">${t("terminal.configError")}: ${err.message || err}</span>`;
     configStatus.className = "cli-config-status error";
+    if (configBadge) {
+      configBadge.className = "config-badge error";
+      configBadge.textContent = t("terminal.configError");
+    }
+  }
+}
+
+async function applyCLIConfig(cliType) {
+  try {
+    await ApplyCLIConfig(cliType);
+    await updateCLIConfigStatus(cliType);
+    showNotification(t("terminal.applySuccess"), "success");
+  } catch (err) {
+    console.error("Failed to apply CLI config:", err);
+    showNotification(t("terminal.applyFailed") + ": " + err.message, "error");
+  }
+}
+
+async function restoreCLIConfig(cliType) {
+  try {
+    await RestoreCLIConfig(cliType);
+    await updateCLIConfigStatus(cliType);
+    showNotification(t("terminal.restoreSuccess"), "success");
+  } catch (err) {
+    console.error("Failed to restore CLI config:", err);
+    showNotification(t("terminal.restoreFailed") + ": " + err.message, "error");
   }
 }
 
@@ -247,7 +297,7 @@ function renderProjectDirs() {
   if (!container) return;
 
   if (!terminalConfig.projectDirs || terminalConfig.projectDirs.length === 0) {
-    container.innerHTML = `<div class="empty-tip">${t("terminal.noDirs")}</div>`;
+    container.innerHTML = `<div class="empty-tip">📂 ${t("terminal.noDirs")}</div>`;
     return;
   }
 
@@ -264,22 +314,20 @@ function renderProjectDirs() {
         ? `已选择会话 ${selectedSession.info?.serialNumber || "-"}：${sessionName}`
         : "点击查看历史会话信息";
 
-      // 从路径中提取项目名
       const projectName = dir.split(/[/\\]/).filter(Boolean).pop() || dir;
 
       return `
         <div class="project-dir-item" data-dir-index="${index}">
+            <span class="folder-icon">📂</span>
             <div class="dir-info">
-                <span class="dir-index">${t("terminal.project")} ${index + 1}:</span>
                 <span class="dir-name" title="${dir}">${projectName}</span>
             </div>
             <div class="dir-actions">
-                <button class="btn btn-sm btn-primary" data-action="launch">▶ ${t("terminal.launch")}</button>
-                <button class="btn btn-sm btn-danger" data-action="remove">🗑️ ${t("terminal.delete")}</button>
+                <button class="btn btn-sm btn-primary" data-action="launch" title="${t("terminal.launch")}">▶</button>
                 <button class="btn btn-sm btn-session" data-action="session" title="${sessionTooltip}">
-                    ${hasSession ? "✅" : "📋"} ${t("session.sessions")}
-                    ${hasSession ? '<span class="session-clear-btn">×</span>' : ""}
+                    ${hasSession ? "✅" : "📋"}
                 </button>
+                <button class="delete-btn" data-action="remove" title="${t("terminal.delete")}">🗑️</button>
             </div>
         </div>
     `;

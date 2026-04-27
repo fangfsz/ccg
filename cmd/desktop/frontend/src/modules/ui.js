@@ -464,50 +464,73 @@ export function initUI() {
 
         <!-- Terminal Modal -->
         <div id="terminalModal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content terminal-modal-content">
                 <div class="modal-header">
                     <h2>🖥️ ${t("terminal.title")}</h2>
                     <button class="modal-close" onclick="window.closeTerminalModal()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <div class="form-label-row">
-                            <label><span class="required">*</span>${t("terminal.selectTerminal")}</label>
-                            <div class="cli-type-switcher">
-                                <button class="cli-type-btn active" data-cli="claude" onclick="window.switchCliType('claude')">${t("terminal.cliTypeClaude")}</button>
-                                <button class="cli-type-btn" data-cli="codex" onclick="window.switchCliType('codex')">${t("terminal.cliTypeCodex")}</button>
-                                <button class="cli-type-btn" data-cli="gemini" onclick="window.switchCliType('gemini')">${t("terminal.cliTypeGemini")}</button>
-                            </div>
+                    <!-- CLI 类型选择 -->
+                    <div class="cli-section">
+                        <label class="section-label">${t("terminal.selectCliType")}</label>
+                        <div class="cli-type-switcher">
+                            <button class="cli-type-btn active" data-cli="claude" onclick="window.switchCliType('claude')">
+                                <span class="cli-type-icon">🔵</span>
+                                <span class="cli-type-name">${t("terminal.cliTypeClaude")}</span>
+                            </button>
+                            <button class="cli-type-btn" data-cli="codex" onclick="window.switchCliType('codex')">
+                                <span class="cli-type-icon">🟢</span>
+                                <span class="cli-type-name">${t("terminal.cliTypeCodex")}</span>
+                            </button>
+                            <button class="cli-type-btn" data-cli="gemini" onclick="window.switchCliType('gemini')">
+                                <span class="cli-type-icon">🟡</span>
+                                <span class="cli-type-name">${t("terminal.cliTypeGemini")}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 配置状态卡片 -->
+                    <div class="config-card" id="configCard">
+                        <div class="config-card-header">
+                            <span class="config-card-title">${t("terminal.configStatus")}</span>
+                            <span id="configStatusBadge" class="config-badge"></span>
                         </div>
                         <div id="cliConfigStatus" class="cli-config-status"></div>
                         <div id="matchingEndpoints" class="matching-endpoints" style="display: none;"></div>
-                        <select id="terminalSelect" onchange="window.onTerminalChange()">
-                            <option value="">Loading...</option>
-                        </select>
-                        <small class="form-help" id="terminalSelectHelp">${t("terminal.selectTerminalHelp")}</small>
                     </div>
-                    <div class="form-group" id="claudeCommandGroup">
-                        <label>${t("terminal.launcherCommand")}</label>
-                        <input type="text" id="claudeCommandInput" placeholder="claude"
-                               oninput="window.onClaudeCommandChange()">
-                        <small class="form-help">${t("terminal.launcherCommandHelp")}</small>
-                    </div>
-                    <div class="form-group" id="geminiCommandGroup" style="display: none;">
-                        <label>${t("terminal.geminiCommand")}</label>
-                        <input type="text" id="geminiCommandInput" placeholder="gemini"
-                               oninput="window.onGeminiCommandChange()">
-                        <small class="form-help">${t("terminal.geminiCommandHelp")}</small>
-                    </div>
-                    <div class="form-group">
-                        <label><span class="required">*</span>${t("terminal.projectDirs")}</label>
-                        <small class="form-help">${t("terminal.projectDirsHelp")}</small>
-                        <div id="projectDirList" class="project-dir-list">
-                            <div class="empty-tip">${t("terminal.noDirs")}</div>
+
+                    <!-- 终端和命令配置 -->
+                    <div class="terminal-config-section">
+                        <div class="form-group">
+                            <label>${t("terminal.selectTerminal")}</label>
+                            <select id="terminalSelect" onchange="window.onTerminalChange()">
+                                <option value="">Loading...</option>
+                            </select>
+                            <small class="form-help" id="terminalSelectHelp"></small>
                         </div>
+                        <div class="form-group" id="claudeCommandGroup">
+                            <label>${t("terminal.launcherCommand")}</label>
+                            <input type="text" id="claudeCommandInput" placeholder="claude"
+                                   oninput="window.onClaudeCommandChange()">
+                            <small class="form-help">${t("terminal.launcherCommandHelp")}</small>
+                        </div>
+                        <div class="form-group" id="geminiCommandGroup" style="display: none;">
+                            <label>${t("terminal.geminiCommand")}</label>
+                            <input type="text" id="geminiCommandInput" placeholder="gemini"
+                                   oninput="window.onGeminiCommandChange()">
+                            <small class="form-help">${t("terminal.geminiCommandHelp")}</small>
+                        </div>
+                    </div>
+
+                    <!-- 项目目录 -->
+                    <div class="project-section">
+                        <label class="section-label">${t("terminal.projectDirs")}</label>
+                        <small class="form-help">${t("terminal.projectDirsHelp")}</small>
+                        <div id="projectDirList" class="project-dir-list"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary btn-add-dir" onclick="window.addProjectDir()">
+                    <button class="btn btn-secondary" onclick="window.addProjectDir()">
                         ➕ ${t("terminal.addDir")}
                     </button>
                 </div>
