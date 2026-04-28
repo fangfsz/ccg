@@ -547,6 +547,59 @@ func (p *Proxy) shouldSkipEndpoint(endpointName string) bool {
 	return false
 }
 
+// suggestPossibleAPIPaths 根据 transformer 类型提示可能的 API 路径
+func (p *Proxy) suggestPossibleAPIPaths(endpoint config.Endpoint, transformerName string) {
+	logger.Warn("[%s] 💡 可能的解决方案:", endpoint.Name)
+	logger.Warn("[%s]    当前使用的 Transformer: %s", endpoint.Name, endpoint.Transformer)
+
+	preferredPath := getPreferredAPIPath(endpoint.ProviderType, endpoint.Transformer, endpoint.CustomPath)
+	if endpoint.CustomPath != "" {
+		logger.Warn("[%s]    ⚠️ 已配置自定义 API 路径: %s (将覆盖自动选择的路径)", endpoint.Name, endpoint.CustomPath)
+	}
+	logger.Warn("[%s]    根据 ProviderType '%s' 和 Transformer '%s'，推荐的 API 路径是: %s",
+		endpoint.Name, endpoint.ProviderType, endpoint.Transformer, preferredPath)
+
+	switch endpoint.Transformer {
+	case "openai":
+		logger.Warn("[%s]    OpenAI 格式转换器支持以下 API 路径:", endpoint.Name)
+		logger.Warn("[%s]      - /v1/chat/completions (标准 OpenAI Chat API)", endpoint.Name)
+		logger.Warn("[%s]      - /v1/responses (OpenAI Responses API)", endpoint.Name)
+		logger.Warn("[%s]    提示: 尝试将 Transformer 改为 'openai2' 如果中转站使用 Responses API", endpoint.Name)
+	case "openai2":
+		logger.Warn("[%s]    OpenAI2 格式转换器支持以下 API 路径:", endpoint.Name)
+		logger.Warn("[%s]      - /v1/responses (OpenAI Responses API)", endpoint.Name)
+		logger.Warn("[%s]    提示: 某些中转站可能只支持 /v1/chat/completions", endpoint.Name)
+		logger.Warn("[%s]    提示: 尝试将 Transformer 改为 'openai' 如果中转站使用 Chat API", endpoint.Name)
+	case "passthrough", "claude":
+		logger.Warn("[%s]    Claude 格式转换器支持以下 API 路径:", endpoint.Name)
+		logger.Warn("[%s]      - /v1/messages (Claude Messages API)", endpoint.Name)
+		logger.Warn("[%s]    提示: 确认中转站是否支持 Claude Messages API", endpoint.Name)
+	case "gemini":
+		logger.Warn("[%s]    Gemini 格式转换器支持以下 API 路径:", endpoint.Name)
+		logger.Warn("[%s]      - /v1beta/models/{model}:generateContent", endpoint.Name)
+		logger.Warn("[%s]      - /v1beta/models/{model}:streamGenerateContent (流式)", endpoint.Name)
+		logger.Warn("[%s]    提示: 确认中转站的 Gemini API 路径是否正确", endpoint.Name)
+	default:
+		logger.Warn("[%s]    未知 Transformer 类型: %s", endpoint.Name, endpoint.Transformer)
+		logger.Warn("[%s]    支持的 Transformer 类型: passthrough, openai, openai2, gemini", endpoint.Name)
+	}
+
+	logger.Warn("[%s] 💡 ProviderType (中转方案) 说明:", endpoint.Name)
+	logger.Warn("[%s]    - oneapi/newapi: One API / New API 兼容方案", endpoint.Name)
+	logger.Warn("[%s]    - sub2api: Sub2API 方案", endpoint.Name)
+	logger.Warn("[%s]    - cliproxyapi: CLIProxyAPI 方案", endpoint.Name)
+	logger.Warn("[%s]    - native: 原生 API (不做转换)", endpoint.Name)
+
+	logger.Warn("[%s] 💡 通用建议:", endpoint.Name)
+	if endpoint.ProviderType != "" {
+		logger.Warn("[%s]    已配置 ProviderType: %s", endpoint.Name, endpoint.ProviderType)
+	}
+	logger.Warn("[%s]    1. 确认中转站的 API 文档，了解其支持的 API 格式", endpoint.Name)
+	logger.Warn("[%s]    2. 检查中转站的模型列表，确保所需的模型可用", endpoint.Name)
+	logger.Warn("[%s]    3. 某些中转站可能需要特定的身份验证方式", endpoint.Name)
+	logger.Warn("[%s]    4. 尝试访问中转站的 /v1/models 端点查看支持的模型", endpoint.Name)
+}
+
 // recordEndpointSuccess 记录端点成功
 func (p *Proxy) recordEndpointSuccess(endpointName string) {
 	cb := p.getCircuitBreaker(endpointName)
@@ -581,6 +634,118 @@ func (p *Proxy) clearCircuitBreaker(endpointName string) {
 
 	delete(p.circuitBreakers, endpointName)
 	logger.Debug("[CircuitBreaker] 端点 %s 熔断器已清除", endpointName)
+}
+
+// getPreferredAPIPath 根据 ProviderType、Transformer 和 CustomPath 返回最佳 API 路径
+func getPreferredAPIPath(providerType, transformer, customPath string) string {
+	if customPath != "" {
+		return customPath
+	}
+
+	providerType = strings.ToLower(providerType)
+	transformer = strings.ToLower(transformer)
+
+	switch providerType {
+	case "oneapi", "newapi":
+		switch transformer {
+		case "openai", "passthrough", "claude", "auto":
+			return "/v1/chat/completions"
+		case "openai2":
+			return "/v1/responses"
+		case "gemini":
+			return "/v1beta/models/{model}:generateContent"
+		default:
+			return "/v1/chat/completions"
+		}
+	case "sub2api":
+		switch transformer {
+		case "openai", "passthrough", "claude", "auto":
+			return "/v1/chat/completions"
+		case "openai2":
+			return "/v1/responses"
+		case "gemini":
+			return "/v1beta/models/{model}:generateContent"
+		default:
+			return "/v1/chat/completions"
+		}
+	case "cliproxyapi":
+		switch transformer {
+		case "openai", "auto":
+			return "/v1/chat/completions"
+		case "openai2":
+			return "/v1/responses"
+		case "passthrough", "claude":
+			return "/v1/messages"
+		case "gemini":
+			return "/v1beta/models/{model}:generateContent"
+		default:
+			return "/v1/chat/completions"
+		}
+	case "native", "":
+		switch transformer {
+		case "openai", "auto":
+			return "/v1/chat/completions"
+		case "openai2":
+			return "/v1/responses"
+		case "passthrough", "claude":
+			return "/v1/messages"
+		case "gemini":
+			return "/v1beta/models/{model}:generateContent"
+		default:
+			return "/v1/chat/completions"
+		}
+	default:
+		switch transformer {
+		case "openai", "auto":
+			return "/v1/chat/completions"
+		case "openai2":
+			return "/v1/responses"
+		case "passthrough", "claude":
+			return "/v1/messages"
+		case "gemini":
+			return "/v1beta/models/{model}:generateContent"
+		default:
+			return "/v1/chat/completions"
+		}
+	}
+}
+
+// probeAvailablePaths 探测端点支持的 API 路径
+func (p *Proxy) probeAvailablePaths(endpoint config.Endpoint, modelName string) []string {
+	var availablePaths []string
+	pathsToProbe := []string{
+		"/v1/chat/completions",
+		"/v1/responses",
+		"/v1/messages",
+		"/v1beta/models/" + modelName + ":generateContent",
+	}
+
+	client := &http.Client{Timeout: 5 * time.Second}
+	for _, path := range pathsToProbe {
+		url := strings.TrimSuffix(endpoint.APIUrl, "/") + path
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			continue
+		}
+		req.Header.Set("Authorization", "Bearer "+endpoint.APIKey)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			continue
+		}
+		resp.Body.Close()
+
+		if resp.StatusCode != http.StatusNotFound && resp.StatusCode != http.StatusUnauthorized {
+			availablePaths = append(availablePaths, path)
+			logger.Debug("[%s] 探测到可用路径: %s (状态码: %d)", endpoint.Name, path, resp.StatusCode)
+		}
+	}
+
+	if len(availablePaths) == 0 {
+		logger.Warn("[%s] 无法探测到任何可用的 API 路径", endpoint.Name)
+	}
+	return availablePaths
 }
 
 // Start starts the proxy server
@@ -1356,7 +1521,8 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				} else {
-					logger.Warn("[%s] Request failed %d: %s (可能是 API 路径错误)", endpoint.Name, resp.StatusCode, errMsg)
+					logger.Warn("[%s] Request failed %d: %s", endpoint.Name, resp.StatusCode, errMsg)
+					p.suggestPossibleAPIPaths(endpoint, transformerName)
 				}
 			} else {
 				logger.Warn("[%s] Request failed %d: %s", endpoint.Name, resp.StatusCode, errMsg)

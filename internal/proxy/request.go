@@ -30,9 +30,13 @@ const (
 
 // prepareTransformerForClient creates transformer based on client format and endpoint
 func prepareTransformerForClient(clientFormat ClientFormat, endpoint config.Endpoint) (transformer.Transformer, error) {
-	endpointTransformer := endpoint.Transformer
-	if endpointTransformer == "" {
-		endpointTransformer = "claude"
+	endpointTransformer := strings.ToLower(strings.TrimSpace(endpoint.Transformer))
+
+	if endpointTransformer == "auto" || endpointTransformer == "" {
+		inferredTransformer := inferTransformer(endpoint, clientFormat)
+		logger.Debug("[%s] Transformer auto-detection: endpointTransformer=%s → inferred=%s",
+			endpoint.Name, endpoint.Transformer, inferredTransformer)
+		endpointTransformer = inferredTransformer
 	}
 
 	switch clientFormat {
@@ -45,6 +49,110 @@ func prepareTransformerForClient(clientFormat ClientFormat, endpoint config.Endp
 	}
 
 	return nil, fmt.Errorf("unsupported client format: %s", clientFormat)
+}
+
+// inferTransformer automatically selects the best transformer based on endpoint configuration
+// It considers ProviderType, model name patterns, and client format to make an intelligent decision
+func inferTransformer(endpoint config.Endpoint, clientFormat ClientFormat) string {
+	providerType := strings.ToLower(strings.TrimSpace(endpoint.ProviderType))
+	modelName := strings.ToLower(strings.TrimSpace(endpoint.Model))
+
+	if providerType == "cliproxyapi" {
+		return "passthrough"
+	}
+
+	if isChineseModel(modelName) {
+		if clientFormat == ClientFormatOpenAIChat || clientFormat == ClientFormatOpenAIResponses {
+			return "passthrough"
+		}
+		return "openai"
+	}
+
+	switch providerType {
+	case "oneapi", "newapi":
+		return "openai"
+	case "sub2api":
+		return "openai"
+	case "native", "":
+		if isOpenAIModel(modelName) {
+			return "openai"
+		}
+		if isClaudeModel(modelName) {
+			if clientFormat == ClientFormatClaude {
+				return "passthrough"
+			}
+			return "claude"
+		}
+		if isGeminiModel(modelName) {
+			return "gemini"
+		}
+	}
+
+	if clientFormat == ClientFormatOpenAIChat || clientFormat == ClientFormatOpenAIResponses {
+		return "passthrough"
+	}
+	return "openai"
+}
+
+// isChineseModel checks if the model name indicates a Chinese domestic model
+func isChineseModel(modelName string) bool {
+	chinesePrefixes := []string{
+		"glm-", "glm.", // Zhipu AI (智谱AI)
+		"qwen-", "qwen.", // Alibaba (阿里通义)
+		"deepseek-", // DeepSeek (深度求索)
+		"minimax-",  // MiniMax (海螺AI)
+		"moonshot-", // Moonshot (月之暗面)
+		"spark-",    // iFlytek (科大讯飞星火)
+		"ernie-",    // Baidu (百度文心)
+		"hunyuan-",  // Tencent (腾讯混元)
+		"lingxi-",   // Lingxi
+		"step-",     // StepFun (阶跃星辰)
+		"abab-",     // MiniMax
+		"local-",    // Local models
+	}
+	modelName = strings.ToLower(modelName)
+	for _, prefix := range chinesePrefixes {
+		if strings.HasPrefix(modelName, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// isOpenAIModel checks if the model name indicates an OpenAI model
+func isOpenAIModel(modelName string) bool {
+	openaiPrefixes := []string{"gpt-3", "gpt-4", "gpt-5", "gpt5", "o1", "o2", "o3"}
+	modelName = strings.ToLower(modelName)
+	for _, prefix := range openaiPrefixes {
+		if strings.HasPrefix(modelName, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// isClaudeModel checks if the model name indicates an Anthropic Claude model
+func isClaudeModel(modelName string) bool {
+	claudePrefixes := []string{"claude-", "claude."}
+	modelName = strings.ToLower(modelName)
+	for _, prefix := range claudePrefixes {
+		if strings.HasPrefix(modelName, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// isGeminiModel checks if the model name indicates a Google Gemini model
+func isGeminiModel(modelName string) bool {
+	geminiPrefixes := []string{"gemini-", "gemini."}
+	modelName = strings.ToLower(modelName)
+	for _, prefix := range geminiPrefixes {
+		if strings.HasPrefix(modelName, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // prepareCCTransformer creates transformer for Claude Code client
@@ -134,8 +242,13 @@ func prepareCxRespTransformer(endpoint config.Endpoint, endpointTransformer stri
 	}
 }
 
-// getTargetPath determines the target API path based on transformer name
+// getTargetPath determines the target API path based on transformer name and ProviderType
 func getTargetPath(originalPath string, endpoint config.Endpoint, transformedBody []byte, transformerName string) string {
+	preferredPath := getPreferredAPIPath(endpoint.ProviderType, endpoint.Transformer, endpoint.CustomPath)
+	if preferredPath != "" {
+		return preferredPath
+	}
+
 	switch transformerName {
 	case "cc_claude", "cx_chat_claude", "cx_resp_claude":
 		return "/v1/messages"

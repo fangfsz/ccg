@@ -93,15 +93,17 @@ func isCodexBackendAPIURL(raw string) bool {
 
 // Endpoint represents a single API endpoint configuration
 type Endpoint struct {
-	Name           string            `json:"name"`
-	APIUrl         string            `json:"apiUrl"`
-	APIKey         string            `json:"apiKey"`
-	AuthMode       string            `json:"authMode,omitempty"`
-	Enabled        bool              `json:"enabled"`
-	Transformer    string            `json:"transformer,omitempty"`       // Transformer type: claude, openai, gemini, deepseek
-	Model          string            `json:"model,omitempty"`            // Target model name for non-Claude APIs
-	Remark         string            `json:"remark,omitempty"`           // Optional remark for the endpoint
-	ModelMappings  map[string]string  `json:"modelMappings,omitempty"`    // Model name mappings: clientModel -> actualModel
+	Name          string            `json:"name"`
+	APIUrl        string            `json:"apiUrl"`
+	APIKey        string            `json:"apiKey"`
+	AuthMode      string            `json:"authMode,omitempty"`
+	Enabled       bool              `json:"enabled"`
+	Transformer   string            `json:"transformer,omitempty"`   // Transformer type: claude, openai, openai2, gemini
+	Model         string            `json:"model,omitempty"`         // Target model name for non-Claude APIs
+	Remark        string            `json:"remark,omitempty"`        // Optional remark for the endpoint
+	ModelMappings map[string]string `json:"modelMappings,omitempty"` // Model name mappings: clientModel -> actualModel
+	ProviderType   string            `json:"providerType,omitempty"`      // Provider type: oneapi, newapi, sub2api, cliproxyapi, native
+	CustomPath    string            `json:"customPath,omitempty"`    // Custom API path override
 }
 
 // WebDAVConfig represents WebDAV synchronization configuration

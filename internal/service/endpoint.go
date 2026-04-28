@@ -136,7 +136,7 @@ func (e *EndpointService) resolveEndpointAPIKey(endpoint config.Endpoint) (strin
 }
 
 // AddEndpoint adds a new endpoint
-func (e *EndpointService) AddEndpoint(name, apiUrl, apiKey, authMode, transformer, model, remark string) error {
+func (e *EndpointService) AddEndpoint(name, apiUrl, apiKey, authMode, transformer, model, remark, providerType, customPath string) error {
 	endpoints := e.config.GetEndpoints()
 	for _, ep := range endpoints {
 		if ep.Name == name {
@@ -155,14 +155,16 @@ func (e *EndpointService) AddEndpoint(name, apiUrl, apiKey, authMode, transforme
 	apiUrl = normalizeAPIUrl(apiUrl)
 
 	newEndpoint := config.Endpoint{
-		Name:        name,
-		APIUrl:      apiUrl,
-		APIKey:      apiKey,
-		AuthMode:    authMode,
-		Enabled:     true,
-		Transformer: transformer,
-		Model:       model,
-		Remark:      remark,
+		Name:         name,
+		APIUrl:       apiUrl,
+		APIKey:       apiKey,
+		AuthMode:     authMode,
+		Enabled:      true,
+		Transformer:  transformer,
+		Model:        model,
+		Remark:       remark,
+		ProviderType: strings.TrimSpace(providerType),
+		CustomPath:   strings.TrimSpace(customPath),
 	}
 	config.ApplyEndpointAuthModeRules(&newEndpoint)
 	endpoints = append(endpoints, newEndpoint)
@@ -227,7 +229,7 @@ func (e *EndpointService) RemoveEndpoint(index int) error {
 }
 
 // UpdateEndpoint updates an endpoint by index
-func (e *EndpointService) UpdateEndpoint(index int, name, apiUrl, apiKey, authMode, transformer, model, remark string) error {
+func (e *EndpointService) UpdateEndpoint(index int, name, apiUrl, apiKey, authMode, transformer, model, remark, providerType, customPath string) error {
 	endpoints := e.config.GetEndpoints()
 
 	if index < 0 || index >= len(endpoints) {
@@ -257,14 +259,16 @@ func (e *EndpointService) UpdateEndpoint(index int, name, apiUrl, apiKey, authMo
 	apiUrl = normalizeAPIUrl(apiUrl)
 
 	updatedEndpoint := config.Endpoint{
-		Name:        name,
-		APIUrl:      apiUrl,
-		APIKey:      apiKey,
-		AuthMode:    authMode,
-		Enabled:     enabled,
-		Transformer: transformer,
-		Model:       model,
-		Remark:      remark,
+		Name:         name,
+		APIUrl:       apiUrl,
+		APIKey:       apiKey,
+		AuthMode:     authMode,
+		Enabled:      enabled,
+		Transformer:  transformer,
+		Model:        model,
+		Remark:       remark,
+		ProviderType: strings.TrimSpace(providerType),
+		CustomPath:   strings.TrimSpace(customPath),
 	}
 	config.ApplyEndpointAuthModeRules(&updatedEndpoint)
 	endpoints[index] = updatedEndpoint

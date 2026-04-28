@@ -420,6 +420,7 @@ export function initUI() {
                     <div class="form-group">
                         <label><span class="required">*</span>${t("modal.transformer")}</label>
                         <select id="endpointTransformer" onchange="window.handleTransformerChange()">
+                            <option value="auto" title="${t("modal.transformerOptionAuto")}">${t("modal.transformerOptionAuto")}</option>
                             <option value="passthrough" title="${t("modal.transformerOptionPassthrough")}">${t("modal.transformerOptionPassthrough")}</option>
                             <option value="openai" title="${t("modal.transformerOptionOpenAI")}">${t("modal.transformerOptionOpenAI")}</option>
                             <option value="openai2" title="${t("modal.transformerOptionOpenAI2")}">${t("modal.transformerOptionOpenAI2")}</option>
@@ -447,6 +448,26 @@ export function initUI() {
                         </div>
                         <p style="color: #666; font-size: 12px; margin-top: 5px;" id="modelHelpText">
                             ${t("modal.modelHelp")}
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label>${t("modal.providerType")}</label>
+                        <select id="endpointProviderType">
+                            <option value="">${t("modal.providerTypeNative")}</option>
+                            <option value="oneapi">${t("modal.providerTypeOneAPI")}</option>
+                            <option value="newapi">${t("modal.providerTypeNewAPI")}</option>
+                            <option value="sub2api">${t("modal.providerTypeSub2API")}</option>
+                            <option value="cliproxyapi">${t("modal.providerTypeCliproxyAPI")}</option>
+                        </select>
+                        <p style="color: #666; font-size: 12px; margin-top: 5px;">
+                            ${t("modal.providerTypeHelp")}
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label>${t("modal.customPath")}</label>
+                        <input type="text" id="endpointCustomPath" placeholder="${t("modal.customPathPlaceholder")}">
+                        <p style="color: #666; font-size: 12px; margin-top: 5px;">
+                            ${t("modal.customPathHelp")}
                         </p>
                     </div>
                     <div class="form-group">

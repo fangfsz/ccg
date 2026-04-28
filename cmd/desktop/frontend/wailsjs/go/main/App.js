@@ -6,8 +6,8 @@ export function ActivateEndpointCredential(arg1, arg2) {
   return window['go']['main']['App']['ActivateEndpointCredential'](arg1, arg2);
 }
 
-export function AddEndpoint(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
-  return window['go']['main']['App']['AddEndpoint'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+export function AddEndpoint(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) {
+  return window['go']['main']['App']['AddEndpoint'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
 export function AddProjectDir(arg1) {
@@ -454,8 +454,8 @@ export function UpdateConfig(arg1) {
   return window['go']['main']['App']['UpdateConfig'](arg1);
 }
 
-export function UpdateEndpoint(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) {
-  return window['go']['main']['App']['UpdateEndpoint'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+export function UpdateEndpoint(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
+  return window['go']['main']['App']['UpdateEndpoint'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
 }
 
 export function UpdateEndpointCredentialToken(arg1, arg2, arg3, arg4) {

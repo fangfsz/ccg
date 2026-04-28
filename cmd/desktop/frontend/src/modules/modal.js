@@ -211,7 +211,7 @@ export function showAddEndpointModal() {
   document.getElementById("eyeIcon").innerHTML =
     '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
   document.getElementById("endpointAuthMode").value = "api_key";
-  document.getElementById("endpointTransformer").value = "claude";
+  document.getElementById("endpointTransformer").value = "auto";
   document.getElementById("endpointModel").value = "";
   document.getElementById("endpointRemark").value = "";
   handleAuthModeChange();
@@ -234,7 +234,7 @@ export function showAddEndpointModalWithPreset(presetData) {
   document.getElementById("endpointAuthMode").value =
     presetData.authMode || "api_key";
   document.getElementById("endpointTransformer").value =
-    presetData.transformer || "claude";
+    presetData.transformer || "auto";
   document.getElementById("endpointModel").value = presetData.model || "";
   document.getElementById("endpointRemark").value = presetData.remark || "";
   handleAuthModeChange();
@@ -259,9 +259,16 @@ export async function editEndpoint(index) {
     '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
   document.getElementById("endpointAuthMode").value = ep.authMode || "api_key";
   document.getElementById("endpointTransformer").value =
-    ep.transformer || "claude";
+    ep.transformer || "auto";
   document.getElementById("endpointModel").value = ep.model || "";
   document.getElementById("endpointRemark").value = ep.remark || "";
+  if (document.getElementById("endpointProviderType")) {
+    document.getElementById("endpointProviderType").value =
+      ep.providerType || "";
+  }
+  if (document.getElementById("endpointCustomPath")) {
+    document.getElementById("endpointCustomPath").value = ep.customPath || "";
+  }
 
   handleAuthModeChange();
   updateManageTokenPoolButton();
@@ -291,6 +298,10 @@ export async function saveEndpoint() {
   let transformer = document.getElementById("endpointTransformer").value;
   const model = document.getElementById("endpointModel").value.trim();
   const remark = document.getElementById("endpointRemark").value.trim();
+  const providerType =
+    document.getElementById("endpointProviderType")?.value?.trim() || "";
+  const customPath =
+    document.getElementById("endpointCustomPath")?.value?.trim() || "";
   const isCodexTokenPool = isCodexTokenPoolMode(authMode);
 
   if (isCodexTokenPool) {
@@ -326,7 +337,17 @@ export async function saveEndpoint() {
 
   try {
     if (currentEditIndex === -1) {
-      await addEndpoint(name, url, key, authMode, transformer, model, remark);
+      await addEndpoint(
+        name,
+        url,
+        key,
+        authMode,
+        transformer,
+        model,
+        remark,
+        providerType,
+        customPath,
+      );
     } else {
       await updateEndpoint(
         currentEditIndex,
@@ -337,6 +358,8 @@ export async function saveEndpoint() {
         transformer,
         model,
         remark,
+        providerType,
+        customPath,
       );
     }
 
@@ -826,8 +849,6 @@ export function openGitHub() {
 
 export function openArticle() {
   if (window.go?.main?.App) {
-    window.go.main.App.OpenURL(
-      "https://github.com/fangfsz/ccg",
-    );
+    window.go.main.App.OpenURL("https://github.com/fangfsz/ccg");
   }
 }

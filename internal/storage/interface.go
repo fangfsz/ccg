@@ -15,6 +15,8 @@ type Endpoint struct {
 	SortOrder   int       `json:"sortOrder"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
+	ProviderType string   `json:"providerType"` // Provider type: oneapi, newapi, sub2api, cliproxyapi, native
+	CustomPath   string   `json:"customPath"`   // Custom API path override
 }
 
 type EndpointCredential struct {
