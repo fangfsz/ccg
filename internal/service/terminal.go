@@ -37,11 +37,12 @@ func (t *TerminalService) GetTerminalConfig() string {
 }
 
 // SaveTerminalConfig saves the terminal configuration
-func (t *TerminalService) SaveTerminalConfig(selectedTerminal string, projectDirs []string, claudeCommand string, geminiCommand string) error {
+func (t *TerminalService) SaveTerminalConfig(selectedTerminal string, projectDirs []string, claudeCommand string, codexCommand string, geminiCommand string) error {
 	terminalCfg := &config.TerminalConfig{
 		SelectedTerminal: selectedTerminal,
 		ProjectDirs:      projectDirs,
 		ClaudeCommand:    claudeCommand,
+		CodexCommand:     codexCommand,
 		GeminiCommand:    geminiCommand,
 	}
 	t.config.UpdateTerminal(terminalCfg)
@@ -53,7 +54,7 @@ func (t *TerminalService) SaveTerminalConfig(selectedTerminal string, projectDir
 		}
 	}
 
-	logger.Info("Terminal config saved: terminal=%s, dirs=%d, claudeCommand=%s, geminiCommand=%s", selectedTerminal, len(projectDirs), claudeCommand, geminiCommand)
+	logger.Info("Terminal config saved: terminal=%s, dirs=%d, claudeCommand=%s, codexCommand=%s, geminiCommand=%s", selectedTerminal, len(projectDirs), claudeCommand, codexCommand, geminiCommand)
 	return nil
 }
 

@@ -354,8 +354,8 @@ export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }
 
-export function SaveTerminalConfig(arg1, arg2, arg3, arg4) {
-  return window['go']['main']['App']['SaveTerminalConfig'](arg1, arg2, arg3, arg4);
+export function SaveTerminalConfig(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['SaveTerminalConfig'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function SelectDirectory() {

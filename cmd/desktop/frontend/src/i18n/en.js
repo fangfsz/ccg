@@ -539,6 +539,8 @@ export default {
       "Custom CLI command to launch Claude Code, defaults to claude (e.g., hapi)",
     geminiCommand: "Gemini Command",
     geminiCommandHelp: "Custom Gemini CLI command, defaults to gemini",
+    codexCommand: "Codex Command",
+    codexCommandHelp: "Custom Codex CLI command, defaults to codex",
     cliTypeClaude: "Claude Code",
     cliTypeCodex: "Codex",
     cliTypeGemini: "Gemini CLI",

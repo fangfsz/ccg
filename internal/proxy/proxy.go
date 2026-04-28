@@ -377,7 +377,11 @@ func (p *Proxy) generateClientID(r *http.Request, bodyBytes []byte) string {
 		clientIP = r.RemoteAddr
 	}
 
-	hashInput = fmt.Sprintf("%s|%s", clientIP, apiKey)
+	apiKeySuffix := apiKey
+	if len(apiKey) > 8 {
+		apiKeySuffix = apiKey[:8]
+	}
+	hashInput = fmt.Sprintf("%s|%s", clientIP, apiKeySuffix)
 	return fmt.Sprintf("%x", hashInput)
 }
 

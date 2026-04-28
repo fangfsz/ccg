@@ -541,6 +541,12 @@ export function initUI() {
                                    oninput="window.onGeminiCommandChange()">
                             <small class="form-help">${t("terminal.geminiCommandHelp")}</small>
                         </div>
+                        <div class="form-group" id="codexCommandGroup" style="display: none;">
+                            <label>${t("terminal.codexCommand")}</label>
+                            <input type="text" id="codexCommandInput" placeholder="codex"
+                                   oninput="window.onCodexCommandChange()">
+                            <small class="form-help">${t("terminal.codexCommandHelp")}</small>
+                        </div>
                     </div>
 
                     <!-- 项目目录 -->

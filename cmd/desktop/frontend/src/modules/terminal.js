@@ -46,6 +46,7 @@ export function initTerminal() {
   window.closeTerminalModal = closeTerminalModal;
   window.onTerminalChange = onTerminalChange;
   window.onClaudeCommandChange = onClaudeCommandChange;
+  window.onCodexCommandChange = onCodexCommandChange;
   window.onGeminiCommandChange = onGeminiCommandChange;
   window.addProjectDir = addProjectDir;
   window.removeProjectDir = removeProjectDir;
@@ -70,19 +71,23 @@ function switchCliType(cliType) {
   const helpText = document.getElementById("terminalSelectHelp");
   const claudeCmdGroup = document.getElementById("claudeCommandGroup");
   const geminiCmdGroup = document.getElementById("geminiCommandGroup");
+  const codexCmdGroup = document.getElementById("codexCommandGroup");
   if (helpText) {
     if (cliType === "claude") {
       helpText.textContent = t("terminal.selectTerminalHelp");
       if (claudeCmdGroup) claudeCmdGroup.style.display = "block";
       if (geminiCmdGroup) geminiCmdGroup.style.display = "none";
+      if (codexCmdGroup) codexCmdGroup.style.display = "none";
     } else if (cliType === "codex") {
       helpText.textContent = t("terminal.selectTerminalHelpCodex");
       if (claudeCmdGroup) claudeCmdGroup.style.display = "none";
       if (geminiCmdGroup) geminiCmdGroup.style.display = "none";
+      if (codexCmdGroup) codexCmdGroup.style.display = "block";
     } else if (cliType === "gemini") {
       helpText.textContent = t("terminal.selectTerminalHelpGemini");
       if (claudeCmdGroup) claudeCmdGroup.style.display = "none";
       if (geminiCmdGroup) geminiCmdGroup.style.display = "block";
+      if (codexCmdGroup) codexCmdGroup.style.display = "none";
     }
   }
   // 应用CLI配置并显示匹配端点
@@ -255,6 +260,7 @@ async function onTerminalChange() {
       terminalConfig.selectedTerminal,
       terminalConfig.projectDirs,
       terminalConfig.claudeCommand || "",
+      terminalConfig.codexCommand || "",
       terminalConfig.geminiCommand || "",
     );
   } catch (err) {
@@ -270,10 +276,27 @@ async function onClaudeCommandChange() {
       terminalConfig.selectedTerminal,
       terminalConfig.projectDirs,
       terminalConfig.claudeCommand,
+      terminalConfig.codexCommand || "",
       terminalConfig.geminiCommand || "",
     );
   } catch (err) {
     console.error("Failed to save claude command:", err);
+  }
+}
+
+async function onCodexCommandChange() {
+  const cmdInput = document.getElementById("codexCommandInput");
+  terminalConfig.codexCommand = cmdInput ? cmdInput.value.trim() : "";
+  try {
+    await SaveTerminalConfig(
+      terminalConfig.selectedTerminal,
+      terminalConfig.projectDirs,
+      terminalConfig.claudeCommand || "",
+      terminalConfig.codexCommand,
+      terminalConfig.geminiCommand || "",
+    );
+  } catch (err) {
+    console.error("Failed to save codex command:", err);
   }
 }
 
@@ -285,6 +308,7 @@ async function onGeminiCommandChange() {
       terminalConfig.selectedTerminal,
       terminalConfig.projectDirs,
       terminalConfig.claudeCommand || "",
+      terminalConfig.codexCommand || "",
       terminalConfig.geminiCommand,
     );
   } catch (err) {

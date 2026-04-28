@@ -520,6 +520,8 @@ export default {
       "自定义 Claude Code 启动命令，默认为 claude（例如：hapi）",
     geminiCommand: "Gemini 命令",
     geminiCommandHelp: "自定义 Gemini CLI 启动命令，默认为 gemini",
+    codexCommand: "Codex 命令",
+    codexCommandHelp: "自定义 Codex CLI 启动命令，默认为 codex",
     cliTypeClaude: "Claude Code",
     cliTypeCodex: "Codex",
     cliTypeGemini: "Gemini CLI",
