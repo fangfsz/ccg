@@ -82,7 +82,7 @@ func prepareCxChatTransformer(endpoint config.Endpoint, endpointTransformer stri
 	case "passthrough", "claude":
 		model := endpoint.Model
 		if model == "" {
-			model = "claude-sonnet-4-20250514"
+			model = "claude-sonnet-4-6"
 		}
 		return chat.NewClaudeTransformer(model), nil
 	case "openai":
@@ -111,7 +111,7 @@ func prepareCxRespTransformer(endpoint config.Endpoint, endpointTransformer stri
 	case "passthrough", "claude":
 		model := endpoint.Model
 		if model == "" {
-			model = "claude-sonnet-4-20250514"
+			model = "claude-sonnet-4-6"
 		}
 		return responses.NewClaudeTransformer(model), nil
 	case "openai":

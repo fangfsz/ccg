@@ -126,8 +126,10 @@ func (p *Proxy) GetDrainingEndpoints() []string {
 // CircuitBreaker tracks failures for an endpoint and can open the circuit
 type CircuitBreaker struct {
 	mu                sync.RWMutex
-	failures          int           // consecutive failure count
-	threshold         int           // number of failures before opening circuit
+	failures          int           // consecutive failure count for service errors (503, etc.)
+	networkFailures   int           // consecutive failure count for network errors (DNS, connection refused)
+	threshold         int           // number of service failures before opening circuit
+	networkThreshold  int           // number of network failures before opening circuit
 	halfOpenSuccesses int           // successful calls needed to close circuit from half-open
 	halfOpenRequired  int           // successful calls needed to close circuit
 	openTime          time.Time     // when the circuit was opened
@@ -166,11 +168,13 @@ func (cb *CircuitBreaker) RecordSuccess() {
 	switch cb.state {
 	case CircuitClosed:
 		cb.failures = 0
+		cb.networkFailures = 0
 	case CircuitHalfOpen:
 		cb.halfOpenSuccesses++
 		if cb.halfOpenSuccesses >= cb.halfOpenRequired {
 			cb.state = CircuitClosed
 			cb.failures = 0
+			cb.networkFailures = 0
 			cb.halfOpenSuccesses = 0
 			logger.Info("[CircuitBreaker] Circuit closed, service recovered")
 		}
@@ -178,23 +182,60 @@ func (cb *CircuitBreaker) RecordSuccess() {
 }
 
 // RecordFailure records a failed request
-func (cb *CircuitBreaker) RecordFailure() {
+// isNetworkError indicates if the failure is due to network issues (DNS, connection refused, etc.)
+func (cb *CircuitBreaker) RecordFailure(isNetworkError bool) {
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
 
 	switch cb.state {
 	case CircuitClosed:
-		cb.failures++
-		if cb.failures >= cb.threshold {
-			cb.state = CircuitOpen
-			cb.openTime = time.Now()
-			logger.Warn("[CircuitBreaker] Circuit opened due to %d consecutive failures", cb.failures)
+		if isNetworkError {
+			cb.networkFailures++
+			cb.failures++ // also increment general counter for mixed error scenarios
+			if cb.networkFailures >= cb.networkThreshold {
+				cb.state = CircuitOpen
+				cb.openTime = time.Now()
+				logger.Warn("[CircuitBreaker] Circuit opened due to %d consecutive network failures (threshold: %d)", cb.networkFailures, cb.networkThreshold)
+			}
+		} else {
+			cb.failures++
+			cb.networkFailures++ // also increment network counter for mixed error scenarios
+			if cb.failures >= cb.threshold {
+				cb.state = CircuitOpen
+				cb.openTime = time.Now()
+				logger.Warn("[CircuitBreaker] Circuit opened due to %d consecutive service failures", cb.failures)
+			}
 		}
 	case CircuitHalfOpen:
 		cb.state = CircuitOpen
 		cb.openTime = time.Now()
 		logger.Warn("[CircuitBreaker] Request failed in half-open state, circuit reopened")
 	}
+}
+
+// IsNetworkError determines if an error is a network-related error
+func IsNetworkError(err error) bool {
+	if err == nil {
+		return false
+	}
+	message := strings.ToLower(err.Error())
+	networkErrorIndicators := []string{
+		"no such host",
+		"connection refused",
+		"connection reset",
+		"connection aborted",
+		"network is unreachable",
+		"host is unreachable",
+		"network is down",
+		"cannot resolve",
+		"lookup",
+	}
+	for _, indicator := range networkErrorIndicators {
+		if strings.Contains(message, indicator) {
+			return true
+		}
+	}
+	return false
 }
 
 // Proxy represents the proxy server
@@ -483,7 +524,9 @@ func (p *Proxy) getCircuitBreaker(endpointName string) *CircuitBreaker {
 
 	cb := &CircuitBreaker{
 		failures:          0,
-		threshold:         5, // 连续失败 5 次后打开断路器
+		networkFailures:   0,
+		threshold:         5,  // 连续服务错误(503等) 5 次后打开断路器
+		networkThreshold:  10, // 连续网络错误(DNS/连接等) 10 次后打开断路器
 		halfOpenSuccesses: 0,
 		halfOpenRequired:  2, // 半开状态下需要 2 次成功才能关闭
 		openTime:          time.Time{},
@@ -511,9 +554,9 @@ func (p *Proxy) recordEndpointSuccess(endpointName string) {
 }
 
 // recordEndpointFailure 记录端点失败
-func (p *Proxy) recordEndpointFailure(endpointName string) {
+func (p *Proxy) recordEndpointFailure(endpointName string, err error) {
 	cb := p.getCircuitBreaker(endpointName)
-	cb.RecordFailure()
+	cb.RecordFailure(IsNetworkError(err))
 }
 
 // resetCircuitBreaker 重置端点的熔断器状态
@@ -669,6 +712,7 @@ func (p *Proxy) cancelEndpointRequests(endpointName string) {
 
 // rotateEndpoint switches to the next endpoint (thread-safe)
 // Uses connection draining to gracefully handle ongoing requests on the old endpoint
+// Skips endpoints with circuit breakers open
 func (p *Proxy) rotateEndpoint() config.Endpoint {
 	oldEndpoint := p.getCurrentEndpoint()
 
@@ -684,20 +728,48 @@ func (p *Proxy) rotateEndpoint() config.Endpoint {
 		return config.Endpoint{}
 	}
 
-	oldIndex := p.currentIndex % len(endpoints)
-	oldEndpoint = endpoints[oldIndex]
+	// Find next available endpoint (skip circuit breakers and draining endpoints)
+	maxAttempts := len(endpoints)
+	var validCandidate config.Endpoint
+	var validIndex int
+	found := false
 
-	// Calculate next index
-	p.currentIndex = (oldIndex + 1) % len(endpoints)
+	for i := 0; i < maxAttempts; i++ {
+		nextIndex := (p.currentIndex + 1 + i) % len(endpoints)
+		candidate := endpoints[nextIndex]
 
-	newEndpoint := endpoints[p.currentIndex]
-	if len(endpoints) > 1 && oldEndpoint.Name != newEndpoint.Name {
-		// 开始排空旧端点，而不是立即取消请求
-		p.startDrainingEndpoint(oldEndpoint.Name)
-		logger.Debug("[SWITCH] %s → %s (#%d) (旧端点开始排空)", oldEndpoint.Name, newEndpoint.Name, p.currentIndex+1)
+		cb := p.getCircuitBreaker(candidate.Name)
+		if cb.ShouldAllow() && !p.isDrainingLocked(candidate.Name) {
+			validCandidate = candidate
+			validIndex = nextIndex
+			found = true
+			break
+		}
+		logger.Debug("[SWITCH] 跳过端点 %s (断路器开启或正在排空)", candidate.Name)
 	}
 
-	return newEndpoint
+	if found {
+		// Only drain old endpoint and update index when we actually found a valid candidate
+		if len(endpoints) > 1 && oldEndpoint.Name != validCandidate.Name {
+			p.startDrainingEndpoint(oldEndpoint.Name)
+			logger.Debug("[SWITCH] %s → %s (#%d) (旧端点开始排空)", oldEndpoint.Name, validCandidate.Name, validIndex+1)
+		}
+		p.currentIndex = validIndex
+		return validCandidate
+	}
+
+	// No available endpoints found
+	logger.Warn("[SWITCH] 所有可用端点均不可用（断路器开启或正在排空）")
+	return config.Endpoint{}
+}
+
+// isDrainingLocked checks if an endpoint is draining (called with lock held)
+func (p *Proxy) isDrainingLocked(endpointName string) bool {
+	deadline, exists := p.drainingEndpoints[endpointName]
+	if !exists {
+		return false
+	}
+	return time.Now().Before(deadline)
 }
 
 // GetCurrentEndpointName returns the current endpoint name (thread-safe)
@@ -886,25 +958,35 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 
 		// 熔断器检查：如果端点的断路器开启，跳过该端点
 		if p.shouldSkipEndpoint(endpoint.Name) {
-			logger.Warn("[CircuitBreaker] 端点 %s 断路器开启", endpoint.Name)
+			logger.Warn("[CircuitBreaker] 端点 %s 断路器开启，跳过", endpoint.Name)
 			p.markRequestInactive(endpoint.Name)
 			if useSpecificEndpoint {
 				p.writeJSONError(w, fmt.Sprintf("Endpoint %s is unavailable (circuit breaker open)", endpoint.Name), http.StatusServiceUnavailable)
 				return
 			}
-			p.rotateEndpoint()
+			newEndpoint := p.rotateEndpoint()
+			if newEndpoint.Name == "" {
+				logger.Error("[CircuitBreaker] 所有端点断路器均开启，无法处理请求")
+				p.writeJSONError(w, "All endpoints are unavailable due to circuit breakers", http.StatusServiceUnavailable)
+				return
+			}
 			continue
 		}
 
 		// 排空检查：如果端点正在排空，跳过该端点
 		if p.isDraining(endpoint.Name) {
-			logger.Warn("[Drain] 端点 %s 正在排空", endpoint.Name)
+			logger.Warn("[Drain] 端点 %s 正在排空，跳过", endpoint.Name)
 			p.markRequestInactive(endpoint.Name)
 			if useSpecificEndpoint {
 				p.writeJSONError(w, fmt.Sprintf("Endpoint %s is draining and unavailable", endpoint.Name), http.StatusServiceUnavailable)
 				return
 			}
-			p.rotateEndpoint()
+			newEndpoint := p.rotateEndpoint()
+			if newEndpoint.Name == "" {
+				logger.Error("[Drain] 所有端点均正在排空，无法处理请求")
+				p.writeJSONError(w, "All endpoints are draining and unavailable", http.StatusServiceUnavailable)
+				return
+			}
 			continue
 		}
 
@@ -982,6 +1064,7 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 		}
 
 		transformerName := trans.Name()
+		logger.Debug("[%s] 转换器选择: clientFormat=%s, endpointTransformer=%s → %s", endpoint.Name, clientFormat, endpoint.Transformer, transformerName)
 
 		transformedBody, err := trans.TransformRequest(bodyBytes)
 		if err != nil {
@@ -1026,11 +1109,47 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 		} else if fallbackModel != "" {
 			modelName = fallbackModel
 			logger.Debug("[%s] 使用 fallback 模型: %s", endpoint.Name, modelName)
+		} else if len(endpoint.ModelMappings) > 0 {
+			if mappedModel, ok := endpoint.ModelMappings[modelName]; ok {
+				modelName = mappedModel
+				logger.Info("[%s] 模型名称映射: %s → %s (根据端点模型映射配置)", endpoint.Name, originalModelName, modelName)
+			} else if endpoint.Model != "" {
+				modelName = endpoint.Model
+				logger.Info("[%s] 动态模型映射: %s → %s (根据端点配置自动替换)", endpoint.Name, originalModelName, modelName)
+			} else if modelName == "" && !useSpecificEndpoint {
+				if autoModel, availableModels := p.GetFirstAvailableModel(endpoint.Name); autoModel != "" {
+					modelName = autoModel
+					logger.Info("[%s] 自动发现模型: %s (可用模型数: %d)", endpoint.Name, modelName, len(availableModels))
+				}
+			}
 		} else if endpoint.Model != "" && modelName != endpoint.Model {
 			modelName = endpoint.Model
 			logger.Info("[%s] 动态模型映射: %s → %s (根据端点配置自动替换)", endpoint.Name, originalModelName, modelName)
 		} else if modelName == "" {
 			modelName = endpoint.Model
+			if modelName == "" && !useSpecificEndpoint {
+				if autoModel, availableModels := p.GetFirstAvailableModel(endpoint.Name); autoModel != "" {
+					modelName = autoModel
+					logger.Info("[%s] 自动发现模型: %s (可用模型数: %d)", endpoint.Name, modelName, len(availableModels))
+				}
+			}
+		}
+
+		autoSwitched := false
+		if valid, availModels := p.ValidateModelForEndpoint(endpoint.Name, modelName); !valid && availModels != nil && len(availModels) > 0 {
+			if !useSpecificEndpoint {
+				logger.Warn("[%s] 模型 %s 不在 API Key 权限范围内，自动切换到: %s", endpoint.Name, modelName, availModels[0])
+				modelName = availModels[0]
+				autoSwitched = true
+			} else {
+				if len(availModels) <= 10 {
+					logger.Warn("[%s] 模型 %s 不在 API Key 权限范围内，可用模型: %v", endpoint.Name, modelName, availModels)
+				} else {
+					logger.Warn("[%s] 模型 %s 不在 API Key 权限范围内，可用模型(前10个): %v", endpoint.Name, modelName, availModels[:10])
+				}
+			}
+		} else if !valid && modelName != "" {
+			logger.Debug("[%s] 模型缓存未初始化，跳过模型验证", endpoint.Name)
 		}
 
 		if modelName != originalModelName {
@@ -1043,8 +1162,14 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 				reason = "模型覆盖"
 			case fallbackModel != "":
 				reason = "fallback"
-			default:
+			case len(endpoint.ModelMappings) > 0 && originalModelName != modelName:
+				reason = "模型映射"
+			case endpoint.Model != "" && originalModelName != modelName:
 				reason = "动态映射"
+			case autoSwitched:
+				reason = "自动切换"
+			default:
+				reason = "自动发现"
 			}
 			logger.Debug("[%s] 替换请求体中的模型(%s): %s → %s", endpoint.Name, reason, originalModelName, modelName)
 		}
@@ -1088,6 +1213,17 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 		}
 
 		ctx := p.getEndpointContext(endpoint.Name)
+
+		logger.Debug("[%s] >>> REQUEST START >>>", endpoint.Name)
+		logger.Debug("[%s] URL: %s %s", endpoint.Name, proxyReq.Method, proxyReq.URL.String())
+		logger.Debug("[%s] Headers: %v", endpoint.Name, proxyReq.Header)
+		bodyPreview := string(transformedBody)
+		if len(bodyPreview) > 500 {
+			bodyPreview = bodyPreview[:500] + "...(truncated)"
+		}
+		logger.Debug("[%s] Body: %s", endpoint.Name, bodyPreview)
+		logger.Debug("[%s] >>> REQUEST END >>>", endpoint.Name)
+
 		resp, err := sendRequest(ctx, proxyReq, p.httpClient, p.config)
 		if err != nil {
 			logger.Error("[%s] Request failed: %v", endpoint.Name, err)
@@ -1101,6 +1237,7 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 			p.markCredentialFailure(credentialID, 0, err.Error())
 			p.recordCredentialUsage(credentialID, endpoint.Name, 0, 1, 0, 0)
 			p.stats.RecordError(endpoint.Name)
+			p.recordEndpointFailure(endpoint.Name, err)
 			p.markRequestInactive(endpoint.Name)
 			if endpointAttempts >= 2 {
 				p.rotateEndpoint()
@@ -1205,12 +1342,31 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 			if len(errMsg) > 200 {
 				errMsg = errMsg[:200] + "..."
 			}
-			logger.Warn("[%s] Request failed %d: %s", endpoint.Name, resp.StatusCode, errMsg)
+			if resp.StatusCode == http.StatusNotFound {
+				if strings.Contains(errMsg, "model") || strings.Contains(errMsg, "invalid_request_error") {
+					logger.Warn("[%s] ⚠️ 模型不存在或无权限访问 (404)", endpoint.Name)
+					logger.Warn("[%s] 模型 %s 可能不在 API Key 权限范围内，请检查端点配置", endpoint.Name, modelName)
+					if valid, availableModels := p.ValidateModelForEndpoint(endpoint.Name, modelName); availableModels != nil {
+						if !valid {
+							if len(availableModels) <= 10 {
+								logger.Warn("[%s] 可用模型列表: %v", endpoint.Name, availableModels)
+							} else {
+								logger.Warn("[%s] 可用模型列表(前10个): %v", endpoint.Name, availableModels[:10])
+							}
+						}
+					}
+				} else {
+					logger.Warn("[%s] Request failed %d: %s (可能是 API 路径错误)", endpoint.Name, resp.StatusCode, errMsg)
+				}
+			} else {
+				logger.Warn("[%s] Request failed %d: %s", endpoint.Name, resp.StatusCode, errMsg)
+			}
 			logger.DebugLog("[%s] Request failed %d: %s", endpoint.Name, resp.StatusCode, errMsg)
 			p.markCredentialFailure(credentialID, resp.StatusCode, errMsg)
 			p.recordCredentialUsage(credentialID, endpoint.Name, 0, 1, 0, 0)
 			p.stats.RecordError(endpoint.Name)
-			p.recordEndpointFailure(endpoint.Name)
+			httpErr := fmt.Errorf("http %d: %s", resp.StatusCode, errMsg)
+			p.recordEndpointFailure(endpoint.Name, httpErr)
 			p.markRequestInactive(endpoint.Name)
 			if endpointAttempts >= 2 {
 				p.rotateEndpoint()

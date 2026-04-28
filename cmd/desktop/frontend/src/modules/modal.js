@@ -382,17 +382,17 @@ export function handleTransformerChange() {
   clearFetchedModels();
 
   modelRequired.style.display = "none";
-  if (transformer === "claude") {
-    modelInput.placeholder = "e.g., claude-3-5-sonnet-20241022";
+  if (transformer === "passthrough") {
+    modelInput.placeholder = "e.g., claude-sonnet-4-6";
     modelHelpText.textContent = t("modal.modelHelpClaude");
   } else if (transformer === "openai") {
-    modelInput.placeholder = "e.g., gpt-4-turbo";
+    modelInput.placeholder = "e.g., gpt-5.4";
     modelHelpText.textContent = t("modal.modelHelpOpenAI");
   } else if (transformer === "openai2") {
-    modelInput.placeholder = "e.g., gpt-4.1";
+    modelInput.placeholder = "e.g., gpt-5.4";
     modelHelpText.textContent = t("modal.modelHelpOpenAI2");
   } else if (transformer === "gemini") {
-    modelInput.placeholder = "e.g., gemini-pro";
+    modelInput.placeholder = "e.g., gemini-3.1-pro";
     modelHelpText.textContent = t("modal.modelHelpGemini");
   }
 }

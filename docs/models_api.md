@@ -26,7 +26,7 @@ curl http://localhost:3000/v1/models?refresh=true
   "object": "list",
   "data": [
     {
-      "id": "claude-sonnet-4-20250514",
+      "id": "claude-sonnet-4-6",
       "object": "model",
       "created": 1700000000,
       "owned_by": "anthropic",

@@ -92,16 +92,12 @@ export default {
     togglePassword: "显示/隐藏密钥",
     transformer: "转换器",
     transformerHelp: "选择此端点的 API 格式",
-    transformerOptionPassthrough:
-      "Claude 直通 - 原生 Claude API 格式，适用于 Claude API 官方端点",
-    transformerOptionOpenAI:
-      "OpenAI 转换 - 将 Claude 请求转换为 OpenAI Chat 格式 (/v1/chat/completions)",
-    transformerOptionOpenAI2:
-      "OpenAI2 转换 - 将 Claude 请求转换为 OpenAI Responses 格式 (/v1/responses)，适用于 Codex",
-    transformerOptionGemini:
-      "Gemini 转换 - 将 Claude 请求转换为 Google Gemini API 格式",
+    transformerOptionPassthrough: "其他模型转 Claude 格式",
+    transformerOptionOpenAI: "其他模型转 OpenAI Chat 格式",
+    transformerOptionOpenAI2: "其他模型转 OpenAI Response 格式",
+    transformerOptionGemini: "其他模型转 Gemini 格式",
     model: "模型",
-    modelPlaceholder: "例如：claude-sonnet-4-5-20250929",
+    modelPlaceholder: "例如：claude-sonnet-4-6",
     modelHelp: "可选：覆盖请求中指定的模型",
     modelHelpClaude: "可选：覆盖请求中指定的模型",
     modelHelpOpenAI: "指定要使用的 OpenAI 模型",

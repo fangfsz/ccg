@@ -156,7 +156,59 @@ func (p *Proxy) fetchModelsFromEndpoint(ep config.Endpoint) ([]ModelInfo, error)
 		}
 	}
 
+	logger.Debug("[%s] 获取到 %d 个可用模型: %v", ep.Name, len(models), extractModelIDs(models))
+	if len(models) > 20 {
+		logger.Debug("[%s] 模型列表(前20个): %v", ep.Name, extractModelIDs(models[:20]))
+		logger.Debug("[%s] 模型列表(后 %d 个): %v ...", ep.Name, len(models)-20, extractModelIDs(models[len(models)-10:]))
+	} else if len(models) > 0 {
+		logger.Debug("[%s] 完整模型列表: %v", ep.Name, extractModelIDs(models))
+	}
+
 	return models, nil
+}
+
+func extractModelIDs(models []ModelInfo) []string {
+	ids := make([]string, len(models))
+	for i, m := range models {
+		ids[i] = m.ID
+	}
+	return ids
+}
+
+func (p *Proxy) ValidateModelForEndpoint(endpointName string, modelName string) (bool, []string) {
+	if cached, ok := p.modelsCache.Get(); ok {
+		var endpointModels []string
+		for _, m := range cached {
+			if m.EndpointID == endpointName {
+				endpointModels = append(endpointModels, m.ID)
+			}
+		}
+		if len(endpointModels) == 0 {
+			return false, nil
+		}
+		for _, id := range endpointModels {
+			if id == modelName {
+				return true, endpointModels
+			}
+		}
+		return false, endpointModels
+	}
+	return false, nil
+}
+
+func (p *Proxy) GetFirstAvailableModel(endpointName string) (string, []string) {
+	if cached, ok := p.modelsCache.Get(); ok {
+		var endpointModels []string
+		for _, m := range cached {
+			if m.EndpointID == endpointName {
+				endpointModels = append(endpointModels, m.ID)
+			}
+		}
+		if len(endpointModels) > 0 {
+			return endpointModels[0], endpointModels
+		}
+	}
+	return "", nil
 }
 
 // getDefaultModels returns default models for endpoints that don't support /v1/models
@@ -165,28 +217,39 @@ func (p *Proxy) getDefaultModels(ep config.Endpoint) []ModelInfo {
 	var ownedBy string
 
 	switch strings.ToLower(ep.Transformer) {
-	case "claude":
-		// Claude endpoints
+	case "claude", "passthrough":
 		if ep.Model != "" {
 			modelID = ep.Model
 		} else {
-			modelID = "claude-sonnet-4-20250514" // Default Claude model
+			modelID = "claude-sonnet-4-6"
 		}
 		ownedBy = "anthropic"
 
-	case "openai2":
-		// Codex endpoints
+	case "openai":
 		if ep.Model != "" {
 			modelID = ep.Model
-		} else if ep.AuthMode == config.AuthModeCodexTokenPool {
-			modelID = "gpt-5-codex" // Default Codex model
 		} else {
-			modelID = "gpt-4o" // Default OpenAI model
+			modelID = "gpt-5.4"
 		}
 		ownedBy = "openai"
 
+	case "openai2":
+		if ep.Model != "" {
+			modelID = ep.Model
+		} else {
+			modelID = "gpt-5.4"
+		}
+		ownedBy = "openai"
+
+	case "gemini":
+		if ep.Model != "" {
+			modelID = ep.Model
+		} else {
+			modelID = "gemini-3.1-pro"
+		}
+		ownedBy = "google"
+
 	default:
-		// Fallback for any other transformer
 		if ep.Model != "" {
 			modelID = ep.Model
 		} else {

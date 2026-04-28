@@ -43,7 +43,7 @@
   "apiKey": "sk-xxx",
   "enabled": true,
   "transformer": "openai",
-  "model": "gpt-4-turbo"
+  "model": "gpt-5.4"
 }
 ```
 
@@ -55,7 +55,7 @@
   "apiKey": "AIza-xxx",
   "enabled": true,
   "transformer": "gemini",
-  "model": "gemini-pro"
+  "model": "gemini-3.1-pro"
 }
 ```
 

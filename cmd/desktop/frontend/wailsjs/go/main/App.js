@@ -334,6 +334,10 @@ export function ReorderEndpoints(arg1) {
   return window['go']['main']['App']['ReorderEndpoints'](arg1);
 }
 
+export function RestoreCLIConfig(arg1) {
+  return window['go']['main']['App']['RestoreCLIConfig'](arg1);
+}
+
 export function RestoreCLIConfigs() {
   return window['go']['main']['App']['RestoreCLIConfigs']();
 }

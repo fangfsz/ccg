@@ -17,9 +17,9 @@
 
 | 转换器 | 推荐默认模型 | 说明 |
 |--------|--------------|------|
-| `claude` | `claude-sonnet-4-20250514` | Claude 4.6 系列 |
-| `openai` | `gpt-4o` | OpenAI 最新通用模型 |
-| `openai2` | `gpt-4o` | OpenAI 最新通用模型 |
+| `claude` | `claude-sonnet-4-6` | Claude 4.6 系列 |
+| `openai` | `gpt-5.4` | OpenAI 最新通用模型 |
+| `openai2` | `gpt-5.4` | OpenAI 最新通用模型 |
 | `gemini` | `gemini-3.1-pro` | Google Gemini 最新模型 |
 | `codex` | `gpt-5.4` | Codex 推荐默认模型 |
 
@@ -53,7 +53,7 @@
   "apiKey": "sk-xxx",
   "enabled": true,
   "transformer": "openai",
-  "model": "gpt-4o"
+  "model": "gpt-5.4"
 }
 ```
 

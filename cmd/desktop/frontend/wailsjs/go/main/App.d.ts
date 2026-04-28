@@ -167,6 +167,8 @@ export function RenameSession(arg1:string,arg2:string,arg3:string):Promise<void>
 
 export function ReorderEndpoints(arg1:Array<string>):Promise<void>;
 
+export function RestoreCLIConfig(arg1:string):Promise<void>;
+
 export function RestoreCLIConfigs():Promise<void>;
 
 export function RestoreFromProvider(arg1:string,arg2:string,arg3:string):Promise<void>;

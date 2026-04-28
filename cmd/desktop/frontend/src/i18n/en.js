@@ -96,16 +96,12 @@ export default {
     togglePassword: "Show/Hide Key",
     transformer: "Transformer",
     transformerHelp: "Select the API format for this endpoint",
-    transformerOptionPassthrough:
-      "Passthrough - No transformation, direct Claude format",
-    transformerOptionOpenAI:
-      "OpenAI Transform - Converts Claude requests to OpenAI Chat format (/v1/chat/completions)",
-    transformerOptionOpenAI2:
-      "OpenAI2 Transform - Converts Claude requests to OpenAI Responses format (/v1/responses), for Codex",
-    transformerOptionGemini:
-      "Gemini Transform - Converts Claude requests to Google Gemini API format",
+    transformerOptionPassthrough: "Other → Claude Format",
+    transformerOptionOpenAI: "Other → OpenAI Chat Format",
+    transformerOptionOpenAI2: "Other → OpenAI Response Format",
+    transformerOptionGemini: "Other → Gemini Format",
     model: "Model",
-    modelPlaceholder: "e.g., claude-sonnet-4-5-20250929",
+    modelPlaceholder: "e.g., claude-sonnet-4-6",
     modelHelp: "Optional: Override the model specified in requests",
     modelHelpClaude: "Optional: Override the model specified in requests",
     modelHelpOpenAI: "Specify the OpenAI model to use",
