@@ -53,54 +53,176 @@ func prepareTransformerForClient(clientFormat ClientFormat, endpoint config.Endp
 
 // inferTransformer automatically selects the best transformer based on endpoint configuration
 // It considers ProviderType, model name patterns, and client format to make an intelligent decision
+//
+// Key decision logic:
+// 1. cliproxyapi: always passthrough (no transformation)
+// 2. Chinese models supporting Claude natively (DeepSeek, MiniMax, Qwen):
+//   - If clientFormat is Claude: passthrough (no transformation needed)
+//   - If clientFormat is OpenAI: claude (convert Claude → OpenAI)
+//
+// 3. Chinese models NOT supporting Claude natively (GLM, etc.):
+//   - Always use openai (convert whatever → OpenAI)
+//
+// 4. OpenAI/Claude/Gemini models: use appropriate native format
+// 5. Relay providers (oneapi, newapi, sub2api): use openai (they accept OpenAI format)
 func inferTransformer(endpoint config.Endpoint, clientFormat ClientFormat) string {
 	providerType := strings.ToLower(strings.TrimSpace(endpoint.ProviderType))
 	modelName := strings.ToLower(strings.TrimSpace(endpoint.Model))
 
+	logger.Debug("[Transformer] Inferring: provider=%s, model=%s, clientFormat=%s",
+		providerType, modelName, clientFormat)
+
+	// 1. cliproxyapi always passthrough
 	if providerType == "cliproxyapi" {
+		logger.Debug("[Transformer] cliproxyapi → passthrough")
 		return "passthrough"
 	}
 
-	if isChineseModel(modelName) {
-		if clientFormat == ClientFormatOpenAIChat || clientFormat == ClientFormatOpenAIResponses {
+	// 2. Chinese models that support Claude natively
+	if isClaudeCompatibleChineseModel(modelName) {
+		logger.Debug("[Transformer] Claude-compatible Chinese model detected: %s", modelName)
+		if clientFormat == ClientFormatClaude {
+			logger.Debug("[Transformer] Client wants Claude, model supports it natively → passthrough")
 			return "passthrough"
 		}
+		// Client wants OpenAI but model supports Claude natively
+		logger.Debug("[Transformer] Client wants %s, converting from Claude → %s", clientFormat, "openai/claude")
+		return "claude"
+	}
+
+	// 3. Chinese models that do NOT support Claude natively (GLM, etc.)
+	if isOpenAICompatibleChineseModel(modelName) {
+		logger.Debug("[Transformer] OpenAI-only Chinese model: %s → openai", modelName)
 		return "openai"
 	}
 
-	switch providerType {
-	case "oneapi", "newapi":
+	// 4. Relay providers - use OpenAI format
+	if isRelayProvider(providerType) {
+		logger.Debug("[Transformer] Relay provider (%s) → openai", providerType)
 		return "openai"
-	case "sub2api":
-		return "openai"
-	case "native", "":
+	}
+
+	// 5. Native providers with native model types
+	if providerType == "native" || providerType == "" {
 		if isOpenAIModel(modelName) {
+			logger.Debug("[Transformer] OpenAI model → openai")
 			return "openai"
 		}
 		if isClaudeModel(modelName) {
 			if clientFormat == ClientFormatClaude {
+				logger.Debug("[Transformer] Claude model + Claude client → passthrough")
 				return "passthrough"
 			}
+			logger.Debug("[Transformer] Claude model + non-Claude client → claude")
 			return "claude"
 		}
 		if isGeminiModel(modelName) {
+			logger.Debug("[Transformer] Gemini model → gemini")
 			return "gemini"
 		}
 	}
 
-	if clientFormat == ClientFormatOpenAIChat || clientFormat == ClientFormatOpenAIResponses {
-		return "passthrough"
-	}
+	logger.Debug("[Transformer] Default → openai")
 	return "openai"
 }
 
+// isRelayProvider checks if the provider type is a known relay/proxy service
+func isRelayProvider(providerType string) bool {
+	relayProviders := []string{"oneapi", "newapi", "sub2api"}
+	for _, p := range relayProviders {
+		if providerType == p {
+			return true
+		}
+	}
+	return false
+}
+
+// shouldSkipProbe checks if we should skip API path probing for this endpoint
+// Probing can trigger rate limits on third-party relays and may not work with GET requests
+// for endpoints that only support POST. For known relay providers, probing is generally safe.
+func shouldSkipProbe(providerType string) bool {
+	providerType = strings.ToLower(strings.TrimSpace(providerType))
+
+	// Known relay providers support probing well
+	if isRelayProvider(providerType) {
+		return false
+	}
+
+	// cliproxyapi should skip probing (typically requires POST)
+	if providerType == "cliproxyapi" {
+		return true
+	}
+
+	// Empty or "native" providers - these are usually official APIs that support probing
+	if providerType == "" || providerType == "native" {
+		return false
+	}
+
+	// For any other third-party relay, skip probing to avoid rate limits
+	// The system will rely on inference from ProviderType and transformer
+	return true
+}
+
+// inferAPIPathFromConfig infers the API path based on ProviderType and transformer
+// This is used when probing is skipped to avoid rate limits
+func inferAPIPathFromConfig(providerType string, transformer string) string {
+	providerType = strings.ToLower(strings.TrimSpace(providerType))
+	transformer = strings.ToLower(strings.TrimSpace(transformer))
+
+	// Known relay providers
+	if isRelayProvider(providerType) {
+		switch transformer {
+		case "openai", "passthrough", "claude", "auto":
+			return "/v1/chat/completions"
+		case "openai2":
+			return "/v1/responses"
+		case "gemini":
+			return "/v1beta/models/{model}:generateContent"
+		default:
+			return "/v1/chat/completions"
+		}
+	}
+
+	// cliproxyapi - supports POST only
+	if providerType == "cliproxyapi" {
+		switch transformer {
+		case "openai", "auto":
+			return "/v1/chat/completions"
+		case "openai2":
+			return "/v1/responses"
+		case "passthrough", "claude":
+			return "/v1/messages"
+		case "gemini":
+			return "/v1beta/models/{model}:generateContent"
+		default:
+			return "/v1/chat/completions"
+		}
+	}
+
+	// Native or empty provider type - use transformer to determine
+	switch transformer {
+	case "openai", "auto":
+		return "/v1/chat/completions"
+	case "openai2":
+		return "/v1/responses"
+	case "passthrough", "claude":
+		return "/v1/messages"
+	case "gemini":
+		return "/v1beta/models/{model}:generateContent"
+	default:
+		return "/v1/chat/completions"
+	}
+}
+
 // isChineseModel checks if the model name indicates a Chinese domestic model
+// Note: Not all Chinese models support Claude /v1/messages natively.
+// Use isClaudeCompatibleChineseModel to check Claude API compatibility.
 func isChineseModel(modelName string) bool {
 	chinesePrefixes := []string{
-		"glm-", "glm.", // Zhipu AI (智谱AI)
-		"qwen-", "qwen.", // Alibaba (阿里通义)
-		"deepseek-", // DeepSeek (深度求索)
-		"minimax-",  // MiniMax (海螺AI)
+		"glm-", "glm.", // Zhipu AI (智谱AI) - 不支持Claude原生
+		"qwen-", "qwen.", // Alibaba (阿里通义) - 支持Claude原生
+		"deepseek-", // DeepSeek (深度求索) - 支持Claude原生
+		"minimax-",  // MiniMax (海螺AI) - 支持Claude原生
 		"moonshot-", // Moonshot (月之暗面)
 		"spark-",    // iFlytek (科大讯飞星火)
 		"ernie-",    // Baidu (百度文心)
@@ -117,6 +239,49 @@ func isChineseModel(modelName string) bool {
 		}
 	}
 	return false
+}
+
+// isClaudeCompatibleChineseModel checks if a Chinese domestic model supports Claude /v1/messages natively
+// Based on research as of 2026-04-28:
+// - DeepSeek V4/V3: Supported via https://api.deepseek.com/anthropic/v1/messages
+// - MiniMax M2.7/M2.1: Supported via https://api.minimax.io/anthropic/v1/messages
+// - Qwen series: Supported via https://dashscope.aliyuncs.com/apps/anthropic
+// - GLM series: NOT supported natively, requires OpenAI format or third-party relay
+func isClaudeCompatibleChineseModel(modelName string) bool {
+	modelName = strings.ToLower(modelName)
+
+	// Models that support Claude /v1/messages natively
+	// Use prefix matching with common separators: -, ., /
+	if strings.HasPrefix(modelName, "deepseek-") ||
+		strings.HasPrefix(modelName, "deepseek.") ||
+		strings.HasPrefix(modelName, "minimax-") ||
+		strings.HasPrefix(modelName, "minimax.") ||
+		strings.HasPrefix(modelName, "qwen-") ||
+		strings.HasPrefix(modelName, "qwen.") ||
+		strings.HasPrefix(modelName, "qwq-") ||
+		strings.HasPrefix(modelName, "qwq.") {
+		return true
+	}
+
+	// Handle Qwen models with version numbers like qwen3.6-plus, qwen3.5-plus
+	// These have pattern: qwen<digit>.<digit>...
+	if strings.HasPrefix(modelName, "qwen") {
+		// Check if after "qwen" there's a digit (version number)
+		if len(modelName) > 4 {
+			c := modelName[4]
+			if c >= '0' && c <= '9' {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// isOpenAICompatibleChineseModel checks if a Chinese model requires OpenAI format
+// These models do NOT support Claude /v1/messages natively and need format conversion
+func isOpenAICompatibleChineseModel(modelName string) bool {
+	return isChineseModel(modelName) && !isClaudeCompatibleChineseModel(modelName)
 }
 
 // isOpenAIModel checks if the model name indicates an OpenAI model
@@ -244,7 +409,7 @@ func prepareCxRespTransformer(endpoint config.Endpoint, endpointTransformer stri
 
 // getTargetPath determines the target API path based on transformer name and ProviderType
 func getTargetPath(originalPath string, endpoint config.Endpoint, transformedBody []byte, transformerName string) string {
-	preferredPath := getPreferredAPIPath(endpoint.ProviderType, endpoint.Transformer, endpoint.CustomPath)
+	preferredPath := getPreferredAPIPath(endpoint.ProviderType, transformerName, endpoint.CustomPath)
 	if preferredPath != "" {
 		return preferredPath
 	}

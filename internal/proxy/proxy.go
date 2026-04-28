@@ -711,7 +711,17 @@ func getPreferredAPIPath(providerType, transformer, customPath string) string {
 }
 
 // probeAvailablePaths 探测端点支持的 API 路径
+// 如果 ProviderType 表明是第三方中转站，则跳过探测以避免触发限流
 func (p *Proxy) probeAvailablePaths(endpoint config.Endpoint, modelName string) []string {
+	providerType := strings.ToLower(strings.TrimSpace(endpoint.ProviderType))
+
+	// 对于第三方中转站，跳过探测，直接使用推断的路径
+	if shouldSkipProbe(providerType) {
+		inferredPath := inferAPIPathFromConfig(providerType, endpoint.Transformer)
+		logger.Debug("[%s] 跳过探测 (第三方中转站), 使用推断路径: %s", endpoint.Name, inferredPath)
+		return []string{inferredPath}
+	}
+
 	var availablePaths []string
 	pathsToProbe := []string{
 		"/v1/chat/completions",
@@ -721,7 +731,7 @@ func (p *Proxy) probeAvailablePaths(endpoint config.Endpoint, modelName string) 
 	}
 
 	client := &http.Client{Timeout: 5 * time.Second}
-	for _, path := range pathsToProbe {
+	for i, path := range pathsToProbe {
 		url := strings.TrimSuffix(endpoint.APIUrl, "/") + path
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -732,6 +742,10 @@ func (p *Proxy) probeAvailablePaths(endpoint config.Endpoint, modelName string) 
 
 		resp, err := client.Do(req)
 		if err != nil {
+			// 探测失败时，等待一下再尝试下一个，避免触发限流
+			if i < len(pathsToProbe)-1 {
+				time.Sleep(500 * time.Millisecond)
+			}
 			continue
 		}
 		resp.Body.Close()
@@ -740,10 +754,18 @@ func (p *Proxy) probeAvailablePaths(endpoint config.Endpoint, modelName string) 
 			availablePaths = append(availablePaths, path)
 			logger.Debug("[%s] 探测到可用路径: %s (状态码: %d)", endpoint.Name, path, resp.StatusCode)
 		}
+
+		// 每个探测之间添加延迟，避免触发限流
+		if i < len(pathsToProbe)-1 {
+			time.Sleep(500 * time.Millisecond)
+		}
 	}
 
 	if len(availablePaths) == 0 {
-		logger.Warn("[%s] 无法探测到任何可用的 API 路径", endpoint.Name)
+		// 探测失败时，回退到推断的路径
+		inferredPath := inferAPIPathFromConfig(providerType, endpoint.Transformer)
+		logger.Warn("[%s] 无法探测到可用的 API 路径，回退到推断路径: %s", endpoint.Name, inferredPath)
+		return []string{inferredPath}
 	}
 	return availablePaths
 }
@@ -1277,25 +1299,25 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 		} else if len(endpoint.ModelMappings) > 0 {
 			if mappedModel, ok := endpoint.ModelMappings[modelName]; ok {
 				modelName = mappedModel
-				logger.Info("[%s] 模型名称映射: %s → %s (根据端点模型映射配置)", endpoint.Name, originalModelName, modelName)
+				logger.Debug("[%s] 模型名称映射: %s → %s (根据端点模型映射配置)", endpoint.Name, originalModelName, modelName)
 			} else if endpoint.Model != "" {
 				modelName = endpoint.Model
-				logger.Info("[%s] 动态模型映射: %s → %s (根据端点配置自动替换)", endpoint.Name, originalModelName, modelName)
+				logger.Debug("[%s] 动态模型映射: %s → %s (根据端点配置自动替换)", endpoint.Name, originalModelName, modelName)
 			} else if modelName == "" && !useSpecificEndpoint {
 				if autoModel, availableModels := p.GetFirstAvailableModel(endpoint.Name); autoModel != "" {
 					modelName = autoModel
-					logger.Info("[%s] 自动发现模型: %s (可用模型数: %d)", endpoint.Name, modelName, len(availableModels))
+					logger.Debug("[%s] 自动发现模型: %s (可用模型数: %d)", endpoint.Name, modelName, len(availableModels))
 				}
 			}
 		} else if endpoint.Model != "" && modelName != endpoint.Model {
 			modelName = endpoint.Model
-			logger.Info("[%s] 动态模型映射: %s → %s (根据端点配置自动替换)", endpoint.Name, originalModelName, modelName)
+			logger.Debug("[%s] 动态模型映射: %s → %s (根据端点配置自动替换)", endpoint.Name, originalModelName, modelName)
 		} else if modelName == "" {
 			modelName = endpoint.Model
 			if modelName == "" && !useSpecificEndpoint {
 				if autoModel, availableModels := p.GetFirstAvailableModel(endpoint.Name); autoModel != "" {
 					modelName = autoModel
-					logger.Info("[%s] 自动发现模型: %s (可用模型数: %d)", endpoint.Name, modelName, len(availableModels))
+					logger.Debug("[%s] 自动发现模型: %s (可用模型数: %d)", endpoint.Name, modelName, len(availableModels))
 				}
 			}
 		}
@@ -1507,6 +1529,61 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 			if len(errMsg) > 200 {
 				errMsg = errMsg[:200] + "..."
 			}
+
+			// Enhanced error logging with error type classification
+			errorLabel := getErrorTypeLabel(resp.StatusCode, errMsg)
+
+			// Special handling for rate limit errors (429)
+			if isRateLimitError(resp.StatusCode) {
+				retryAfter := getRetryAfterFromResponse(resp)
+				logger.Warn("[%s] ⚠️ %s: %s", endpoint.Name, errorLabel, errMsg)
+				if retryAfter > 0 {
+					logger.Warn("[%s] Rate limit detected, waiting %v before retry...", endpoint.Name, retryAfter)
+					time.Sleep(retryAfter)
+				} else {
+					// Exponential backoff if no Retry-After header
+					backoffDuration := time.Duration(endpointAttempts*5) * time.Second
+					if backoffDuration < 30*time.Second {
+						backoffDuration = 30 * time.Second
+					}
+					if backoffDuration > 120*time.Second {
+						backoffDuration = 120 * time.Second
+					}
+					logger.Warn("[%s] Rate limit detected, using backoff %v (attempt %d)", endpoint.Name, backoffDuration, endpointAttempts)
+					time.Sleep(backoffDuration)
+				}
+				p.stats.RecordError(endpoint.Name)
+				httpErr := fmt.Errorf("http %d: %s", resp.StatusCode, errMsg)
+				p.recordEndpointFailure(endpoint.Name, httpErr)
+				p.markRequestInactive(endpoint.Name)
+				if endpointAttempts >= 2 {
+					p.rotateEndpoint()
+					endpointAttempts = 0
+				}
+				continue
+			}
+
+			// Special handling for service unavailable (503)
+			if isServiceUnavailableError(resp.StatusCode) {
+				logger.Warn("[%s] ⚠️ %s: %s", endpoint.Name, errorLabel, errMsg)
+				logger.Warn("[%s] Service unavailable, will retry with exponential backoff", endpoint.Name)
+				backoffDuration := time.Duration(endpointAttempts*3) * time.Second
+				if backoffDuration < 10*time.Second {
+					backoffDuration = 10 * time.Second
+				}
+				time.Sleep(backoffDuration)
+				p.stats.RecordError(endpoint.Name)
+				httpErr := fmt.Errorf("http %d: %s", resp.StatusCode, errMsg)
+				p.recordEndpointFailure(endpoint.Name, httpErr)
+				p.markRequestInactive(endpoint.Name)
+				if endpointAttempts >= 2 {
+					p.rotateEndpoint()
+					endpointAttempts = 0
+				}
+				continue
+			}
+
+			// General error handling
 			if resp.StatusCode == http.StatusNotFound {
 				if strings.Contains(errMsg, "model") || strings.Contains(errMsg, "invalid_request_error") {
 					logger.Warn("[%s] ⚠️ 模型不存在或无权限访问 (404)", endpoint.Name)
@@ -1521,11 +1598,11 @@ func (p *Proxy) handleProxy(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				} else {
-					logger.Warn("[%s] Request failed %d: %s", endpoint.Name, resp.StatusCode, errMsg)
+					logger.Warn("[%s] ⚠️ %s: %s", endpoint.Name, errorLabel, errMsg)
 					p.suggestPossibleAPIPaths(endpoint, transformerName)
 				}
 			} else {
-				logger.Warn("[%s] Request failed %d: %s", endpoint.Name, resp.StatusCode, errMsg)
+				logger.Warn("[%s] ⚠️ %s: %s", endpoint.Name, errorLabel, errMsg)
 			}
 			logger.DebugLog("[%s] Request failed %d: %s", endpoint.Name, resp.StatusCode, errMsg)
 			p.markCredentialFailure(credentialID, resp.StatusCode, errMsg)

@@ -3,7 +3,9 @@ package proxy
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"ccg/internal/logger"
 	"ccg/internal/tokencount"
@@ -22,6 +24,129 @@ func shouldRetry(statusCode int) bool {
 	return statusCode != http.StatusOK &&
 		statusCode != http.StatusBadRequest &&
 		statusCode != http.StatusUnauthorized
+}
+
+// isRateLimitError checks if the status code indicates a rate limit error (429)
+func isRateLimitError(statusCode int) bool {
+	return statusCode == http.StatusTooManyRequests
+}
+
+// isServiceUnavailableError checks if the status code indicates service unavailable (503)
+func isServiceUnavailableError(statusCode int) bool {
+	return statusCode == http.StatusServiceUnavailable
+}
+
+// parseRetryAfter parses the Retry-After header value and returns the duration to wait
+// Supports both HTTP-date and delta-seconds formats per RFC 9110
+func parseRetryAfter(headerValue string) time.Duration {
+	if headerValue == "" {
+		return 0
+	}
+
+	// Try parsing as delta-seconds first (most common for APIs)
+	if seconds, err := strconv.Atoi(headerValue); err == nil && seconds > 0 {
+		return time.Duration(seconds) * time.Second
+	}
+
+	// Try parsing as HTTP-date (e.g., "Wed, 31 Dec 2025 23:59:59 GMT")
+	if t, err := time.Parse(time.RFC1123, headerValue); err == nil {
+		waitDuration := t.Sub(time.Now())
+		if waitDuration > 0 {
+			return waitDuration
+		}
+	}
+
+	// Try other common HTTP date formats
+	dateFormats := []string{
+		time.RFC1123Z,
+		"Mon, 02 Jan 2006 15:04:05 MST",
+		"Mon, 02 Jan 2006 15:04:05 GMT",
+	}
+	for _, format := range dateFormats {
+		if t, err := time.Parse(format, headerValue); err == nil {
+			waitDuration := t.Sub(time.Now())
+			if waitDuration > 0 {
+				return waitDuration
+			}
+		}
+	}
+
+	return 0
+}
+
+// getRetryAfterFromResponse extracts Retry-After duration from HTTP response headers
+func getRetryAfterFromResponse(resp *http.Response) time.Duration {
+	if resp == nil {
+		return 0
+	}
+
+	// Check Retry-After header
+	retryAfter := resp.Header.Get("Retry-After")
+	if retryAfter != "" {
+		duration := parseRetryAfter(retryAfter)
+		if duration > 0 {
+			logger.Debug("[RateLimit] Retry-After header: %v", duration)
+			return duration
+		}
+	}
+
+	// For 429 responses, extract retry info from error message if available
+	if resp.StatusCode == http.StatusTooManyRequests {
+		return 60 * time.Second // Default fallback for 429 without Retry-After
+	}
+
+	return 0
+}
+
+// classifyErrorType classifies an HTTP error into a human-readable category
+func classifyErrorType(statusCode int, errMsg string) string {
+	switch statusCode {
+	case http.StatusTooManyRequests:
+		if strings.Contains(errMsg, "rate limit") ||
+			strings.Contains(errMsg, "请求数限制") ||
+			strings.Contains(errMsg, "请求限制") {
+			return "rate_limit"
+		}
+		return "rate_limit"
+	case http.StatusServiceUnavailable:
+		return "service_unavailable"
+	case http.StatusBadGateway:
+		return "bad_gateway"
+	case http.StatusGatewayTimeout:
+		return "gateway_timeout"
+	case http.StatusNotFound:
+		if strings.Contains(errMsg, "model") {
+			return "model_not_found"
+		}
+		return "not_found"
+	case http.StatusInternalServerError:
+		return "internal_error"
+	default:
+		return "unknown"
+	}
+}
+
+// getErrorTypeLabel returns a human-readable label for the error type
+func getErrorTypeLabel(statusCode int, errMsg string) string {
+	errType := classifyErrorType(statusCode, errMsg)
+	switch errType {
+	case "rate_limit":
+		return "速率限制 (429)"
+	case "service_unavailable":
+		return "服务不可用 (503)"
+	case "bad_gateway":
+		return "网关错误 (502)"
+	case "gateway_timeout":
+		return "网关超时 (504)"
+	case "model_not_found":
+		return "模型不存在 (404)"
+	case "not_found":
+		return "资源不存在 (404)"
+	case "internal_error":
+		return "服务器内部错误 (500)"
+	default:
+		return "未知错误"
+	}
 }
 
 // isUnsupportedModelError checks if the error message indicates an unsupported model error
